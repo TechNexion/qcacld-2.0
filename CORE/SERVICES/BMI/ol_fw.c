@@ -152,21 +152,28 @@ static int ol_get_fw_files_for_target(struct ol_fw_files *pfw_files,
 #endif
 
 #ifdef CONFIG_NON_QC_PLATFORM_PCI
+
+#ifdef MULTI_IF_NAME
+#define PREFIX MULTI_IF_NAME "/"
+#else
+#define PREFIX ""
+#endif
+
 static struct non_qc_platform_pci_fw_files FW_FILES_QCA6174_FW_1_1 = {
-"qwlan11.bin", "bdwlan11.bin", "otp11.bin", "utf11.bin",
-"utfbd11.bin", "epping11.bin", "evicted11.bin"};
+	PREFIX "qwlan11.bin", PREFIX "bdwlan11.bin", PREFIX "otp11.bin",  PREFIX "utf11.bin",
+	PREFIX "utfbd11.bin", PREFIX "epping11.bin", PREFIX "evicted11.bin"};
 static struct non_qc_platform_pci_fw_files FW_FILES_QCA6174_FW_2_0 = {
-"qwlan20.bin", "bdwlan20.bin", "otp20.bin", "utf20.bin",
-"utfbd20.bin", "epping20.bin", "evicted20.bin"};
+	PREFIX "qwlan20.bin", PREFIX "bdwlan20.bin", PREFIX "otp20.bin", PREFIX "utf20.bin",
+	PREFIX "utfbd20.bin", PREFIX "epping20.bin", PREFIX "evicted20.bin"};
 static struct non_qc_platform_pci_fw_files FW_FILES_QCA6174_FW_1_3 = {
-"qwlan13.bin", "bdwlan13.bin", "otp13.bin", "utf13.bin",
-"utfbd13.bin", "epping13.bin", "evicted13.bin"};
+	PREFIX "qwlan13.bin", PREFIX "bdwlan13.bin", PREFIX "otp13.bin", PREFIX "utf13.bin",
+	PREFIX "utfbd13.bin", PREFIX "epping13.bin", PREFIX "evicted13.bin"};
 static struct non_qc_platform_pci_fw_files FW_FILES_QCA6174_FW_3_0 = {
-"qwlan30.bin", "bdwlan30.bin", "otp30.bin", "utf30.bin",
-"utfbd30.bin", "epping30.bin", "evicted30.bin"};
+	PREFIX "qwlan30.bin", PREFIX "bdwlan30.bin", PREFIX "otp30.bin", PREFIX "utf30.bin",
+	PREFIX "utfbd30.bin", PREFIX "epping30.bin", PREFIX "evicted30.bin"};
 static struct non_qc_platform_pci_fw_files FW_FILES_DEFAULT = {
-"qwlan.bin", "bdwlan.bin", "otp.bin", "utf.bin",
-"utfbd.bin", "epping.bin", "evicted.bin"};
+	PREFIX "qwlan.bin", PREFIX "bdwlan.bin", PREFIX "otp.bin", PREFIX "utf.bin",
+	PREFIX "utfbd.bin", PREFIX "epping.bin", PREFIX "evicted.bin"};
 
 static
 int get_fw_files_for_non_qc_pci_target(struct non_qc_platform_pci_fw_files *pfw_files,
@@ -203,6 +210,12 @@ int get_fw_files_for_non_qc_pci_target(struct non_qc_platform_pci_fw_files *pfw_
 				__func__, target_type, target_version);
 			break;
 	}
+
+	pr_debug("%s:%d: pfw_files:%s, %s, %s, %s, %s, %s, %s\n", __func__, __LINE__,
+		pfw_files->image_file, pfw_files->board_data, pfw_files->otp_data,
+		pfw_files->utf_file, pfw_files->utf_board_data, pfw_files->epping_file,
+		pfw_files->evicted_data);
+
 	return 0;
 }
 #endif
