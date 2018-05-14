@@ -53,10 +53,12 @@ enum cnss_cc_src {
 };
 
 static inline void vos_wlan_pci_link_down(void){ return; }
+#ifdef HIF_PCI
 static inline int vos_pcie_shadow_control(struct pci_dev *dev, bool enable)
 {
 	return -ENODEV;
 }
+#endif
 
 static inline u8 *vos_get_cnss_wlan_mac_buff(struct device *dev, uint32_t *num)
 {

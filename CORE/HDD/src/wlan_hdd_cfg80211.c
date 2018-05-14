@@ -7704,6 +7704,8 @@ static int __wlan_hdd_cfg80211_ll_stats_get(struct wiphy *wiphy,
     hdd_station_ctx_t *hddstactx = WLAN_HDD_GET_STATION_CTX_PTR(pAdapter);
     int status;
 
+    printk("WAR: return ll_stats, because fw didn't enable\n");
+    return 0;
     if (VOS_FTM_MODE == hdd_get_conparam()) {
         hddLog(LOGE, FL("Command not allowed in FTM mode"));
         return -EINVAL;
@@ -30074,6 +30076,7 @@ wlan_hdd_cfg80211_set_mac_acl(struct wiphy *wiphy,
 	return ret;
 }
 
+#ifdef CONFIG_NL80211_TESTMODE
 #ifdef WLAN_NL80211_TESTMODE
 #ifdef FEATURE_WLAN_LPHB
 void wlan_hdd_cfg80211_lphb_ind_handler
@@ -30323,6 +30326,7 @@ nla_put_failure:
 }
 #endif
 #endif /* CONFIG_NL80211_TESTMODE */
+#endif
 
 /**
  * wlan_hdd_chan_info_cb() - channel info callback
@@ -32696,8 +32700,10 @@ static struct cfg80211_ops wlan_hdd_cfg80211_ops =
      .resume = wlan_hdd_cfg80211_resume_wlan,
      .suspend = wlan_hdd_cfg80211_suspend_wlan,
      .set_mac_acl = wlan_hdd_cfg80211_set_mac_acl,
+#ifdef CONFIG_NL80211_TESTMODE
 #ifdef WLAN_NL80211_TESTMODE
      .testmode_cmd = wlan_hdd_cfg80211_testmode,
+#endif
 #endif
 #ifdef QCA_HT_2040_COEX
      .set_ap_chanwidth = wlan_hdd_cfg80211_set_ap_channel_width,

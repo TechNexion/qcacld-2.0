@@ -222,6 +222,8 @@ ifeq ($(CONFIG_ROME_IF),usb)
 endif
 ifeq ($(CONFIG_QCA_WIFI_SDIO), 1)
 CONFIG_ATH_11AC_TXCOMPACT := 0
+CONFIG_WLAN_SYNC_TSF := y
+#CONFIG_WLAN_SYNC_TSF_PLUS := y
 endif
 
 #Enable per vdev Tx desc pool
