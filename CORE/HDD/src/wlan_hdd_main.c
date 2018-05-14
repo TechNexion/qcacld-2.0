@@ -13860,10 +13860,13 @@ VOS_STATUS hdd_get_front_adapter( hdd_context_t *pHddCtx,
                                   hdd_adapter_list_node_t** ppAdapterNode)
 {
     VOS_STATUS status;
-    spin_lock_bh(&pHddCtx->hddAdapters.lock);
+    bool in_irq_context = (in_irq() || irqs_disabled());
+    if (!in_irq_context)
+	spin_lock_bh(&pHddCtx->hddAdapters.lock);
     status =  hdd_list_peek_front ( &pHddCtx->hddAdapters,
                    (hdd_list_node_t**) ppAdapterNode );
-    spin_unlock_bh(&pHddCtx->hddAdapters.lock);
+    if (!in_irq_context)
+	spin_unlock_bh(&pHddCtx->hddAdapters.lock);
     return status;
 }
 
