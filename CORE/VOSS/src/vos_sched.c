@@ -553,14 +553,14 @@ vos_sched_open
   spin_lock_init(&pSchedContext->TlshimRxQLock);
   spin_lock_init(&pSchedContext->VosTlshimPktFreeQLock);
   INIT_LIST_HEAD(&pSchedContext->tlshimRxQueue);
-  spin_lock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+  SPIN_LOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
   INIT_LIST_HEAD(&pSchedContext->VosTlshimPktFreeQ);
   if (vos_alloc_tlshim_pkt_freeq(pSchedContext) !=  VOS_STATUS_SUCCESS)
   {
-       spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+       SPIN_UNLOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
        return VOS_STATUS_E_FAILURE;
   }
-  spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+  SPIN_UNLOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0))
   register_hotcpu_notifier(&vos_cpu_hotplug_notifier);
   pSchedContext->cpuHotPlugNotifier = &vos_cpu_hotplug_notifier;
@@ -1296,16 +1296,16 @@ void vos_free_tlshim_pkt_freeq(pVosSchedContext pSchedContext)
 {
    struct VosTlshimPkt *pkt;
 
-   spin_lock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   SPIN_LOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
    while (!list_empty(&pSchedContext->VosTlshimPktFreeQ)) {
        pkt = list_entry((&pSchedContext->VosTlshimPktFreeQ)->next,
                      typeof(*pkt), list);
        list_del(&pkt->list);
-       spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+       SPIN_UNLOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
        vos_mem_free(pkt);
-       spin_lock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+       SPIN_LOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
    }
-   spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   SPIN_UNLOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
 
 }
 
@@ -1360,9 +1360,9 @@ void vos_free_tlshim_pkt(pVosSchedContext pSchedContext,
                          struct VosTlshimPkt *pkt)
 {
    memset(pkt, 0, sizeof(*pkt));
-   spin_lock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   SPIN_LOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
    list_add_tail(&pkt->list, &pSchedContext->VosTlshimPktFreeQ);
-   spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   SPIN_UNLOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
 }
 
 /*---------------------------------------------------------------------------
@@ -1378,15 +1378,15 @@ struct VosTlshimPkt *vos_alloc_tlshim_pkt(pVosSchedContext pSchedContext)
 {
    struct VosTlshimPkt *pkt;
 
-   spin_lock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   SPIN_LOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
    if (list_empty(&pSchedContext->VosTlshimPktFreeQ)) {
-       spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+       SPIN_UNLOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
        return NULL;
    }
    pkt = list_first_entry(&pSchedContext->VosTlshimPktFreeQ,
                           struct VosTlshimPkt, list);
    list_del(&pkt->list);
-   spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   SPIN_UNLOCK_BH(&pSchedContext->VosTlshimPktFreeQLock);
    return pkt;
 }
 
@@ -1403,9 +1403,9 @@ struct VosTlshimPkt *vos_alloc_tlshim_pkt(pVosSchedContext pSchedContext)
 void vos_indicate_rxpkt(pVosSchedContext pSchedContext,
                         struct VosTlshimPkt *pkt)
 {
-   spin_lock_bh(&pSchedContext->TlshimRxQLock);
+   SPIN_LOCK_BH(&pSchedContext->TlshimRxQLock);
    list_add_tail(&pkt->list, &pSchedContext->tlshimRxQueue);
-   spin_unlock_bh(&pSchedContext->TlshimRxQLock);
+   SPIN_UNLOCK_BH(&pSchedContext->TlshimRxQLock);
    set_bit(RX_POST_EVENT, &pSchedContext->tlshimRxEvtFlg);
    wake_up_interruptible(&pSchedContext->tlshimRxWaitQueue);
 }
@@ -1427,16 +1427,16 @@ void vos_drop_rxpkt_by_staid(pVosSchedContext pSchedContext, u_int16_t staId)
    adf_nbuf_t buf, next_buf;
 
    INIT_LIST_HEAD(&local_list);
-   spin_lock_bh(&pSchedContext->TlshimRxQLock);
+   SPIN_LOCK_BH(&pSchedContext->TlshimRxQLock);
    if (list_empty(&pSchedContext->tlshimRxQueue)) {
-       spin_unlock_bh(&pSchedContext->TlshimRxQLock);
+       SPIN_UNLOCK_BH(&pSchedContext->TlshimRxQLock);
        return;
    }
    list_for_each_entry_safe(pkt, tmp, &pSchedContext->tlshimRxQueue, list) {
        if (pkt->staId == staId || staId == WLAN_MAX_STA_COUNT)
            list_move_tail(&pkt->list, &local_list);
    }
-   spin_unlock_bh(&pSchedContext->TlshimRxQLock);
+   SPIN_UNLOCK_BH(&pSchedContext->TlshimRxQLock);
 
    list_for_each_entry_safe(pkt, tmp, &local_list, list) {
        list_del(&pkt->list);
@@ -1464,18 +1464,18 @@ static void vos_rx_from_queue(pVosSchedContext pSchedContext)
    struct VosTlshimPkt *pkt;
    u_int16_t sta_id;
 
-   spin_lock_bh(&pSchedContext->TlshimRxQLock);
+   SPIN_LOCK_BH(&pSchedContext->TlshimRxQLock);
    while (!list_empty(&pSchedContext->tlshimRxQueue)) {
            pkt = list_first_entry(&pSchedContext->tlshimRxQueue,
                                   struct VosTlshimPkt, list);
            list_del(&pkt->list);
-           spin_unlock_bh(&pSchedContext->TlshimRxQLock);
+           SPIN_UNLOCK_BH(&pSchedContext->TlshimRxQLock);
            sta_id = pkt->staId;
            pkt->callback(pkt->context, pkt->Rxpkt, sta_id);
            vos_free_tlshim_pkt(pSchedContext, pkt);
-           spin_lock_bh(&pSchedContext->TlshimRxQLock);
+           SPIN_LOCK_BH(&pSchedContext->TlshimRxQLock);
    }
-   spin_unlock_bh(&pSchedContext->TlshimRxQLock);
+   SPIN_UNLOCK_BH(&pSchedContext->TlshimRxQLock);
 }
 
 /*---------------------------------------------------------------------------

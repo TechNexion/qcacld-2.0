@@ -342,11 +342,11 @@ void vos_pkt_trace_buf_update
       return;
    }
 
-   spin_lock_bh(&trace_buffer_lock);
+   SPIN_LOCK_BH(&trace_buffer_lock);
    slot = trace_buffer_order % VOS_PKT_TRAC_MAX_TRACE_BUF;
    trace_buffer[slot].order = trace_buffer_order;
    trace_buffer_order++;
-   spin_unlock_bh(&trace_buffer_lock);
+   SPIN_UNLOCK_BH(&trace_buffer_lock);
    do_gettimeofday(&tv);
    trace_buffer[slot].event_sec_time = tv.tv_sec;
    trace_buffer[slot].event_msec_time = tv.tv_usec;
@@ -462,10 +462,10 @@ void vos_pkt_proto_trace_close
 {
    VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_ERROR,
              "%s %d", __func__, __LINE__);
-   spin_lock_bh(&trace_buffer_lock);
+   SPIN_LOCK_BH(&trace_buffer_lock);
    vos_mem_free(trace_buffer);
    trace_buffer = NULL;
-   spin_unlock_bh(&trace_buffer_lock);
+   SPIN_UNLOCK_BH(&trace_buffer_lock);
 
    return;
 }

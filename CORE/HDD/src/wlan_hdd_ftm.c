@@ -834,7 +834,7 @@ int wlan_hdd_ftm_close(hdd_context_t *pHddCtx)
     }
 
 #if defined(QCA_WIFI_FTM) && defined(LINUX_QCMBR)
-    spin_lock_bh(&qcmbr_queue_lock);
+    SPIN_LOCK_BH(&qcmbr_queue_lock);
     if (!list_empty(&qcmbr_queue_head)) {
         qcmbr_queue_t *msg_buf, *tmp_buf;
         list_for_each_entry_safe(msg_buf, tmp_buf, &qcmbr_queue_head, list) {
@@ -842,7 +842,7 @@ int wlan_hdd_ftm_close(hdd_context_t *pHddCtx)
             kfree(msg_buf);
         }
     }
-    spin_unlock_bh(&qcmbr_queue_lock);
+    SPIN_UNLOCK_BH(&qcmbr_queue_lock);
 #endif
 
     return 0;
@@ -972,7 +972,7 @@ static int wlan_hdd_qcmbr_command(hdd_adapter_t *pAdapter, qcmbr_data_t *pqcmbr_
         case ATH_XIOCTL_UNIFIED_UTF_RSP: {
             pqcmbr_data->copy_to_user = 1;
 
-            spin_lock_bh(&qcmbr_queue_lock);
+            SPIN_LOCK_BH(&qcmbr_queue_lock);
             if (!list_empty(&qcmbr_queue_head)) {
                 qcmbr_buf = list_first_entry(&qcmbr_queue_head,
                                              qcmbr_queue_t, list);
@@ -981,7 +981,7 @@ static int wlan_hdd_qcmbr_command(hdd_adapter_t *pAdapter, qcmbr_data_t *pqcmbr_
             } else {
                 ret = -1;
             }
-            spin_unlock_bh(&qcmbr_queue_lock);
+            SPIN_UNLOCK_BH(&qcmbr_queue_lock);
 
             if (!ret) {
                 memcpy(pqcmbr_data->buf, qcmbr_buf->utf_buf,
@@ -1085,9 +1085,9 @@ static void WLANQCMBR_McProcessMsg(v_VOID_t *message)
     qcmbr_buf = kzalloc(sizeof(qcmbr_queue_t), GFP_KERNEL);
     if (qcmbr_buf != NULL) {
         memcpy(qcmbr_buf->utf_buf, message, data_len);
-        spin_lock_bh(&qcmbr_queue_lock);
+        SPIN_LOCK_BH(&qcmbr_queue_lock);
         list_add_tail(&(qcmbr_buf->list), &qcmbr_queue_head);
-        spin_unlock_bh(&qcmbr_queue_lock);
+        SPIN_UNLOCK_BH(&qcmbr_queue_lock);
     }
 }
 #endif /*LINUX_QCMBR*/
