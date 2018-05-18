@@ -1377,20 +1377,16 @@ void vos_free_tlshim_pkt(pVosSchedContext pSchedContext,
 struct VosTlshimPkt *vos_alloc_tlshim_pkt(pVosSchedContext pSchedContext)
 {
    struct VosTlshimPkt *pkt;
-   bool in_irq_context = (in_irq() || irqs_disabled());
 
-   if (!in_irq_context)
-	spin_lock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   spin_lock_bh(&pSchedContext->VosTlshimPktFreeQLock);
    if (list_empty(&pSchedContext->VosTlshimPktFreeQ)) {
-   	if (!in_irq_context)
-		spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+       spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
        return NULL;
    }
    pkt = list_first_entry(&pSchedContext->VosTlshimPktFreeQ,
                           struct VosTlshimPkt, list);
    list_del(&pkt->list);
-   if (!in_irq_context)
-	spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
+   spin_unlock_bh(&pSchedContext->VosTlshimPktFreeQLock);
    return pkt;
 }
 
