@@ -17754,7 +17754,11 @@ int hdd_hif_register_driver(void)
 		return ret;
 	}
 
+#ifdef HDD_WLAN_WAIT_TIME
+	timeout = msecs_to_jiffies(HDD_WLAN_WAIT_TIME);
+#else
 	timeout = msecs_to_jiffies(HDD_WLAN_START_WAIT_TIME);
+#endif
 
 	rc = wait_for_completion_timeout(&wlan_comp.wlan_start_comp, timeout);
 
