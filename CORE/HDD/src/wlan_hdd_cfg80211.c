@@ -16712,7 +16712,7 @@ void wlan_hdd_cfg80211_update_wiphy_caps(struct wiphy *wiphy)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
        wiphy->flags &= ~WIPHY_FLAG_SUPPORTS_SCHED_SCAN;
 #else
-       wiphy->max_sched_scan_reqs = 1;
+       wiphy->max_sched_scan_reqs = 0;
 #endif
        wiphy->max_sched_scan_ssids = 0;
        wiphy->max_match_sets = 0;
