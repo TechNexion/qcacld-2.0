@@ -726,11 +726,11 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
                  * SA-Query procedure determines that the original SA is
                  * invalid.
                  */
-                if (isConnected
+                if (isConnected && pStaDs->PrevAuthSeqno != currSeqNum
 #ifdef WLAN_FEATURE_11W
                     && !pStaDs->rmfEnabled
 #endif
-                                          )
+                   )
                 {
                     limLog(pMac, LOGE,
                             FL("STA is already connected but received auth frame"
@@ -747,7 +747,7 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
             if (pAuthNode)
             {
                 /// Pre-auth context exists for the STA
-                if (pHdr->fc.retry == 0 || pAuthNode->seqNum != currSeqNum)
+                if (pAuthNode->seqNum != currSeqNum)
                 {
                     /**
                      * STA is initiating brand-new Authentication
