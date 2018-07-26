@@ -1,0 +1,7 @@
+= qcacld-2.0 for Qualcomm WIFI module
+
+The qcacld-2.0 is Qualcomm WIFI module out-of-tree driver.
+
+
+*Support kernel:* `4.1.x` `4.9.x`
+
