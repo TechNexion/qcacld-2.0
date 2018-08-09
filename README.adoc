@@ -2,6 +2,13 @@
 
 The qcacld-2.0 is Qualcomm WIFI module out-of-tree driver.
 
+To make and make install module for QCA9377-3:
+[source,console]
+$: KERNEL_SRC=<your kernel path> CONFIG_CLD_HL_SDIO_CORE=y make -j4
+$: KERNEL_SRC=<your kernel path> INSTALL_MOD_PATH=<modules> make modules_install
 
-*Support kernel:* `4.1.x` `4.9.x`
+(NOTE: The "modules" directory should be already installed kernel module inside)
+
+
+*Support kernel:* `4.9.x`
 
