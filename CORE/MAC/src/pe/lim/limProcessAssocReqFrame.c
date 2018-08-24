@@ -1704,14 +1704,7 @@ limProcessAssocReqFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,
                 }/* end - if(pAssocReq->wpa.length) */
                 akm_type = lim_translate_rsn_oui_to_akm_type(
                                           Dot11fIEWPA.auth_suites[0]);
-            } else {
-		    limLog(pMac, LOG1,
-			FL("Non RSNIE and WPA IE received"));
-		    limSendAssocRspMgmtFrame(pMac,
-			eSIR_MAC_INVALID_RSN_IE_CAPABILITIES_STATUS,
-			1, pHdr->sa, subType, 0,psessionEntry);
-		    goto error;
-	    }
+            }
         } /* end of if(psessionEntry->pLimStartBssReq->privacy
             && psessionEntry->pLimStartBssReq->rsnIE->length) */
 

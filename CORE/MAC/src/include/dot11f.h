@@ -4893,7 +4893,7 @@ typedef struct sDot11fIERSNOpaque {
 #define DOT11F_EID_RSNOPAQUE ( 48 )
 
 // N.B. These #defines do *not* include the EID & length
-#define DOT11F_IE_RSNOPAQUE_MIN_LEN ( 6 )
+#define DOT11F_IE_RSNOPAQUE_MIN_LEN ( 0 )
 
 #define DOT11F_IE_RSNOPAQUE_MAX_LEN ( 253 )
 
