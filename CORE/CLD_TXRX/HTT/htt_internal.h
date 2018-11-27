@@ -449,8 +449,11 @@ htt_rx_ipa_uc_detach(struct htt_pdev_t *pdev);
 #endif /* IPA_UC_OFFLOAD */
 
 /* Maximum Outstanding Bus Download */
+#ifdef QCA_TXRX_PERF
+#define HTT_MAX_BUS_CREDIT 300
+#else
 #define HTT_MAX_BUS_CREDIT 33
-
+#endif
 int
 htt_tx_credit_update(struct htt_pdev_t *pdev);
 
