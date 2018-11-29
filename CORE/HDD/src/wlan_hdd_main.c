@@ -366,6 +366,27 @@ const char* hdd_device_mode_to_string(uint8_t device_mode)
 	}
 }
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+
+/* 1 means usb recovery onging, 0 means no usb recovery or recovery done(probe done) */
+int usb_recovery_status = 0;
+
+extern int hif_usb_wlan_en_check(void);
+
+/*
+ * Helper func to judge whether it is in recovery state
+ *
+ *   usb_recovery_status is triggered by our driver
+ *   while WLAN_EN PIN could also by triggered by platform driver.
+ */
+
+int hdd_in_recovery_state(void)
+{
+	return ( usb_recovery_status || (!hif_usb_wlan_en_check()) );
+}
+
+#endif
+
 #ifdef QCA_LL_TX_FLOW_CT
 
 /**
@@ -1146,6 +1167,12 @@ static int __hdd_netdev_notifier_call(struct notifier_block * nb,
         if( pAdapter->scan_info.mScanPending != FALSE )
         {
            unsigned long rc;
+#ifdef WLAN_FEATURE_USB_RECOVERY
+           if(hdd_in_recovery_state()) {
+              printk(KERN_ERR "%s in recovery state, ignore abort scan\n", __func__);
+              break;
+           }
+#endif
            INIT_COMPLETION(pAdapter->scan_info.abortscan_event_var);
            hdd_abort_mac_scan(pAdapter->pHddCtx, pAdapter->sessionId,
                               eCSR_SCAN_ABORT_DEFAULT);
@@ -9617,6 +9644,61 @@ v_BOOL_t hdd_is_valid_mac_address(const tANI_U8 *pMacAddr)
     return (xdigit == 12 && (separator == 5 || separator == 0));
 }
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+extern bool hif_usb_check(void);
+extern void hif_usb_recovery(void);
+
+void hdd_usb_detect_work(struct work_struct *work)
+{
+    int status = 0;
+    hdd_adapter_t *adapter = NULL;
+    hdd_context_t *hdd_ctx = container_of(work,
+                                      hdd_context_t,
+                                      usb_detect_work.work);
+
+    if (!hdd_ctx)
+	return;
+
+    mutex_lock(&hdd_ctx->usb_recovery_lock);
+
+    if (! hif_usb_wlan_en_check() ) {
+        hddLog(LOGE, FL("WLAN_EN PIN disabled by system, disable usb auto recovery now...\n"));
+        mutex_unlock(&hdd_ctx->usb_recovery_lock);
+        return;
+    }
+
+    if(!hif_usb_check()) {
+        status = -1;
+        goto usb_error;
+    }
+
+    if (wlan_hdd_validate_context(hdd_ctx) != 0) {
+        hddLog(LOGE, FL("ctx not ready for recovery"));
+        mutex_unlock(&hdd_ctx->usb_recovery_lock);
+        return;
+    }
+    //printk(KERN_ERR "jiffies:%ld, usb detect work ...\n", jiffies);
+    adapter = hdd_get_adapter_by_vdev(hdd_ctx, 0);
+    if (!adapter) {
+        hddLog(LOGE, FL("adapter is NULL"));
+        mutex_unlock(&hdd_ctx->usb_recovery_lock);
+        return;
+    }
+
+    if(wlan_hdd_get_fw_state(adapter)) {
+        hddLog(VOS_TRACE_LEVEL_INFO, "%s: wlan fw alive...", __func__);
+        schedule_delayed_work(&hdd_ctx->usb_detect_work, msecs_to_jiffies(3000));
+        mutex_unlock(&hdd_ctx->usb_recovery_lock);
+        return;
+    }
+usb_error:
+    hddLog(LOGE, "usb auto recovery ..., status:%d\n",status);
+    usb_recovery_status = 1;
+    mutex_unlock(&hdd_ctx->usb_recovery_lock);
+    hif_usb_recovery();
+}
+#endif
+
 /**
  * __hdd_open() - HDD Open function
  * @dev: pointer to net_device structure
@@ -12553,6 +12635,12 @@ static void hdd_wait_for_sme_close_sesion(hdd_context_t *hdd_ctx,
             sme_CloseSession(hdd_ctx->hHal, adapter->sessionId,
                 hdd_smeCloseSessionCallback,
                 adapter)) {
+#ifdef WLAN_FEATURE_USB_RECOVERY
+        if ( hdd_in_recovery_state() ) {
+            printk(KERN_ERR "%s ignore wait session close\n",__func__);
+            return;
+        }
+#endif
         /*
          * Block on a completion variable. Can't wait
          * forever though.
@@ -12593,6 +12681,11 @@ VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
          if ((WLAN_HDD_NDI == pAdapter->device_mode) ||
             hdd_connIsConnected(WLAN_HDD_GET_STATION_CTX_PTR(pAdapter)) ||
             hdd_is_connecting(WLAN_HDD_GET_STATION_CTX_PTR(pAdapter))) {
+#ifdef WLAN_FEATURE_USB_RECOVERY
+            if ( hdd_in_recovery_state() ) {
+                goto _ignore_disconnect;
+            }
+#endif
             INIT_COMPLETION(pAdapter->disconnect_comp_var);
             /*
              * For NDI do not use pWextState from sta_ctx, if needed
@@ -12627,6 +12720,9 @@ VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
                hddLog(LOGE, "%s: failed to post disconnect event to SME",
                       __func__);
            }
+#ifdef WLAN_FEATURE_USB_RECOVERY
+_ignore_disconnect:
+#endif
            memset(&wrqu, '\0', sizeof(wrqu));
            wrqu.ap_addr.sa_family = ARPHRD_ETHER;
            memset(wrqu.ap_addr.sa_data,'\0',ETH_ALEN);
@@ -14598,6 +14694,11 @@ void hdd_wlan_exit(hdd_context_t *pHddCtx)
    {
       // Unloading, restart logic is no more required.
       wlan_hdd_restart_deinit(pHddCtx);
+
+      //only do this in non-FTM Mode
+#ifdef WLAN_FEATURE_USB_RECOVERY
+      vos_flush_delayed_work(&pHddCtx->usb_detect_work);
+#endif
    }
    TRACK_UNLOAD_STATUS(unload_unregister_wext_adpater);
    hdd_UnregisterWext_all_adapters(pHddCtx);
@@ -17077,6 +17178,10 @@ int hdd_wlan_startup(struct device *dev, v_VOID_t *hif_sc)
    hdd_list_init((&pHddCtx->hdd_roc_req_q), MAX_ROC_REQ_QUEUE_ENTRY);
    vos_init_delayed_work(&pHddCtx->rocReqWork, wlan_hdd_roc_request_dequeue);
    vos_init_work(&pHddCtx->sap_start_work, hdd_sap_restart_handle);
+#ifdef WLAN_FEATURE_USB_RECOVERY
+   vos_init_delayed_work(&pHddCtx->usb_detect_work, hdd_usb_detect_work);
+   mutex_init(&pHddCtx->usb_recovery_lock);
+#endif
 
    if (pHddCtx->cfg_ini->dot11p_mode == WLAN_HDD_11P_STANDALONE) {
        /* Create only 802.11p interface */
@@ -17577,6 +17682,10 @@ int hdd_wlan_startup(struct device *dev, v_VOID_t *hif_sc)
                                           set_value, PDEV_CMD);
    }
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+   schedule_delayed_work(&pHddCtx->usb_detect_work, msecs_to_jiffies(6000));
+#endif
+
    if (pHddCtx->cfg_ini->max_mpdus_inampdu) {
        set_value = pHddCtx->cfg_ini->max_mpdus_inampdu;
        process_wma_set_command(0, (int)WMI_PDEV_PARAM_MAX_MPDUS_IN_AMPDU,
@@ -17723,6 +17832,10 @@ err_free_hdd_context:
    return -EIO;
 
 success:
+#ifdef WLAN_FEATURE_USB_RECOVERY
+   usb_recovery_status = 0;
+   pr_err("%s usb_recovery_status = 0\n", __func__);
+#endif
    EXIT();
    return 0;
 }
@@ -17900,6 +18013,15 @@ static int hdd_driver_init( void)
       }
 #endif
 
+#ifdef FEATURE_USB_WARM_RESET  //Only enabled when warm reset is enabled
+      if (VOS_FTM_MODE == con_mode) {
+            printk(KERN_ERR "%s calling hif_usb_recovery for FTM mode\n",__func__);
+#ifdef WLAN_FEATURE_USB_RECOVERY
+            hif_usb_recovery();
+#endif
+      }
+#endif
+
       /* Preopen VOSS so that it is ready to start at least SAL */
       status = vos_preOpen(&pVosContext);
 
@@ -18067,7 +18189,7 @@ static void hdd_driver_exit(void)
    int retry = 0;
    v_CONTEXT_t pVosContext = NULL;
 
-   pr_info("%s: unloading driver v%s\n", WLAN_MODULE_NAME, QWLAN_VERSIONSTR);
+   pr_err("%s: unloading driver v%s\n", WLAN_MODULE_NAME, QWLAN_VERSIONSTR);
 
    //Get the global vos context
    pVosContext = vos_get_global_context(VOS_MODULE_ID_SYS, NULL);
@@ -18085,6 +18207,23 @@ static void hdd_driver_exit(void)
 
    //Get the HDD context.
    pHddCtx = (hdd_context_t *)vos_get_context(VOS_MODULE_ID_HDD, pVosContext );
+
+#define MAX_USB_RECOVERY_COUNT  100  /* 10s is enough fo recovery */
+
+#ifdef WLAN_FEATURE_USB_RECOVERY
+   if ( (VOS_FTM_MODE != hdd_get_conparam()) && pHddCtx ) {
+       int cnt = 0;
+       pr_err("%s: mutext lock\n", __func__);
+       mutex_lock(&pHddCtx->usb_recovery_lock);
+       pHddCtx->isUnloadInProgress = TRUE;
+       while( usb_recovery_status && (cnt++ < MAX_USB_RECOVERY_COUNT) ) {
+              msleep(100);
+              pr_err("%s: usb_recovery_satus is 1  ##\n", __func__);
+       }
+       mutex_unlock(&pHddCtx->usb_recovery_lock);
+       pr_err("%s: mutext unlock, cnt=%d\n", __func__, cnt);
+   }
+#endif
 
    if(!pHddCtx)
    {

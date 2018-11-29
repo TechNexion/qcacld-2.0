@@ -1966,6 +1966,11 @@ struct hdd_context_s
     uint64_t       prev_tx;
 #endif
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+    struct delayed_work usb_detect_work;
+    struct mutex usb_recovery_lock;
+#endif
+
     /* VHT80 allowed*/
     v_BOOL_t isVHT80Allowed;
 

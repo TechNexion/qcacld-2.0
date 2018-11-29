@@ -1827,6 +1827,10 @@ void hdd_unregister_mcast_bcast_filter(hdd_context_t *pHddCtx)
    }
 }
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+extern bool hif_usb_check(void);
+#endif
+
 void hdd_resume_wlan(bool thermal)
 {
    hdd_context_t *pHddCtx = NULL;
@@ -1940,6 +1944,11 @@ send_resume_ind:
 
 #ifdef IPA_OFFLOAD
    hdd_ipa_resume(pHddCtx);
+#endif
+
+#ifdef WLAN_FEATURE_USB_RECOVERY
+   if (hif_usb_check())
+      schedule_delayed_work(&pHddCtx->usb_detect_work, msecs_to_jiffies(3000));
 #endif
 
 #ifdef SUPPORT_EARLY_SUSPEND_STANDBY_DEEPSLEEP

@@ -28361,11 +28361,22 @@ wlan_hdd_cfg80211_update_ft_ies(struct wiphy *wiphy,
 }
 #endif
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+extern int hdd_in_recovery_state(void);
+#endif
+
 int wlan_hdd_scan_abort(hdd_adapter_t *pAdapter)
 {
     hdd_context_t *pHddCtx = WLAN_HDD_GET_CTX(pAdapter);
     hdd_scaninfo_t *pScanInfo = NULL;
     unsigned long rc;
+
+#ifdef WLAN_FEATURE_USB_RECOVERY
+    if (hdd_in_recovery_state()) {
+        printk(KERN_ERR "%s in recovery state, ignore scan abort!\n", __func__);
+        return 0;
+    }
+#endif
 
     pScanInfo = &pAdapter->scan_info;
 
@@ -30899,6 +30910,10 @@ static void wlan_hdd_thermal_suspend(hdd_context_t *pHddCtx)
 
 #endif
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+extern bool hif_usb_check(void);
+#endif
+
 /*
  * FUNCTION: __wlan_hdd_cfg80211_resume_wlan
  * this is called when cfg80211 driver resume
@@ -30935,6 +30950,9 @@ int __wlan_hdd_cfg80211_resume_wlan(struct wiphy *wiphy, bool thermal)
     if (0 != result)
         return result;
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+    if (hif_usb_check()) {
+#endif
     if (!thermal && hif_is_80211_fw_wow_required()) {
         result = wma_resume_fw();
         if (result) {
@@ -30951,6 +30969,12 @@ int __wlan_hdd_cfg80211_resume_wlan(struct wiphy *wiphy, bool thermal)
           return -EBUSY;
         }
     }
+#ifdef WLAN_FEATURE_USB_RECOVERY
+    } else {
+        hddLog(LOGE, FL("USB lost when resume!"));
+    }
+#endif
+
     dev = pHddCtx->parent_dev;
 
 #ifdef FEATURE_BUS_BANDWIDTH
@@ -31211,6 +31235,10 @@ int __wlan_hdd_cfg80211_suspend_wlan(struct wiphy *wiphy,
         hddLog(VOS_TRACE_LEVEL_DEBUG, FL("IPA not ready to suspend!"));
         return -EAGAIN;
     }
+#endif
+
+#ifdef WLAN_FEATURE_USB_RECOVERY
+    cancel_delayed_work(&pHddCtx->usb_detect_work);
 #endif
 
     /* Wait for the target to be ready for suspend */

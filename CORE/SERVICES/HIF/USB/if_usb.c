@@ -30,6 +30,9 @@
 #include <linux/interrupt.h>
 #include <linux/if_arp.h>
 #include <linux/usb/hcd.h>
+#ifdef WLAN_FEATURE_USB_RECOVERY
+#include <linux/kallsyms.h>
+#endif
 #include "if_usb.h"
 #include "hif_usb_internal.h"
 #include "bmi_msg.h"		/* TARGET_TYPE_ */
@@ -72,6 +75,103 @@ static wait_queue_head_t hif_usb_unload_event_wq;
 static atomic_t hif_usb_unload_state;
 struct hif_usb_softc *usb_sc = NULL;
 static int hif_usb_resume(struct usb_interface *interface);
+
+#ifdef WLAN_FEATURE_USB_RECOVERY
+
+extern int hdd_in_recovery_state(void);
+
+#define WLAN_EN_GPIO_PIN  3
+#define SYM_GPIO_PAD_READ ""
+#define SYM_GPIO_SET_LOW ""
+#define SYM_GPIO_SET_HIGH ""
+
+bool hif_usb_check(void)
+{
+	u16 devstat = 0;
+	int status;
+
+	HIF_DEVICE *hifDevice = usb_sc->hif_device;
+	HIF_DEVICE_USB *device = (HIF_DEVICE_USB *) hifDevice;
+
+	status = usb_get_status(device->udev, USB_RECIP_DEVICE, 0, &devstat);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,12,0))
+	if (status != 0) {
+		return false;
+	}
+#else
+	if (status != 2) {
+		return false;
+	}
+#endif
+	return true;
+}
+
+/*
+ * Judge the WLAN_EN PIN status
+ *
+ * In STR procedure, customer system will disable WLAN_EN pin
+ *
+ * return:
+ *        0 :  WLAN_EN disabled
+ *        1 :  WLAN_EN enabled
+ */
+int hif_usb_wlan_en_check(void)
+{
+	typedef unsigned char (*wlan_gpio_pad_read)(unsigned char);
+	char *gpio_sym_pad_read = SYM_GPIO_PAD_READ;
+	wlan_gpio_pad_read  func = NULL;
+
+	if (gpio_sym_pad_read[0] == '\0') {
+		printk("TODO: define GPIO pad read function.");
+		return 1;
+	}
+
+	func = (wlan_gpio_pad_read) kallsyms_lookup_name(gpio_sym_pad_read);
+
+	if (NULL == func) {
+		printk("usb: %s: cant't find the (MDrv_GPIO_Pad_Read) \n", __func__);
+		return 1; /* Here we assume WLAN_EN is always enabled in x86 platform */
+	}
+
+	return func(WLAN_EN_GPIO_PIN);
+}
+
+void hif_usb_recovery(void) {
+
+	typedef int (*wlan_gpio_set_low) (int);
+	typedef int (*wlan_gpio_set_high) (int);
+
+	wlan_gpio_set_low wlan_usb_gpio_set_low_fun = NULL;
+	wlan_gpio_set_high wlan_usb_gpio_set_high_fun = NULL;
+
+	char *gpio_sym_name_low = SYM_GPIO_SET_LOW;
+	char *gpio_sym_name_high = SYM_GPIO_SET_HIGH;
+
+	if (gpio_sym_name_low[0] == '\0' || gpio_sym_name_high[0] == '\0') {
+		printk("TODO: define GPIO set low/high function.");
+		return;
+	}
+
+	wlan_usb_gpio_set_low_fun = (wlan_gpio_set_low) kallsyms_lookup_name (gpio_sym_name_low);
+	if (wlan_usb_gpio_set_low_fun != NULL){
+		printk("usb: find the MDrv_GPIO_Set_Low func, and set wlan GPIO low.\n");
+		wlan_usb_gpio_set_low_fun(WLAN_EN_GPIO_PIN);
+	} else {
+		printk("usb: %s: cant't find the (MDrv_GPIO_Set_Low) \n", __func__);
+	}
+
+        msleep(200);
+
+	wlan_usb_gpio_set_high_fun = (wlan_gpio_set_high) kallsyms_lookup_name (gpio_sym_name_high);
+	if (wlan_usb_gpio_set_high_fun != NULL){
+		printk("usb: find the MDrv_GPIO_Set_High func, and set wlan GPIO high. \n");
+		wlan_usb_gpio_set_high_fun(WLAN_EN_GPIO_PIN);
+	} else {
+		printk("usb: %s: cant't find the (MDrv_GPIO_Set_High) \n", __func__);
+	}
+}
+
+#endif
 
 static int
 hif_usb_configure(struct hif_usb_softc *sc, hif_handle_t *hif_hdl,
@@ -285,6 +385,10 @@ static inline int hif_usb_warm_reset_flag(struct ol_softc *scn, int set)
 }
 #endif
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+extern int usb_recovery_status;
+#endif
+
 static void hif_usb_remove(struct usb_interface *interface)
 {
 	HIF_DEVICE_USB *device = usb_get_intfdata(interface);
@@ -302,7 +406,17 @@ static void hif_usb_remove(struct usb_interface *interface)
 	if (!scn)
 		return;
 
-	pr_info("Try to remove hif_usb!\n");
+	pr_err("Try to remove hif_usb!\n");
+
+#ifdef WLAN_FEATURE_USB_RECOVERY
+	if(hdd_in_recovery_state()) {
+		pr_err("%s: in recovery state\n", __func__);
+		goto _hdd_removed_processing;
+	} else if (!vos_is_unload_in_progress()) {
+		pr_err("%s: not unload, set recovery!\n", __func__);
+		usb_recovery_status = 1;
+	}
+#endif
 
 	/* wait __hdd_wlan_exit until finished and no more than 4 seconds*/
 	while(atomic_read(&usb_sc->hdd_removed_processing) == 1 &&
@@ -312,6 +426,10 @@ static void hif_usb_remove(struct usb_interface *interface)
 		set_current_state(TASK_RUNNING);
 		usb_sc->hdd_removed_wait_cnt ++;
 	}
+
+#ifdef WLAN_FEATURE_USB_RECOVERY
+_hdd_removed_processing:
+#endif
 	atomic_set(&usb_sc->hdd_removed_processing, 1);
 	vos_set_shutdown_in_progress(VOS_MODULE_ID_HIF, TRUE);
 
@@ -325,10 +443,15 @@ static void hif_usb_remove(struct usb_interface *interface)
 	schedule_timeout(msecs_to_jiffies(DELAY_FOR_TARGET_READY));
 	set_current_state(TASK_RUNNING);
 
+#ifdef WLAN_FEATURE_USB_RECOVERY
+	if(!hdd_in_recovery_state()) { /* for fast recovery */
+#endif
 	/* Save to global for later unregister phase */
 	hif_usb_warm_reset_flag(scn, true);
 	hif_diag_write_reset_type(sc);
-
+#ifdef WLAN_FEATURE_USB_RECOVERY
+	}
+#endif
 	unregister_reboot_notifier(&sc->reboot_notifier);
 	usb_put_dev(interface_to_usbdev(interface));
 	if (atomic_read(&hif_usb_unload_state) ==
@@ -529,8 +652,8 @@ int hif_register_driver(void)
 	usb_register_notify(&hif_usb_dev_nb);
 	status = usb_register(&hif_usb_drv_id);
 
-	/* wait for usb probe done, 2s at most*/
-	while(!usb_sc && probe_wait_cnt < 10) {
+	/* wait for usb probe done, 3s at most*/
+	while(!usb_sc && probe_wait_cnt < 15) {
 		A_MSLEEP(200);
 		probe_wait_cnt++;
 	}
