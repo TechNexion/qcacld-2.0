@@ -18270,6 +18270,7 @@ static inline void hdd_timer_exit(void)
 static inline void hdd_mem_exit(void)
 {
 	adf_net_buf_debug_exit();
+	adf_nbuf_map_check_for_leaks();
 	vos_mem_exit();
 }
 #else
@@ -18649,6 +18650,7 @@ static void hdd_driver_exit(void)
 #endif
 #ifdef MEMORY_DEBUG
    adf_net_buf_debug_exit();
+   adf_nbuf_map_check_for_leaks();
    vos_mem_exit();
 #endif
 
