@@ -59,6 +59,14 @@
 
 #include "qwlan_version.h"
 
+#ifdef FW_RAM_DUMP_TO_PROC
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/version.h>
+#include <linux/proc_fs.h> /* Necessary because we use the proc fs */
+#include <linux/uaccess.h> /* for copy_to_user */
+#endif
+
 #ifdef FEATURE_SECURE_FIRMWARE
 static struct hash_fw fw_hash;
 #endif
@@ -155,6 +163,224 @@ static int ol_get_fw_files_for_target(struct ol_fw_files *pfw_files,
     }
     return 0;
 }
+#endif
+
+#ifdef FW_RAM_DUMP_TO_PROC
+#define PROCFS_CRASH_DUMP_DIR "crash"
+#define PROCFS_CRASH_DUMP_NAME "ramdump"
+#define PROCFS_CRASH_DUMP_PERM 0444
+
+static struct proc_dir_entry *crash_file, *crash_dir;
+
+/** crash_dump_get_file_data() - get data available in proc file
+ *
+ * @file - handle for the proc file.
+ *
+ * This function is used to retrieve the data passed while
+ * creating proc file entry.
+ *
+ * Return: void pointer to ol_softc
+ */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)) || defined(WITH_BACKPORTS)
+static void *crash_dump_get_file_data(struct file *file)
+{
+	void *scn;
+
+	scn = PDE_DATA(file_inode(file));
+	return scn;
+}
+#else
+static void *crash_dump_get_file_data(struct file *file)
+{
+	void *scn;
+
+	scn = PDE(file->f_path.dentry->d_inode)->data;
+	return scn;
+}
+#endif
+/**
+ * crash_dump_read() - perform read operation in ram dump proc file
+ *
+ * @file  - handle for the proc file.
+ * @buf   - pointer to user space buffer.
+ * @count - number of bytes to be read.
+ * @pos   - offset in the from buffer.
+ *
+ * This function performs read operation for the ram dump proc file.
+ *
+ * Return: number of bytes read on success, error code otherwise.
+ */
+static ssize_t crash_dump_read(struct file *file, char __user *buf,
+					size_t count, loff_t *pos)
+{
+	struct ol_softc *scn;
+	size_t no_of_bytes_read = 0;
+#ifdef HIF_USB
+	int sec_len = 0, i = 0;
+	size_t pos_data = *pos;
+#endif
+
+	scn = crash_dump_get_file_data(file);
+
+#if defined(HIF_USB)
+	for (i = 0; i < FW_RAM_SEG_CNT; i++) {
+		if (pos_data >= (scn->ramdump[i])->length) {
+			sec_len += (scn->ramdump[i])->length;
+			pos_data -= (scn->ramdump[i])->length;
+		}
+		else {
+			break;
+		}
+	}
+
+	if (i < FW_RAM_SEG_CNT) {
+		if(scn->ramdump[i]) {
+			no_of_bytes_read = MIN((scn->ramdump[i])->length -
+					       (*pos - sec_len), count);
+
+			if (copy_to_user(buf, (scn->ramdump[i])->mem +
+			    (*pos - sec_len), no_of_bytes_read)) {
+				printk(KERN_ERR "copy to user space failed");
+				return -EFAULT;
+			}
+			/* offset(pos) updated based on the copy done */
+			*pos += no_of_bytes_read;
+		}
+	}
+	else {
+		printk(KERN_DEBUG "Fw crash ram dump completes");
+	}
+#else
+	if (*pos < scn->ramdump_size) {
+		if(scn->ramdump_base) {
+			no_of_bytes_read = MIN(scn->ramdump_size -
+					       *pos, count);
+			if (copy_to_user(buf, scn->ramdump_base + *pos,
+			    no_of_bytes_read)) {
+				printk(KERN_ERR "copy to user space failed");
+				return -EFAULT;
+			}
+			*pos += no_of_bytes_read;
+		}
+	}
+	else {
+		printk(KERN_DEBUG "Fw crash ram dump completes");
+	}
+#endif
+	return no_of_bytes_read;
+}
+/**
+ * struct crash_dump_fops - file operations for crash firmware ram dump feature
+ * @read - read function for crash dump operation.
+ *
+ * This structure initialize the file operation handle for crash
+ * dump feature
+ */
+static const struct file_operations crash_dump_fops = {
+	read: crash_dump_read
+};
+
+/**
+ * crash_dump_procfs_remove() - Remove file/dir under procfs for crash dump
+ *
+ * This function removes file/dir under proc file system that was
+ * processing irmware crash dump
+ *
+ * Return:  None
+ */
+static void crash_dump_procfs_remove(void)
+{
+	if (crash_file) {
+		remove_proc_entry(PROCFS_CRASH_DUMP_NAME, crash_dir);
+		pr_debug("/proc/%s/%s removed\n", PROCFS_CRASH_DUMP_DIR,
+				 PROCFS_CRASH_DUMP_NAME);
+	}
+	if (crash_dir) {
+		remove_proc_entry(PROCFS_CRASH_DUMP_DIR, NULL);
+		pr_debug("/proc/%s removed\n", PROCFS_CRASH_DUMP_DIR);
+	}
+}
+
+/**
+ * crash_dump_procfs_init() - Initialize procfs for memory dump
+ *
+ * @scn - struct ol_softc
+ *
+ * This function create file under proc file system to be used later for
+ * processing firmware ram dump
+ *
+ * Return:   0 on success, error code otherwise.
+ */
+static int crash_dump_procfs_init(struct ol_softc *scn)
+{
+	crash_dir = proc_mkdir(PROCFS_CRASH_DUMP_DIR, NULL);
+	if (crash_dir == NULL) {
+		crash_dump_procfs_remove();
+		pr_debug("Error: Could not initialize /proc/%s\n",
+			 PROCFS_CRASH_DUMP_DIR);
+		return -ENOMEM;
+	}
+
+	crash_file = proc_create_data(PROCFS_CRASH_DUMP_NAME,
+				     PROCFS_CRASH_DUMP_PERM,
+				     crash_dir,
+				     &crash_dump_fops, scn);
+	if (crash_file == NULL) {
+		crash_dump_procfs_remove();
+		pr_debug("Error: Could not initialize /proc/debug/%s\n",
+			 PROCFS_CRASH_DUMP_NAME);
+		return -ENOMEM;
+	}
+
+	pr_err("/proc/%s/%s created\n", PROCFS_CRASH_DUMP_DIR,
+	       PROCFS_CRASH_DUMP_NAME);
+	return 0;
+}
+
+#ifdef HIF_USB
+void crash_dump_init(struct ol_softc *scn)
+{
+	int i, k;
+	size_t fw_ram_seg_size[FW_RAM_SEG_CNT] = {DRAM_SIZE, IRAM_SIZE, AXI_SIZE};
+
+	for (i = 0; i < FW_RAM_SEG_CNT; i++) {
+		scn->ramdump[i] = (v_VOID_t *)kmalloc(sizeof(struct fw_ramdump) +
+				   fw_ram_seg_size[i], GFP_KERNEL);
+		if (!scn->ramdump[i]) {
+			pr_err("Fail to allocate memory for scn ram dump %d", i);
+			for (k = 0; k < i; k++) {
+				kfree(scn->ramdump[k]);
+				scn->ramdump[k] = NULL;
+			}
+			pr_err("crash dump initial failed");
+			VOS_BUG(i);
+			return;
+		}
+		(scn->ramdump[i])->mem = (A_UINT8 *) (scn->ramdump[i] + 1);
+		(scn->ramdump[i])->length = 0;
+	}
+	crash_dump_procfs_init(scn);
+}
+
+void crash_dump_exit(struct ol_softc *scn)
+{
+	int k;
+
+	crash_dump_procfs_remove();
+
+	for (k = 0; k < FW_RAM_SEG_CNT; k++) {
+		if(scn->ramdump[k] != NULL) {
+			vos_mem_free(scn->ramdump[k]);
+			scn->ramdump[k] = NULL;
+		}
+	}
+}
+#else
+void crash_dump_exit(void)
+{
+	crash_dump_procfs_remove();
+}
+#endif
 #endif
 
 extern int qca_request_firmware(const struct firmware **firmware_p, const char *name,struct device *device);
@@ -1222,7 +1448,9 @@ static void ramdump_work_handler(struct work_struct *ramdump)
 	printk("%s: RAM dump collecting completed!\n", __func__);
 
 #if (defined(HIF_SDIO) || defined(CONFIG_NON_QC_PLATFORM_PCI)) && !defined(CONFIG_CNSS)
+#ifndef FW_RAM_DUMP_TO_PROC
 	panic("CNSS Ram dump collected\n");
+#endif
 #else
 	/* Notify SSR framework the target has crashed. */
 	vos_device_crashed(dev);
@@ -1343,6 +1571,7 @@ void ol_ramdump_handler(struct ol_softc *scn)
 			vos_set_logp_in_progress(VOS_MODULE_ID_VOSS, TRUE);
 
 		reg = (A_UINT32 *) (data + 4);
+
 		print_hex_dump(KERN_DEBUG, " ", DUMP_PREFIX_OFFSET, 16, 4, reg,
 				min_t(A_UINT32, len - 4, FW_REG_DUMP_CNT * 4),
 				false);
@@ -1382,6 +1611,7 @@ void ol_ramdump_handler(struct ol_softc *scn)
 		if (scn->fw_ram_dumping == 0) {
 			scn->fw_ram_dumping = 1;
 			pr_err("Firmware %s dump:\n", fw_ram_seg_name[i]);
+#ifndef FW_RAM_DUMP_TO_PROC
 			scn->ramdump[i] = kmalloc(sizeof(struct fw_ramdump) +
 							fw_ram_seg_size[i],
 							GFP_KERNEL);
@@ -1397,8 +1627,9 @@ void ol_ramdump_handler(struct ol_softc *scn)
 			pr_err("Memory addr for %s = %pK\n",
 				fw_ram_seg_name[i],
 				(scn->ramdump[i])->mem);
-			(scn->ramdump[i])->start_addr = *reg;
 			(scn->ramdump[i])->length = 0;
+#endif
+			(scn->ramdump[i])->start_addr = *reg;
 		}
 		reg++;
 		ram_ptr = (scn->ramdump[i])->mem + (scn->ramdump[i])->length;
@@ -1413,9 +1644,13 @@ void ol_ramdump_handler(struct ol_softc *scn)
 
 		if (pattern == FW_RAMDUMP_END_PATTERN) {
 			pr_err("%s memory size = %d\n", fw_ram_seg_name[i],
-					(scn->ramdump[i])->length);
-			if (i == (FW_RAM_SEG_CNT - 1)) {
+			       (scn->ramdump[i])->length);
+			if (i == FW_RAM_SEG_CNT - 1) {
+#ifdef FW_RAM_DUMP_TO_PROC
+				pr_err("F/W crash log dump completed\n");
+#else
 				VOS_BUG(0);
+#endif
 			}
 
 			scn->ramdump_index++;
@@ -2866,7 +3101,6 @@ int ol_target_coredump(void *inst, void *memoryBlock, u_int32_t blockLength)
 	uint32_t readLen = 0;
 
 #ifdef CONFIG_NON_QC_PLATFORM_PCI
-
 	char *fw_ram_seg_name[] = {"DRAM ", "AXI ", "REG ", "IRAM1 ", "IRAM2 "};
 #endif
 
@@ -2888,6 +3122,10 @@ int ol_target_coredump(void *inst, void *memoryBlock, u_int32_t blockLength)
 #endif
 		BMIInit(scn);
 	}
+
+#ifdef FW_RAM_DUMP_TO_PROC
+	crash_dump_procfs_init(scn);
+#endif
 
 	while ((sectionCount < MAX_SECTION_COUNT) &&
 	       (amountRead < blockLength)) {

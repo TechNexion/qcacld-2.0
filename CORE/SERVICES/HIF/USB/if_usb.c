@@ -266,6 +266,9 @@ static int hif_usb_disable_lpm(struct usb_device *udev)
 	return ret;
 }
 
+extern void crash_dump_init(struct ol_softc *scn);
+extern void crash_dump_exit(struct ol_softc *scn);
+
 static int
 hif_usb_probe(struct usb_interface *interface, const struct usb_device_id *id)
 {
@@ -306,6 +309,8 @@ hif_usb_probe(struct usb_interface *interface, const struct usb_device_id *id)
 	ol_sc->sc_osdev = &sc->aps_osdev;
 	ol_sc->hif_sc = (void *)sc;
 	sc->ol_sc = ol_sc;
+
+	crash_dump_init(ol_sc);
 
 	if ((usb_control_msg(pdev, usb_sndctrlpipe(pdev, 0),
 			     USB_REQ_SET_CONFIGURATION, 0, 1, 0, NULL, 0,
@@ -473,7 +478,9 @@ _hdd_removed_processing:
 			HIF_USB_UNLOAD_STATE_DRV_DEREG)
 		atomic_set(&hif_usb_unload_state,
 			   HIF_USB_UNLOAD_STATE_TARGET_RESET);
-
+#ifdef FW_RAM_DUMP_TO_PROC
+	crash_dump_exit(scn);
+#endif
         /* The logp is set by target failure's ol_ramdump_handler.
          * Coldreset occurs and do this disconnect cb, try to issue
          * offline uevent to restart driver.

@@ -451,6 +451,9 @@ static const struct cfg80211_wowlan wowlan_config = {
 /* Internal function declarations */
 static int hdd_driver_init(void);
 static void hdd_driver_exit(void);
+#ifdef FW_RAM_DUMP_TO_PROC
+extern void crash_dump_exit(void);
+#endif
 
 /* Internal function declarations */
 
@@ -15182,6 +15185,9 @@ void __hdd_wlan_exit(void)
    hdd_close_tx_queues(pHddCtx);
    //Do all the cleanup before deregistering the driver
    hdd_driver_memdump_deinit();
+#ifdef FW_RAM_DUMP_TO_PROC
+   crash_dump_exit();
+#endif
    hdd_wlan_exit(pHddCtx);
    EXIT();
 }
