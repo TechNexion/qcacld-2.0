@@ -176,7 +176,7 @@ ol_rx_mpdu_list_next(
     adf_nbuf_t *next_mpdu)
 {
     htt_pdev_handle htt_pdev = pdev->htt_pdev;
-    adf_nbuf_t msdu;
+    adf_nbuf_t msdu, prev_msdu;
 
     /*
      * For now, we use a simply flat list of MSDUs.
@@ -184,10 +184,27 @@ ol_rx_mpdu_list_next(
      */
     TXRX_ASSERT2(mpdu_list);
     msdu = mpdu_list;
+    prev_msdu = msdu;
     while (!htt_rx_msdu_desc_completes_mpdu(
                 htt_pdev, htt_rx_msdu_desc_retrieve(htt_pdev, msdu)))
     {
         msdu = adf_nbuf_next(msdu);
+        if (!msdu) {
+            /*
+             * Last MPDU flag is not set but msdu is null, this shouldn't
+             * happen. WAR to avoid crash by resetting msdu to previous one
+             */
+            msdu = prev_msdu;
+            pr_err("Error: MSDU is null, but last mpdu bit is not set");
+            pr_err("Resetting msdu to prev msdu");
+            break;
+        }
+        else
+            prev_msdu = msdu;
+
+        if(!msdu)
+            pr_err("Error: MSDU is NULL");
+
         TXRX_ASSERT2(msdu);
     }
     /* msdu now points to the last MSDU within the first MPDU */
@@ -195,9 +212,7 @@ ol_rx_mpdu_list_next(
     *next_mpdu = adf_nbuf_next(msdu);
 }
 
-
 /*--- txrx stats macros ---*/
-
 
 /* unconditional defs */
 #define TXRX_STATS_INCR(pdev, field) TXRX_STATS_ADD(pdev, field, 1)
