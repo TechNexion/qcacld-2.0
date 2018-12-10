@@ -157,15 +157,17 @@ ifeq ($(KERNEL_BUILD), 0)
 		CONFIG_WLAN_OFFLOAD_PACKETS := y
 	endif
 
-        #Flag to enable 3 port concurrency feature
-        CONFIG_QCA_WIFI_AUTOMOTIVE_CONC := y
-
 	#Enable DSRC feature
 	ifeq ($(CONFIG_QCA_WIFI_SDIO), 1)
 	CONFIG_WLAN_FEATURE_DSRC := y
 	endif
 
 endif
+
+#Flag to enable 3 port concurrency feature
+CONFIG_QCA_WIFI_AUTOMOTIVE_CONC := y
+
+CONFIG_NON_QC_PLATFORM := y
 
 #Enable Power debugfs feature only if debug_fs is enabled
 ifeq ($(CONFIG_DEBUG_FS), y)
@@ -175,10 +177,6 @@ endif
 ifdef CPTCFG_QCA_CLD_WLAN
 	WLAN_ROOT := $(BACKPORT_PWD)/drivers/staging/qcacld-2.0
 	CONFIG_QCA_CLD_WLAN=$(CPTCFG_QCA_CLD_WLAN)
-endif
-
-ifeq ($(CONFIG_X86), y)
-CONFIG_NON_QC_PLATFORM := y
 endif
 
 ifneq ($(CONFIG_MOBILE_ROUTER), y)
