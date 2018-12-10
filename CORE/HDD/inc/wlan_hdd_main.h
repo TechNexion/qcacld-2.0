@@ -1970,7 +1970,10 @@ struct hdd_context_s
     struct delayed_work usb_detect_work;
     struct mutex usb_recovery_lock;
 #endif
-
+#ifdef CONFIG_IXC_TIMER
+    vos_timer_t    set_ixc_prio_timer;
+    int             ixc_pid;
+#endif
     /* VHT80 allowed*/
     v_BOOL_t isVHT80Allowed;
 
