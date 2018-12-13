@@ -60,6 +60,8 @@
 #include <pmcApi.h>
 #include <wlan_hdd_misc.h>
 
+extern int qca_request_firmware(const struct firmware **firmware_p, const char *name,struct device *device);
+
 #if  defined (WLAN_FEATURE_VOWIFI_11R) || defined (FEATURE_WLAN_ESE) || defined(FEATURE_WLAN_LFR)
 static void
 cbNotifySetRoamPrefer5GHz(hdd_context_t *pHddCtx, unsigned long NotifyId)
@@ -5561,7 +5563,7 @@ VOS_STATUS hdd_parse_config_ini(hdd_context_t* pHddCtx)
 
    memset(cfgIniTable, 0, sizeof(cfgIniTable));
 
-   status = request_firmware(&fw, WLAN_INI_FILE, pHddCtx->parent_dev);
+   status = qca_request_firmware(&fw, WLAN_INI_FILE, pHddCtx->parent_dev);
 
    if(status)
    {
@@ -6516,7 +6518,7 @@ VOS_STATUS hdd_update_mac_config(hdd_context_t *pHddCtx)
    VOS_STATUS vos_status = VOS_STATUS_SUCCESS;
 
    memset(macTable, 0, sizeof(macTable));
-   status = request_firmware(&fw, WLAN_MAC_FILE, pHddCtx->parent_dev);
+   status = qca_request_firmware(&fw, WLAN_MAC_FILE, pHddCtx->parent_dev);
 
    if (status)
    {
