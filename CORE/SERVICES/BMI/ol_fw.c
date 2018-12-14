@@ -157,6 +157,8 @@ static int ol_get_fw_files_for_target(struct ol_fw_files *pfw_files,
 }
 #endif
 
+extern int qca_request_firmware(const struct firmware **firmware_p, const char *name,struct device *device);
+
 #ifdef CONFIG_NON_QC_PLATFORM_PCI
 static struct non_qc_platform_pci_fw_files FW_FILES_QCA6174_FW_1_1 = {
 "qwlan11.bin", "bdwlan11.bin", "otp11.bin", "utf11.bin",
@@ -173,7 +175,7 @@ static struct non_qc_platform_pci_fw_files FW_FILES_QCA6174_FW_3_0 = {
 static struct non_qc_platform_pci_fw_files FW_FILES_DEFAULT = {
 "qwlan.bin", "bdwlan.bin", "otp.bin", "utf.bin",
 "utfbd.bin", "epping.bin", "evicted.bin"};
-extern int qca_request_firmware(const struct firmware **firmware_p, const char *name,struct device *device);
+
 static
 int get_fw_files_for_non_qc_pci_target(struct non_qc_platform_pci_fw_files *pfw_files,
                            u32 target_type, u32 target_version)
