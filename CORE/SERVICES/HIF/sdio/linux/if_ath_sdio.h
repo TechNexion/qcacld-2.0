@@ -68,7 +68,7 @@ struct ath_hif_sdio_softc {
     * Guard changes to Target HW state and to software
     * structures that track hardware state.
     */
-    spinlock_t target_lock;
+    adf_os_spinlock_t target_lock;
     void *hif_handle;
     struct targetdef_s *targetdef;
     struct hostdef_s *hostdef;
