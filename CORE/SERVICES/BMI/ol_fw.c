@@ -294,10 +294,12 @@ static void crash_dump_procfs_remove(void)
 		remove_proc_entry(PROCFS_CRASH_DUMP_NAME, crash_dir);
 		pr_debug("/proc/%s/%s removed\n", PROCFS_CRASH_DUMP_DIR,
 				 PROCFS_CRASH_DUMP_NAME);
+		crash_file = NULL;
 	}
 	if (crash_dir) {
 		remove_proc_entry(PROCFS_CRASH_DUMP_DIR, NULL);
 		pr_debug("/proc/%s removed\n", PROCFS_CRASH_DUMP_DIR);
+		crash_dir = NULL;
 	}
 }
 

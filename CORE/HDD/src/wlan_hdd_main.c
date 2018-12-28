@@ -15190,8 +15190,15 @@ void __hdd_wlan_exit(void)
    hdd_close_tx_queues(pHddCtx);
    //Do all the cleanup before deregistering the driver
    hdd_driver_memdump_deinit();
+/**
+ * When rmmoding wlan driver with USB interface, crash_dump_exit
+ * should be called in hif_usb_remove. Other interfaces do
+ * crash_dump_exit here.
+ */
 #ifdef FW_RAM_DUMP_TO_PROC
+#ifndef HIF_USB
    crash_dump_exit();
+#endif
 #endif
    hdd_wlan_exit(pHddCtx);
    EXIT();
