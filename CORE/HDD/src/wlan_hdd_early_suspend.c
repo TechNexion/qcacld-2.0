@@ -1949,8 +1949,7 @@ send_resume_ind:
 #endif
 
 #ifdef WLAN_FEATURE_USB_RECOVERY
-   if (hif_usb_check())
-      schedule_delayed_work(&pHddCtx->usb_detect_work, msecs_to_jiffies(3000));
+   schedule_delayed_work(&pHddCtx->usb_detect_work, msecs_to_jiffies(10000));
 #endif
 
 #ifdef SUPPORT_EARLY_SUSPEND_STANDBY_DEEPSLEEP

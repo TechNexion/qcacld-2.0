@@ -566,11 +566,8 @@ static int hif_usb_resume(struct usb_interface *interface)
 
 static int hif_usb_reset_resume(struct usb_interface *intf)
 {
-	HIF_DEVICE_USB *device = usb_get_intfdata(intf);
-	struct hif_usb_softc *sc = device->sc;
-
 	printk("Enter:%s,Line:%d \n\r", __func__,__LINE__);
-	HIFDiagWriteCOLDRESET(sc->hif_device);
+	hif_usb_resume(intf);
 	printk("Exit:%s,Line:%d \n\r", __func__,__LINE__);
 	return 0;
 }

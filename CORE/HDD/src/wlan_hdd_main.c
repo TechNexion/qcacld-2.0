@@ -12917,6 +12917,8 @@ VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
             hdd_is_connecting(WLAN_HDD_GET_STATION_CTX_PTR(pAdapter))) {
 #ifdef WLAN_FEATURE_USB_RECOVERY
             if ( hdd_in_recovery_state() ) {
+                wlan_hdd_cfg80211_indicate_disconnect(pAdapter->dev, false,
+                                                      WLAN_REASON_UNSPECIFIED);
                 goto _ignore_disconnect;
             }
 #endif
