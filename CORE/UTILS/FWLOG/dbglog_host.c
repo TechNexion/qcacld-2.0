@@ -4960,8 +4960,8 @@ int create_peer_cfr_debug_entry(tp_wma_handle wma, void *buf)
     return TRUE;
 }
 
+#ifdef QCA_CONFIG_RELAY
 struct rchan *rfs_cfr_capture;
-
 void cfr_finalalize_relay(void)
 {
     if (!rfs_cfr_capture)
@@ -4990,17 +4990,6 @@ static struct dentry *create_buf_file_handler(const char *filename,
     return buf_file;
 }
 
-static int remove_buf_file_handler(struct dentry *dentry)
-{
-    debugfs_remove(dentry);
-    return 0;
-}
-
-static struct rchan_callbacks rfs_cfr_capture_cb = {
-    .create_buf_file = create_buf_file_handler,
-    .remove_buf_file = remove_buf_file_handler,
-};
-
 int cfr_capture_init(wmi_unified_t wmi_handle)
 {
     if (!wmi_handle->debugfs_phy)
@@ -5021,4 +5010,38 @@ void cfr_capture_deinit(void)
         rfs_cfr_capture = NULL;
     }
 }
+
+static int remove_buf_file_handler(struct dentry *dentry)
+{
+    debugfs_remove(dentry);
+    return 0;
+}
+
+static struct rchan_callbacks rfs_cfr_capture_cb = {
+    .create_buf_file = create_buf_file_handler,
+    .remove_buf_file = remove_buf_file_handler,
+}
+
+#else
+void cfr_finalalize_relay(void)
+{
+    return;
+}
+
+void cfr_dump_to_rfs(const void *buf, const int length)
+{
+    return;
+}
+
+int cfr_capture_init(wmi_unified_t wmi_handle)
+{
+    return -1;
+}
+
+void cfr_capture_deinit(void)
+{
+    return;
+}
+
+#endif
 #endif /* WLAN_OPEN_SOURCE */
