@@ -1564,7 +1564,9 @@ CDEFINES += -DQCA_HT_20_24G_STA_ONLY
 else #CONFIG_MOBILE_ROUTER
 
 #Open P2P device interface only for non-Mobile router use cases
+ifneq ($(CONFIG_SUPPORT_IFTYPE_P2P_DEVICE_VIF), y)
 CDEFINES += -DWLAN_OPEN_P2P_INTERFACE
+endif
 
 #Enable 2.4 GHz social channels in 5 GHz only mode for p2p usage
 CDEFINES += -DWLAN_ENABLE_SOCIAL_CHANNELS_5G_ONLY
@@ -1752,6 +1754,10 @@ endif
 
 ifeq ($(CONFIG_HIF_PCI), 1)
 CDEFINES += -DFORCE_LEGACY_PCI_INTERRUPTS
+endif
+
+ifeq ($(CONFIG_SUPPORT_IFTYPE_P2P_DEVICE_VIF), y)
+CDEFINES += -DSUPPORT_IFTYPE_P2P_DEVICE_VIF
 endif
 
 ifeq ($(CONFIG_WLAN_THERMAL_SHUTDOWN), 1)

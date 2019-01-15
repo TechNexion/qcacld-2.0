@@ -477,6 +477,13 @@ wlan_hdd_txrx_stypes[NUM_NL80211_IFTYPES] = {
             BIT(SIR_MAC_MGMT_DEAUTH) |
             BIT(SIR_MAC_MGMT_ACTION),
     },
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+    [NL80211_IFTYPE_P2P_DEVICE] = {
+        .tx = 0xffff,
+        .rx = BIT(SIR_MAC_MGMT_ACTION) |
+            BIT(SIR_MAC_MGMT_PROBE_REQ),
+    },
+#endif
 };
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,4,0)) || defined(WITH_BACKPORTS)
@@ -529,6 +536,12 @@ wlan_hdd_p2p_iface_limit[] = {
       .max = 1,
       .types = BIT(NL80211_IFTYPE_P2P_GO),
    },
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+   {
+      .max = 1,
+      .types = BIT(NL80211_IFTYPE_P2P_DEVICE),
+   },
+#endif
 };
 
 static const struct ieee80211_iface_limit
@@ -562,6 +575,12 @@ wlan_hdd_sta_p2p_iface_limit[] = {
       .types = BIT(NL80211_IFTYPE_P2P_GO) |
                BIT(NL80211_IFTYPE_P2P_CLIENT),
    },
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+   {
+      .max = 1,
+      .types = BIT(NL80211_IFTYPE_P2P_DEVICE),
+   },
+#endif
 };
 
 /* STA + AP + P2PGO combination */
@@ -621,7 +640,11 @@ wlan_hdd_iface_combination[] = {
    {
       .limits = wlan_hdd_p2p_iface_limit,
       .num_different_channels = 2,
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+      .max_interfaces = 3,
+#else
       .max_interfaces = 2,
+#endif
       .n_limits = ARRAY_SIZE(wlan_hdd_p2p_iface_limit),
    },
    /* STA + AP */
@@ -641,7 +664,11 @@ wlan_hdd_iface_combination[] = {
       .limits = wlan_hdd_sta_p2p_iface_limit,
       .num_different_channels = 2,
       /* one interface reserved for P2PDEV dedicated usage */
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+      .max_interfaces = 5,
+#else
       .max_interfaces = 4,
+#endif
       .n_limits = ARRAY_SIZE(wlan_hdd_sta_p2p_iface_limit),
       .beacon_int_infra_match = true,
    },
@@ -16426,6 +16453,9 @@ int wlan_hdd_cfg80211_init(struct device *dev,
                              | BIT(NL80211_IFTYPE_ADHOC)
                              | BIT(NL80211_IFTYPE_P2P_CLIENT)
                              | BIT(NL80211_IFTYPE_P2P_GO)
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+                             | BIT(NL80211_IFTYPE_P2P_DEVICE)
+#endif
                              | BIT(NL80211_IFTYPE_AP)
                              | BIT(NL80211_IFTYPE_MONITOR);
 
@@ -19637,6 +19667,33 @@ static int wlan_hdd_cfg80211_start_ap(struct wiphy *wiphy,
 
 	return ret;
 }
+
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+static int wlan_hdd_cfg80211_start_p2p_dev(struct wiphy *wiphy,
+					   struct wireless_dev *wdev)
+{
+	ENTER();
+	return 0;
+}
+static void wlan_hdd_cfg80211_stop_p2p_dev(struct wiphy *wiphy,
+					   struct wireless_dev *wdev)
+{
+	//need add stop scan
+	hdd_adapter_t *pAdapter;
+	hdd_scaninfo_t *pScanInfo = NULL;
+
+	pAdapter = hdd_get_adapter_by_wdev(wdev);
+	if (!pAdapter)
+		return;
+
+	pScanInfo = &pAdapter->scan_info;
+
+	if (pScanInfo != NULL && pScanInfo->mScanPending)
+		wlan_hdd_scan_abort(pAdapter);
+
+	return;
+}
+#endif //SUPPORT_IFTYPE_P2P_DEVICE_VIF
 #endif
 
 
@@ -32957,6 +33014,10 @@ static struct cfg80211_ops wlan_hdd_cfg80211_ops =
     .start_ap = wlan_hdd_cfg80211_start_ap,
     .change_beacon = wlan_hdd_cfg80211_change_beacon,
     .stop_ap = wlan_hdd_cfg80211_stop_ap,
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+    .start_p2p_device = wlan_hdd_cfg80211_start_p2p_dev,
+    .stop_p2p_device = wlan_hdd_cfg80211_stop_p2p_dev,
+#endif
 #endif
     .change_bss = wlan_hdd_cfg80211_change_bss,
     .add_key = wlan_hdd_cfg80211_add_key,

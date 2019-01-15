@@ -1456,6 +1456,10 @@ struct hdd_adapter_s
      */
     uint8_t restrict_offchannel_cnt;
 
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+    char ifname[IFNAMSIZ];
+#endif
+
 };
 
 #define WLAN_HDD_GET_STATION_CTX_PTR(pAdapter) (&(pAdapter)->sessionCtx.station)
@@ -2239,6 +2243,7 @@ hdd_adapter_t * hdd_get_adapter_by_rand_macaddr(hdd_context_t *hdd_ctx, tSirMacA
 
 VOS_STATUS hdd_init_station_mode( hdd_adapter_t *pAdapter );
 hdd_adapter_t * hdd_get_adapter( hdd_context_t *pHddCtx, device_mode_t mode );
+hdd_adapter_t * hdd_get_adapter_by_wdev(struct wireless_dev *wdev);
 void hdd_deinit_adapter(hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
                         bool rtnl_held);
 VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,

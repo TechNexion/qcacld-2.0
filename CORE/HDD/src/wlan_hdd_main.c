@@ -11233,6 +11233,50 @@ static void hdd_adapter_init_action_frame_random_mac(hdd_adapter_t *adapter)
 	vos_mem_zero(adapter->random_mac, sizeof(adapter->random_mac));
 }
 
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+static hdd_adapter_t*
+hdd_alloc_p2p_device_adapter(hdd_context_t *pHddCtx, tSirMacAddr macAddr,
+			     unsigned char name_assign_type, const char* name)
+{
+	hdd_adapter_t *pAdapter = NULL;
+	/*
+	* cfg80211 initialization and registration....
+	*/
+	pAdapter = vos_mem_malloc(sizeof(hdd_adapter_t));
+	hddLog(VOS_TRACE_LEVEL_DEBUG, "%s:pAdapter=0x%lx, MacAddr="MAC_ADDRESS_STR,
+	        __func__, (unsigned long)pAdapter, MAC_ADDR_ARRAY(macAddr));
+
+	vos_mem_zero(pAdapter, sizeof(hdd_adapter_t));
+
+	pAdapter->pHddCtx = pHddCtx;
+	pAdapter->magic = WLAN_HDD_ADAPTER_MAGIC;
+	vos_event_init(&pAdapter->scan_info.scan_finished_event);
+	pAdapter->scan_info.scan_pending_option = WEXT_SCAN_PENDING_GIVEUP;
+	pAdapter->offloads_configured = FALSE;
+	pAdapter->isLinkUpSvcNeeded = FALSE;
+	pAdapter->higherDtimTransition = eANI_BOOLEAN_TRUE;
+	vos_mem_copy(pAdapter->macAddressCurrent.bytes, macAddr,
+		     sizeof(tSirMacAddr));
+	vos_mem_copy(pAdapter->wdev.address, macAddr, sizeof(tSirMacAddr));
+
+	strlcpy(pAdapter->ifname, name, IFNAMSIZ);
+	/*
+	* kernel will consume ethernet header length buffer for hard_header,
+	* so just reserve it
+	*/
+	pAdapter->wdev.wiphy = pHddCtx->wiphy;
+	/* set pWlanDev's parent to underlying device */
+	hdd_wmm_init(pAdapter);
+	hdd_adapter_runtime_suspend_init(pAdapter);
+	adf_os_spinlock_init(&pAdapter->pause_map_lock);
+	pAdapter->last_tx_jiffies = jiffies;
+	pAdapter->bug_report_count = 0;
+	pAdapter->start_time = pAdapter->last_time = vos_system_ticks();
+
+	return pAdapter;
+}
+#endif
+
 static hdd_adapter_t* hdd_alloc_station_adapter(hdd_context_t *pHddCtx,
                                                 tSirMacAddr macAddr,
                                                 unsigned char name_assign_type,
@@ -11272,6 +11316,10 @@ static hdd_adapter_t* hdd_alloc_station_adapter(hdd_context_t *pHddCtx,
       pAdapter->higherDtimTransition = eANI_BOOLEAN_TRUE;
       //Init the net_device structure
       strlcpy(pWlanDev->name, name, IFNAMSIZ);
+
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+      strlcpy(pAdapter->ifname, name, IFNAMSIZ);
+#endif
 
       vos_mem_copy(pWlanDev->dev_addr, (void *)macAddr, sizeof(tSirMacAddr));
       vos_mem_copy( pAdapter->macAddressCurrent.bytes, macAddr, sizeof(tSirMacAddr));
@@ -11782,6 +11830,17 @@ void hdd_cleanup_adapter(hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
       /* Note that the pAdapter is no longer valid at this point
          since the memory has been reclaimed */
    }
+
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+   if (pAdapter->device_mode == WLAN_HDD_P2P_DEVICE) {
+      if (!rtnl_is_locked()) {
+         rtnl_lock();
+         cfg80211_unregister_wdev(&(pAdapter->wdev));
+         rtnl_unlock();
+      } else
+         cfg80211_unregister_wdev(&(pAdapter->wdev));
+   }
+#endif
 }
 
 void hdd_set_pwrparams(hdd_context_t *pHddCtx)
@@ -12153,10 +12212,18 @@ hdd_adapter_t *hdd_open_adapter(hdd_context_t *hdd_ctx,
 	case WLAN_HDD_OCB:
 	case WLAN_HDD_NDI:
 	{
-		adapter = hdd_alloc_station_adapter(hdd_ctx,
-						    mac_addr,
-						    name_assign_type,
-						    iface_name);
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+		if (session_type == WLAN_HDD_P2P_DEVICE)
+			adapter = hdd_alloc_p2p_device_adapter(hdd_ctx,
+							       mac_addr,
+							       name_assign_type,
+							       iface_name);
+		else
+#endif
+			adapter = hdd_alloc_station_adapter(hdd_ctx,
+							    mac_addr,
+							    name_assign_type,
+							    iface_name);
 
 		if (NULL == adapter) {
 			hddLog(VOS_TRACE_LEVEL_FATAL,
@@ -12172,6 +12239,10 @@ hdd_adapter_t *hdd_open_adapter(hdd_context_t *hdd_ctx,
 			adapter->wdev.iftype = NL80211_IFTYPE_P2P_CLIENT;
                 else if (VOS_MONITOR_MODE == vos_get_conparam())
                         adapter->wdev.iftype = NL80211_IFTYPE_MONITOR;
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+		else if (session_type == WLAN_HDD_P2P_DEVICE)
+			adapter->wdev.iftype = NL80211_IFTYPE_P2P_DEVICE;
+#endif
 		else
 			adapter->wdev.iftype = NL80211_IFTYPE_STATION;
 
@@ -12202,9 +12273,15 @@ hdd_adapter_t *hdd_open_adapter(hdd_context_t *hdd_ctx,
 		vos_init_work(&adapter->ipv6NotifierWorkQueue,
 			      hdd_ipv6_notifier_work_queue);
 #endif
-		status = hdd_register_interface(adapter, rtnl_held);
-		if (VOS_STATUS_SUCCESS != status)
-			goto err_register_interface;
+
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+		if (session_type != WLAN_HDD_P2P_DEVICE)
+#endif
+		{
+			status = hdd_register_interface(adapter, rtnl_held);
+			if (VOS_STATUS_SUCCESS != status)
+				goto err_register_interface;
+		}
 
 		/* do not disable tx in monitor mode */
 		if (VOS_MONITOR_MODE != vos_get_conparam()) {
@@ -14336,6 +14413,33 @@ hdd_adapter_t * hdd_get_adapter( hdd_context_t *pHddCtx, device_mode_t mode )
 
 }
 
+hdd_adapter_t * hdd_get_adapter_by_wdev(struct wireless_dev *wdev)
+{
+	hdd_adapter_list_node_t *pAdapterNode = NULL, *pNext = NULL;
+	hdd_adapter_t *pAdapter;
+	VOS_STATUS status;
+	hdd_context_t * pHddCtx;
+
+	if (!wdev)
+		return NULL;
+
+	pHddCtx = wiphy_priv(wdev->wiphy);
+
+	status = hdd_get_front_adapter(pHddCtx, &pAdapterNode);
+
+	while (pAdapterNode != NULL && status == VOS_STATUS_SUCCESS)
+	{
+		pAdapter = pAdapterNode->pAdapter;
+
+		if (pAdapter && (wdev == &(pAdapter->wdev)))
+			return pAdapter;
+
+		status = hdd_get_next_adapter(pHddCtx, pAdapterNode, &pNext);
+		pAdapterNode = pNext;
+	}
+
+	return NULL;
+}
 /**---------------------------------------------------------------------------
 
   \brief hdd_get_operating_channel() -

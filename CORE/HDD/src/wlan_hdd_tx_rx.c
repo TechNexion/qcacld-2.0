@@ -1710,100 +1710,109 @@ void wlan_hdd_netif_queue_control(hdd_adapter_t *adapter,
 		enum netif_action_type action, enum netif_reason_type reason)
 {
 	if ((!adapter) || (WLAN_HDD_ADAPTER_MAGIC != adapter->magic) ||
+#ifndef SUPPORT_IFTYPE_P2P_DEVICE_VIF
 	    (!adapter->dev)) {
+#else
+	    ((!adapter->dev) && (adapter->device_mode != WLAN_HDD_P2P_DEVICE))) {
+#endif
 		hddLog(LOGE, FL("adapter is invalid"));
 		return;
 	}
 	hddLog(LOG1, FL("action is %d reason is %d"),action,reason);
 
-	switch (action) {
-	case WLAN_NETIF_CARRIER_ON:
-		netif_carrier_on(adapter->dev);
-		break;
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+	if (adapter->device_mode != WLAN_HDD_P2P_DEVICE)
+#endif
+	{
+		switch (action) {
+		case WLAN_NETIF_CARRIER_ON:
+			netif_carrier_on(adapter->dev);
+			break;
 
-	case WLAN_NETIF_CARRIER_OFF:
-		netif_carrier_off(adapter->dev);
-		break;
+		case WLAN_NETIF_CARRIER_OFF:
+			netif_carrier_off(adapter->dev);
+			break;
 
-	case WLAN_STOP_ALL_NETIF_QUEUE:
-		adf_os_spin_lock_bh(&adapter->pause_map_lock);
-		if (!adapter->pause_map) {
-			netif_tx_stop_all_queues(adapter->dev);
-			wlan_hdd_update_txq_timestamp(adapter->dev);
-			wlan_hdd_update_unpause_time(adapter);
+		case WLAN_STOP_ALL_NETIF_QUEUE:
+			adf_os_spin_lock_bh(&adapter->pause_map_lock);
+			if (!adapter->pause_map) {
+				netif_tx_stop_all_queues(adapter->dev);
+				wlan_hdd_update_txq_timestamp(adapter->dev);
+				wlan_hdd_update_unpause_time(adapter);
+			}
+			adapter->pause_map |= (1 << reason);
+			adf_os_spin_unlock_bh(&adapter->pause_map_lock);
+			break;
+
+		case WLAN_START_ALL_NETIF_QUEUE:
+			adf_os_spin_lock_bh(&adapter->pause_map_lock);
+			adapter->pause_map &= ~(1 << reason);
+			if (!adapter->pause_map) {
+				netif_tx_start_all_queues(adapter->dev);
+				wlan_hdd_update_pause_time(adapter);
+			}
+			adf_os_spin_unlock_bh(&adapter->pause_map_lock);
+			break;
+
+		case WLAN_WAKE_ALL_NETIF_QUEUE:
+			adf_os_spin_lock_bh(&adapter->pause_map_lock);
+			adapter->pause_map &= ~(1 << reason);
+			if (!adapter->pause_map) {
+				netif_tx_wake_all_queues(adapter->dev);
+				wlan_hdd_update_pause_time(adapter);
+			}
+			adf_os_spin_unlock_bh(&adapter->pause_map_lock);
+			break;
+
+		case WLAN_STOP_ALL_NETIF_QUEUE_N_CARRIER:
+			adf_os_spin_lock_bh(&adapter->pause_map_lock);
+			if (!adapter->pause_map) {
+				netif_tx_stop_all_queues(adapter->dev);
+				wlan_hdd_update_txq_timestamp(adapter->dev);
+				wlan_hdd_update_unpause_time(adapter);
+			}
+			adapter->pause_map |= (1 << reason);
+			netif_carrier_off(adapter->dev);
+			adf_os_spin_unlock_bh(&adapter->pause_map_lock);
+			break;
+
+		case WLAN_START_ALL_NETIF_QUEUE_N_CARRIER:
+			adf_os_spin_lock_bh(&adapter->pause_map_lock);
+			netif_carrier_on(adapter->dev);
+			adapter->pause_map &= ~(1 << reason);
+			if (!adapter->pause_map) {
+				netif_tx_start_all_queues(adapter->dev);
+				wlan_hdd_update_pause_time(adapter);
+			}
+			adf_os_spin_unlock_bh(&adapter->pause_map_lock);
+			break;
+
+		case WLAN_NETIF_TX_DISABLE:
+			adf_os_spin_lock_bh(&adapter->pause_map_lock);
+			if (!adapter->pause_map) {
+				netif_tx_disable(adapter->dev);
+				wlan_hdd_update_txq_timestamp(adapter->dev);
+				wlan_hdd_update_unpause_time(adapter);
+			}
+			adapter->pause_map |= (1 << reason);
+			adf_os_spin_unlock_bh(&adapter->pause_map_lock);
+			break;
+
+		case WLAN_NETIF_TX_DISABLE_N_CARRIER:
+			adf_os_spin_lock_bh(&adapter->pause_map_lock);
+			if (!adapter->pause_map) {
+				netif_tx_disable(adapter->dev);
+				wlan_hdd_update_txq_timestamp(adapter->dev);
+				wlan_hdd_update_unpause_time(adapter);
+			}
+			adapter->pause_map |= (1 << reason);
+			netif_carrier_off(adapter->dev);
+			adf_os_spin_unlock_bh(&adapter->pause_map_lock);
+			break;
+
+		default:
+			hddLog(LOGE, FL("unsupported netif queue action %d"), action);
 		}
-		adapter->pause_map |= (1 << reason);
-		adf_os_spin_unlock_bh(&adapter->pause_map_lock);
-		break;
-
-	case WLAN_START_ALL_NETIF_QUEUE:
-		adf_os_spin_lock_bh(&adapter->pause_map_lock);
-		adapter->pause_map &= ~(1 << reason);
-		if (!adapter->pause_map) {
-			netif_tx_start_all_queues(adapter->dev);
-			wlan_hdd_update_pause_time(adapter);
-		}
-		adf_os_spin_unlock_bh(&adapter->pause_map_lock);
-		break;
-
-	case WLAN_WAKE_ALL_NETIF_QUEUE:
-		adf_os_spin_lock_bh(&adapter->pause_map_lock);
-		adapter->pause_map &= ~(1 << reason);
-		if (!adapter->pause_map) {
-			netif_tx_wake_all_queues(adapter->dev);
-			wlan_hdd_update_pause_time(adapter);
-		}
-		adf_os_spin_unlock_bh(&adapter->pause_map_lock);
-		break;
-
-	case WLAN_STOP_ALL_NETIF_QUEUE_N_CARRIER:
-		adf_os_spin_lock_bh(&adapter->pause_map_lock);
-		if (!adapter->pause_map) {
-			netif_tx_stop_all_queues(adapter->dev);
-			wlan_hdd_update_txq_timestamp(adapter->dev);
-			wlan_hdd_update_unpause_time(adapter);
-		}
-		adapter->pause_map |= (1 << reason);
-		netif_carrier_off(adapter->dev);
-		adf_os_spin_unlock_bh(&adapter->pause_map_lock);
-		break;
-
-	case WLAN_START_ALL_NETIF_QUEUE_N_CARRIER:
-		adf_os_spin_lock_bh(&adapter->pause_map_lock);
-		netif_carrier_on(adapter->dev);
-		adapter->pause_map &= ~(1 << reason);
-		if (!adapter->pause_map) {
-			netif_tx_start_all_queues(adapter->dev);
-			wlan_hdd_update_pause_time(adapter);
-		}
-		adf_os_spin_unlock_bh(&adapter->pause_map_lock);
-		break;
-
-	case WLAN_NETIF_TX_DISABLE:
-		adf_os_spin_lock_bh(&adapter->pause_map_lock);
-		if (!adapter->pause_map) {
-			netif_tx_disable(adapter->dev);
-			wlan_hdd_update_txq_timestamp(adapter->dev);
-			wlan_hdd_update_unpause_time(adapter);
-		}
-		adapter->pause_map |= (1 << reason);
-		adf_os_spin_unlock_bh(&adapter->pause_map_lock);
-		break;
-
-	case WLAN_NETIF_TX_DISABLE_N_CARRIER:
-		adf_os_spin_lock_bh(&adapter->pause_map_lock);
-		if (!adapter->pause_map) {
-			netif_tx_disable(adapter->dev);
-			wlan_hdd_update_txq_timestamp(adapter->dev);
-			wlan_hdd_update_unpause_time(adapter);
-		}
-		adapter->pause_map |= (1 << reason);
-		netif_carrier_off(adapter->dev);
-		adf_os_spin_unlock_bh(&adapter->pause_map_lock);
-		break;
-
-	default:
-		hddLog(LOGE, FL("unsupported netif queue action %d"), action);
 	}
 
 	wlan_hdd_update_queue_oper_stats(adapter, action, reason);

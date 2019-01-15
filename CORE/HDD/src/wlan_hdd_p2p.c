@@ -2964,6 +2964,37 @@ struct wireless_dev* __wlan_hdd_add_virtual_intf(
             if (WLAN_HDD_RX_HANDLE_RPS == pHddCtx->cfg_ini->rxhandle)
                 hdd_dp_util_send_rps_ind(pAdapter);
     }
+#ifdef SUPPORT_IFTYPE_P2P_DEVICE_VIF
+    else if (NL80211_IFTYPE_P2P_DEVICE == type) {
+        if (pHddCtx->cfg_ini->isP2pDeviceAddrAdministrated &&
+            !(pHddCtx->cfg_ini->intfMacAddr[0].bytes[0] & 0x02)) {
+            vos_mem_copy(pHddCtx->p2pDeviceAddress.bytes,
+                         pHddCtx->cfg_ini->intfMacAddr[0].bytes,
+                         sizeof(tSirMacAddr));
+
+            /* Generate the P2P Device Address.        This consists of the device's
+             * primary MAC address with the locally administered bit set.
+             */
+            pHddCtx->p2pDeviceAddress.bytes[0] |= 0x02;
+        } else {
+            uint8_t* p2p_dev_addr = wlan_hdd_get_intf_addr(pHddCtx);
+            if (p2p_dev_addr)
+                vos_mem_copy(&pHddCtx->p2pDeviceAddress.bytes[0],
+                             p2p_dev_addr, VOS_MAC_ADDR_SIZE);
+            else {
+                hddLog(VOS_TRACE_LEVEL_FATAL,
+                       FL("Failed to allocate mac_address for p2p_device"));
+                return ERR_PTR(-EINVAL);
+            }
+        }
+
+        pAdapter = hdd_open_adapter(pHddCtx, wlan_hdd_get_session_type(type),
+                                    name, pHddCtx->p2pDeviceAddress.bytes,
+                                    name_assign_type, VOS_TRUE);
+        if (WLAN_HDD_RX_HANDLE_RPS == pHddCtx->cfg_ini->rxhandle)
+            hdd_dp_util_send_rps_ind(pAdapter);
+    }
+#endif
     else
     {
        pAdapter = hdd_open_adapter( pHddCtx, wlan_hdd_get_session_type(type),
