@@ -4990,6 +4990,17 @@ static struct dentry *create_buf_file_handler(const char *filename,
     return buf_file;
 }
 
+static int remove_buf_file_handler(struct dentry *dentry)
+{
+    debugfs_remove(dentry);
+    return 0;
+}
+
+static struct rchan_callbacks rfs_cfr_capture_cb = {
+    .create_buf_file = create_buf_file_handler,
+    .remove_buf_file = remove_buf_file_handler,
+}
+
 int cfr_capture_init(wmi_unified_t wmi_handle)
 {
     if (!wmi_handle->debugfs_phy)
@@ -5009,17 +5020,6 @@ void cfr_capture_deinit(void)
         relay_close(rfs_cfr_capture);
         rfs_cfr_capture = NULL;
     }
-}
-
-static int remove_buf_file_handler(struct dentry *dentry)
-{
-    debugfs_remove(dentry);
-    return 0;
-}
-
-static struct rchan_callbacks rfs_cfr_capture_cb = {
-    .create_buf_file = create_buf_file_handler,
-    .remove_buf_file = remove_buf_file_handler,
 }
 
 #else
