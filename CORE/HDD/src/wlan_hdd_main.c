@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -4330,7 +4330,7 @@ bool wlan_hdd_get_fw_state(hdd_adapter_t *adapter)
 	struct fw_state *priv;
 	static const struct hdd_request_params params = {
 		.priv_size = sizeof(*priv),
-		.timeout_ms = WLAN_WAIT_TIME_LINK_STATUS,
+		.timeout_ms = WLAN_WAIT_TIME_FW_STATE,
 	};
 	struct hdd_request *request;
 	bool fw_active;
