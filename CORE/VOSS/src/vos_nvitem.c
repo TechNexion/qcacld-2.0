@@ -740,6 +740,15 @@ static int regd_init_wiphy(hdd_context_t *pHddCtx, struct regulatory *reg,
 #else
 	pHddCtx->reg.reg_flags = wiphy->flags;
 #endif
+	/*
+	 * add this to avoid the warning in kernel when invoking
+	 * function wiphy_apply_custom_regulatory.
+	 */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,0)) || defined(WITH_BACKPORTS)
+	wiphy->regulatory_flags |= REGULATORY_CUSTOM_REG;
+#else
+	wiphy->flags |= WIPHY_FLAG_CUSTOM_REGULATORY;
+#endif
 
 	wiphy_apply_custom_regulatory(wiphy, regd);
 
