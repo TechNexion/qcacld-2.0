@@ -5419,6 +5419,14 @@ REG_TABLE_ENTRY g_registry_table[] =
 		     CFG_ENABLE_MONITOR_ON_STA_DEFAULT,
 		     CFG_ENABLE_MONITOR_ON_STA_MIN,
 		     CFG_ENABLE_MONITOR_ON_STA_MAX),
+#ifdef WLAN_FEATURE_SAE
+	REG_VARIABLE(CFG_IS_SAE_ENABLED_NAME, WLAN_PARAM_Integer,
+		struct hdd_config, is_sae_enabled,
+		VAR_FLAGS_OPTIONAL | VAR_FLAGS_RANGE_CHECK_ASSUME_DEFAULT,
+		CFG_IS_SAE_ENABLED_DEFAULT,
+		CFG_IS_SAE_ENABLED_MIN,
+		CFG_IS_SAE_ENABLED_MAX),
+#endif
 };
 
 
@@ -5687,6 +5695,18 @@ config_exit:
    return vos_status;
 }
 
+#ifdef WLAN_FEATURE_SAE
+static void hdd_cfg_print_sae(hdd_context_t *hdd_ctx)
+{
+	hddLog(LOG2, "Name = [%s] value = [%u]",
+	       CFG_IS_SAE_ENABLED_NAME,
+	       hdd_ctx->cfg_ini->is_sae_enabled);
+}
+#else
+static void hdd_cfg_print_sae(hdd_context_t *hdd_ctx)
+{
+}
+#endif
 
 void print_hdd_cfg(hdd_context_t *pHddCtx)
 {
@@ -6358,6 +6378,7 @@ void print_hdd_cfg(hdd_context_t *pHddCtx)
   hddLog(LOG2, "Name = [%s] Value = [%u]",
                  CFG_ARP_AC_CATEGORY,
                  pHddCtx->cfg_ini->arp_ac_category);
+  hdd_cfg_print_sae(pHddCtx);
 }
 
 #define CFG_VALUE_MAX_LEN 256
