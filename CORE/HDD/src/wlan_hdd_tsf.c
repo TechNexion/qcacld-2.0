@@ -814,6 +814,9 @@ static ssize_t __hdd_wlan_tsf_show(struct device *dev,
 		   adapter->device_mode == WLAN_HDD_P2P_GO) {
 		hdd_ap_ctx = WLAN_HDD_GET_AP_CTX_PTR(adapter);
 		bssid = hdd_ap_ctx->sapConfig.self_macaddr.bytes;
+	} else if (adapter->device_mode == WLAN_HDD_P2P_DEVICE
+		   && hdd_ctx->cfg_ini->tsf_by_register) {
+		bssid = adapter->macAddressCurrent.bytes;
 	} else {
 		return scnprintf(buf, PAGE_SIZE, "Invalid interface\n");
 	}
@@ -1077,20 +1080,46 @@ enum hdd_tsf_op_result hdd_netbuf_timestamp(adf_nbuf_t netbuf,
 	return HDD_TSF_OP_FAIL;
 }
 
-int hdd_start_tsf_sync(hdd_adapter_t *adapter)
+void hdd_create_tsf_file(hdd_adapter_t *adapter)
 {
-	enum hdd_tsf_op_result ret;
-	hdd_context_t *hddctx;
 	struct net_device *net_dev;
+	hdd_context_t *hddctx;
 
 	if (!adapter)
-		return -EINVAL;
+		return;
 
 	net_dev = adapter->dev;
 	hddctx = WLAN_HDD_GET_CTX(adapter);
 	if (net_dev && HDD_TSF_IS_DBG_FS_SET(hddctx))
 		device_create_file(&net_dev->dev, &dev_attr_tsf);
+}
 
+void hdd_remove_tsf_file(hdd_adapter_t *adapter)
+{
+	struct net_device *net_dev;
+	hdd_context_t *hddctx;
+
+	if (!adapter)
+		return;
+
+	hddctx = WLAN_HDD_GET_CTX(adapter);
+	net_dev = adapter->dev;
+	if (net_dev && HDD_TSF_IS_DBG_FS_SET(hddctx)) {
+		struct device *dev = &net_dev->dev;
+
+		device_remove_file(dev, &dev_attr_tsf);
+	}
+}
+
+int hdd_start_tsf_sync(hdd_adapter_t *adapter)
+{
+	enum hdd_tsf_op_result ret;
+	hdd_context_t *hddctx;
+
+	if (!adapter)
+		return -EINVAL;
+
+	hddctx = WLAN_HDD_GET_CTX(adapter);
 	if (hddctx->cfg_ini->tsf_by_register)
 		return 0;
 
@@ -1109,18 +1138,11 @@ int hdd_stop_tsf_sync(hdd_adapter_t *adapter)
 {
 	enum hdd_tsf_op_result ret;
 	hdd_context_t *hddctx;
-	struct net_device *net_dev;
 
 	if (!adapter)
 		return -EINVAL;
 
 	hddctx = WLAN_HDD_GET_CTX(adapter);
-	net_dev = adapter->dev;
-	if (net_dev && HDD_TSF_IS_DBG_FS_SET(hddctx)) {
-		struct device *dev = &net_dev->dev;
-
-		device_remove_file(dev, &dev_attr_tsf);
-	}
 	if (hddctx->cfg_ini->tsf_by_register)
 		return 0;
 
@@ -1675,6 +1697,7 @@ static int hdd_get_tsf_cb(void *pcb_cxt, struct stsf *ptsf)
 {
 	hdd_context_t *hddctx;
 	hdd_adapter_t *adapter;
+	hdd_adapter_t *p2p_device;
 	int status;
 	VOS_TIMER_STATE capture_req_timer_status;
 	if (pcb_cxt == NULL || ptsf == NULL) {
@@ -1699,6 +1722,13 @@ static int hdd_get_tsf_cb(void *pcb_cxt, struct stsf *ptsf)
 	if (hddctx->cfg_ini->tsf_by_register) {
 		if (ptsf->tsf_id_valid) {
 			adapter->tsf_id = ptsf->tsf_id;
+			if ((WLAN_HDD_P2P_GO == adapter->device_mode)
+			    || (WLAN_HDD_P2P_CLIENT == adapter->device_mode)) {
+				p2p_device = hdd_get_adapter(hddctx,
+							WLAN_HDD_P2P_DEVICE);
+				if (p2p_device)
+					p2p_device->tsf_id = ptsf->tsf_id;
+			}
 			hddLog(VOS_TRACE_LEVEL_ERROR,
 			       FL("vdev id %u, tsf id %u"),
 			       ptsf->vdev_id, ptsf->tsf_id);
