@@ -478,7 +478,7 @@ _hdd_removed_processing:
 			HIF_USB_UNLOAD_STATE_DRV_DEREG)
 		atomic_set(&hif_usb_unload_state,
 			   HIF_USB_UNLOAD_STATE_TARGET_RESET);
-#ifdef FW_RAM_DUMP_TO_PROC
+#if defined(FW_RAM_DUMP_TO_PROC) || defined(FW_RAM_DUMP_TO_FILE)
 	crash_dump_exit(scn);
 #endif
         /* The logp is set by target failure's ol_ramdump_handler.

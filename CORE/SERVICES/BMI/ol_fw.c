@@ -164,6 +164,159 @@ static int ol_get_fw_files_for_target(struct ol_fw_files *pfw_files,
     return 0;
 }
 #endif
+#ifdef FW_RAM_DUMP_TO_FILE
+#define GET_INODE_FROM_FILEP(filp) ((filp)->f_path.dentry->d_inode)
+
+int _readwrite_file(const char *filename, char *rbuf,
+	const char *wbuf, size_t length, int mode)
+{
+	int ret = 0;
+	struct file *filp = (struct file *)-ENOENT;
+	mm_segment_t oldfs;
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+
+	do {
+		filp = filp_open(filename, mode, S_IRUSR);
+
+		if (IS_ERR(filp) || !filp->f_op) {
+			ret = -ENOENT;
+			break;
+		}
+
+		if (length == 0) {
+			/* Read the length of the file only */
+			struct inode    *inode;
+
+			inode = GET_INODE_FROM_FILEP(filp);
+			if (!inode) {
+				printk(KERN_ERR
+					"_readwrite_file: Error 2\n");
+				ret = -ENOENT;
+				break;
+			}
+			ret = i_size_read(inode->i_mapping->host);
+			break;
+		}
+
+		if (wbuf) {
+			ret = vfs_write(
+				filp, wbuf, length, &filp->f_pos);
+			if (ret < 0) {
+				printk(KERN_ERR
+					"_readwrite_file: Error 3\n");
+				break;
+			}
+		} else {
+			ret = vfs_read(
+				filp, rbuf, length, &filp->f_pos);
+			if (ret < 0) {
+				printk(KERN_ERR
+					"_readwrite_file: Error 4\n");
+				break;
+			}
+		}
+	} while (0);
+
+	if (!IS_ERR(filp))
+		filp_close(filp, NULL);
+
+	set_fs(oldfs);
+	return ret;
+}
+
+#define CRASH_DUMP_PATH "/var/"
+#define CRASH_DUMP_FILE "/var/cld_fwcrash.log"
+
+void crash_dump_init(struct ol_softc *scn)
+{
+#define REGISTER_SIZE 47924
+	int i, k;
+	size_t fw_ram_seg_size[FW_RAM_SEG_CNT + 1] = {REGISTER_SIZE, DRAM_SIZE,
+						      IRAM_SIZE, AXI_SIZE};
+
+	for (i = 0; i < FW_RAM_SEG_CNT + 1; i++) {
+		scn->ramdump[i] = (v_VOID_t *)kmalloc(sizeof(struct fw_ramdump) +
+				   fw_ram_seg_size[i], GFP_KERNEL);
+		if (!scn->ramdump[i]) {
+			pr_err("Fail to allocate memory for scn ram dump %d", i);
+			for (k = 0; k < i; k++) {
+				kfree(scn->ramdump[k]);
+				scn->ramdump[k] = NULL;
+			}
+			pr_err("crash dump initial failed");
+			return;
+		}
+		(scn->ramdump[i])->mem = (A_UINT8 *) (scn->ramdump[i] + 1);
+		(scn->ramdump[i])->length = 0;
+	}
+}
+void crash_dump_exit(struct ol_softc *scn)
+{
+	int i = 0;
+
+	for (i = 0; i < FW_RAM_SEG_CNT+1; i++) {
+		if(scn->ramdump[i] != NULL)
+			kfree(scn->ramdump[i]);
+	}
+}
+
+static void crash_dump_write_buf(struct ol_softc *scn,char* buf, unsigned int len)
+{
+	A_UINT8 *ram_ptr = NULL;
+
+	ram_ptr = (scn->ramdump[0])->mem + (scn->ramdump[0])->length;
+
+	memcpy(ram_ptr, buf, len);
+	(scn->ramdump[0])->length += len;
+}
+
+static void crash_dump_write(struct ol_softc *scn, char* fmt, ...)
+{
+	unsigned int len;
+	A_UINT8 buf[128];
+	va_list args;
+
+	va_start(args, fmt);
+	len = vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+	va_end(args);
+
+	return crash_dump_write_buf(scn, buf, len);
+}
+
+static void writefile_work(struct work_struct *work)
+{
+	int status, i;
+	char fw_dump_filename[40];
+	struct ol_softc *scn = container_of(work, struct ol_softc, ramdump_usb_work);
+	char *fw_ram_seg_name[FW_RAM_SEG_CNT] = {"DRAM", "IRAM", "AXI"};
+
+	for(i = 0; i < FW_RAM_SEG_CNT+1; i++) {
+		memset(fw_dump_filename, 0, sizeof(fw_dump_filename));
+		if(i == 0)
+			memcpy(fw_dump_filename, CRASH_DUMP_FILE,
+			       sizeof(CRASH_DUMP_FILE));
+		else
+			scnprintf(fw_dump_filename, sizeof(fw_dump_filename),
+				  "%scld_%s.bin", CRASH_DUMP_PATH, fw_ram_seg_name[i-1]);
+		status = _readwrite_file(fw_dump_filename, NULL, NULL,
+					 0, (O_WRONLY | O_TRUNC | O_CREAT));
+		if(scn->ramdump[i]) {
+			status = _readwrite_file(fw_dump_filename, NULL,
+						 (scn->ramdump[i])->mem,
+						 (scn->ramdump[i])->length,
+						 (O_RDWR|O_APPEND));
+			scn->ramdump[i]->length = 0;
+			scn->ramdump[i]->start_addr = 0;
+			scn->ramdump[i]->mem = 0;
+			if (status < 0) {
+				printk(KERN_ERR "write failed with status code 0x%x\n", status);
+				return;
+			}
+		}
+	}
+}
+#endif
 
 #ifdef FW_RAM_DUMP_TO_PROC
 #define PROCFS_CRASH_DUMP_DIR "crash"
@@ -1562,6 +1715,11 @@ void ol_ramdump_handler(struct ol_softc *scn)
 		pr_err("Firmware crash detected...\n");
 		pr_err("Host SW version: %s\n", QWLAN_VERSIONSTR);
 		pr_err("FW version: %d.%d.%d.%d", MSPId, mSPId, SIId, CRMId);
+#ifdef FW_RAM_DUMP_TO_FILE
+		crash_dump_write(scn, "Firmware crash detected...\n");
+		crash_dump_write(scn, "Host SW version: %s\n", QWLAN_VERSIONSTR);
+		crash_dump_write(scn, "FW version: %d.%d.%d.%d\n", MSPId, mSPId, SIId, CRMId);
+#endif
 
 		if (vos_is_load_unload_in_progress(VOS_MODULE_ID_VOSS, NULL)) {
 			printk("%s: Loading/Unloading is in progress, ignore!\n",
@@ -1573,7 +1731,13 @@ void ol_ramdump_handler(struct ol_softc *scn)
 			vos_set_logp_in_progress(VOS_MODULE_ID_VOSS, TRUE);
 
 		reg = (A_UINT32 *) (data + 4);
-
+#ifdef FW_RAM_DUMP_TO_FILE
+		for (i = 0; i < min_t(A_UINT32, len - 4, FW_REG_DUMP_CNT); i += 4) {
+			memset(str_buf, 0, sizeof(str_buf));
+			hex_dump_to_buffer(reg+i, 16, 16, 4, str_buf, sizeof(str_buf), false);
+			crash_dump_write(scn, "%#08x: %s\n", i*4, str_buf);
+		}
+#endif
 		print_hex_dump(KERN_DEBUG, " ", DUMP_PREFIX_OFFSET, 16, 4, reg,
 				min_t(A_UINT32, len - 4, FW_REG_DUMP_CNT * 4),
 				false);
@@ -1585,6 +1749,9 @@ void ol_ramdump_handler(struct ol_softc *scn)
 		start_addr = *reg++;
 		if (scn->fw_ram_dumping == 0) {
 			pr_err("Firmware stack dump:");
+#ifdef FW_RAM_DUMP_TO_FILE
+			crash_dump_write(scn, "Firmware stack dump:\n");
+#endif
 			scn->fw_ram_dumping = 1;
 			fw_stack_addr = start_addr;
 		}
@@ -1595,11 +1762,19 @@ void ol_ramdump_handler(struct ol_softc *scn)
 				scn->fw_ram_dumping = 0;
 				pr_err("Stack start address = %#08x\n",
 					fw_stack_addr);
+#ifdef FW_RAM_DUMP_TO_FILE
+				crash_dump_write(scn, "Stack start address = %#08x\n",
+						 fw_stack_addr);
+#endif
 				break;
 			}
 			hex_dump_to_buffer(reg, remaining, 16, 4, str_buf,
 						sizeof(str_buf), false);
+#ifndef FW_RAM_DUMP_TO_FILE
 			pr_err("%#08x: %s\n", start_addr + i, str_buf);
+#else
+			crash_dump_write(scn,"%#08x: %s\n", start_addr + i, str_buf);
+#endif
 			remaining -= 16;
 			reg += 4;
 		}
@@ -1608,12 +1783,21 @@ void ol_ramdump_handler(struct ol_softc *scn)
 			((pattern & FW_RAMDUMP_PATTERN_MASK) ==
 						FW_RAMDUMP_PATTERN)) {
 		VOS_ASSERT(scn->ramdump_index < FW_RAM_SEG_CNT);
+#ifndef FW_RAM_DUMP_TO_FILE
 		i = scn->ramdump_index;
+#else
+		i = scn->ramdump_index + 1;
+#endif
 		reg = (A_UINT32 *) (data + 4);
 		if (scn->fw_ram_dumping == 0) {
 			scn->fw_ram_dumping = 1;
+#ifndef FW_RAM_DUMP_TO_FILE
 			pr_err("Firmware %s dump:\n", fw_ram_seg_name[i]);
-#ifndef FW_RAM_DUMP_TO_PROC
+#else
+			pr_err("Firmware %s dump:\n", fw_ram_seg_name[i - 1]);
+#endif
+
+#if !defined(FW_RAM_DUMP_TO_PROC) && !defined(FW_RAM_DUMP_TO_FILE)
 			scn->ramdump[i] = kmalloc(sizeof(struct fw_ramdump) +
 							fw_ram_seg_size[i],
 							GFP_KERNEL);
@@ -1636,7 +1820,11 @@ void ol_ramdump_handler(struct ol_softc *scn)
 		reg++;
 		ram_ptr = (scn->ramdump[i])->mem + (scn->ramdump[i])->length;
 		(scn->ramdump[i])->length += (len - 8);
+#ifndef FW_RAM_DUMP_TO_FILE
 		if ((scn->ramdump[i])->length <= fw_ram_seg_size[i]) {
+#else
+		if ((scn->ramdump[i])->length <= fw_ram_seg_size[i - 1]) {
+#endif
 			memcpy(ram_ptr, (A_UINT8 *) reg, len - 8);
 		}
 		else {
@@ -1645,10 +1833,26 @@ void ol_ramdump_handler(struct ol_softc *scn)
 		}
 
 		if (pattern == FW_RAMDUMP_END_PATTERN) {
+#ifdef FW_RAM_DUMP_TO_FILE
+			int j;
+			for (j = 0; j < scn->ramdump[i]->length; j += 16) {
+			        memset(str_buf, 0, sizeof(str_buf));
+			        hex_dump_to_buffer(scn->ramdump[i]->mem + j, 16,
+					           16, 4, str_buf, sizeof(str_buf), false);
+			}
+			pr_err("%s memory size = %d\n", fw_ram_seg_name[i -1],
+			       (scn->ramdump[i])->length);
+			if (i == FW_RAM_SEG_CNT) {
+#else
 			pr_err("%s memory size = %d\n", fw_ram_seg_name[i],
 			       (scn->ramdump[i])->length);
 			if (i == FW_RAM_SEG_CNT - 1) {
-#ifdef FW_RAM_DUMP_TO_PROC
+#endif
+#if defined(FW_RAM_DUMP_TO_PROC)
+				pr_err("F/W crash log dump completed\n");
+#elif defined(FW_RAM_DUMP_TO_FILE)
+				INIT_WORK(&scn->ramdump_usb_work, writefile_work);
+				schedule_work(&scn->ramdump_usb_work);
 				pr_err("F/W crash log dump completed\n");
 #else
 				VOS_BUG(0);

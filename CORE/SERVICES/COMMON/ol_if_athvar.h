@@ -260,7 +260,11 @@ struct ol_softc {
     bool                    fastfwdump_fw;
 #ifdef HIF_USB
     /* structure to save FW RAM dump (Rome USB) */
+#ifdef FW_RAM_DUMP_TO_FILE
     struct fw_ramdump       *ramdump[FW_RAM_SEG_CNT];
+#else
+    struct fw_ramdump       *ramdump[FW_RAM_SEG_CNT + 1];
+#endif
     A_UINT8                 ramdump_index;
     bool                    fw_ram_dumping;
 #endif
@@ -321,6 +325,9 @@ struct ol_softc {
     bool enable_fw_hash_check;
 #endif
     uint16_t board_id;
+#ifdef FW_RAM_DUMP_TO_FILE
+    struct work_struct ramdump_usb_work;
+#endif
 };
 
 #ifdef PERE_IP_HDR_ALIGNMENT_WAR
