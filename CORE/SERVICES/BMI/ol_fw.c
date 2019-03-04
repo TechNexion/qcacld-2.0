@@ -228,6 +228,19 @@ int _readwrite_file(const char *filename, char *rbuf,
 #define CRASH_DUMP_PATH "/var/"
 #define CRASH_DUMP_FILE "/var/cld_fwcrash.log"
 
+static void crash_dump_file_init(const char* filename)
+{
+	int ret;
+
+	ret = _readwrite_file(filename, NULL,
+	                NULL, 0, (O_WRONLY | O_CREAT | O_TRUNC));
+	if (ret < 0) {
+		printk("%s:%d: fail to write\n", __func__, __LINE__);
+	}
+
+}
+
+#if defined(HIF_USB)
 void crash_dump_init(struct ol_softc *scn)
 {
 #define REGISTER_SIZE 47924
@@ -270,7 +283,6 @@ static void crash_dump_write_buf(struct ol_softc *scn,char* buf, unsigned int le
 	memcpy(ram_ptr, buf, len);
 	(scn->ramdump[0])->length += len;
 }
-
 static void crash_dump_write(struct ol_softc *scn, char* fmt, ...)
 {
 	unsigned int len;
@@ -299,8 +311,8 @@ static void writefile_work(struct work_struct *work)
 		else
 			scnprintf(fw_dump_filename, sizeof(fw_dump_filename),
 				  "%scld_%s.bin", CRASH_DUMP_PATH, fw_ram_seg_name[i-1]);
-		status = _readwrite_file(fw_dump_filename, NULL, NULL,
-					 0, (O_WRONLY | O_TRUNC | O_CREAT));
+		crash_dump_file_init(fw_dump_filename);
+
 		if(scn->ramdump[i]) {
 			status = _readwrite_file(fw_dump_filename, NULL,
 						 (scn->ramdump[i])->mem,
@@ -316,6 +328,17 @@ static void writefile_work(struct work_struct *work)
 		}
 	}
 }
+#else
+static void crash_dump_write(const char* filename, char* buf, unsigned int len)
+{
+	int ret;
+	ret = _readwrite_file(filename, NULL, buf, len,
+	                      (O_WRONLY | O_APPEND));
+	if (ret < 0) {
+		printk("%s:%d: fail to write\n", __func__, __LINE__);
+	}
+}
+#endif
 #endif
 
 #ifdef FW_RAM_DUMP_TO_PROC
@@ -3305,9 +3328,12 @@ int ol_target_coredump(void *inst, void *memoryBlock, u_int32_t blockLength)
 	uint32_t sectionCount = 0;
 	uint32_t pos = 0;
 	uint32_t readLen = 0;
+	char fw_dump_filename[40];
 
 #ifdef CONFIG_NON_QC_PLATFORM_PCI
 	char *fw_ram_seg_name[] = {"DRAM ", "AXI ", "REG ", "IRAM1 ", "IRAM2 "};
+#else
+	char *fw_ram_seg_name[] = {"DRAM", "AXI", "REG", "IRAM"};
 #endif
 
 	if (scn->fastfwdump_host && scn->fastfwdump_fw) {
@@ -3367,7 +3393,13 @@ int ol_target_coredump(void *inst, void *memoryBlock, u_int32_t blockLength)
 			ret = 0;
 			goto end;
 		}
-
+#ifdef FW_RAM_DUMP_TO_FILE
+		memset(fw_dump_filename, 0, sizeof(fw_dump_filename));
+		scnprintf(fw_dump_filename, sizeof(fw_dump_filename), "%scld_%s.bin",
+			  CRASH_DUMP_PATH, fw_ram_seg_name[sectionCount]);
+		if(sectionCount != 2)
+			crash_dump_file_init(fw_dump_filename);
+#endif
 		if (blockLength - amountRead < readLen) {
 			pr_err("%s: No memory to dump section:%d buffer!\n",
 			       __func__, sectionCount);
@@ -3414,6 +3446,11 @@ int ol_target_coredump(void *inst, void *memoryBlock, u_int32_t blockLength)
 			sectionCount, result[sectionCount]);
 #ifdef CONFIG_NON_QC_PLATFORM_PCI
 		printk("\nMemory addr for %s = 0x%p (size: %x)\n",fw_ram_seg_name[sectionCount], bufferLoc, result[sectionCount]);
+#endif
+#ifdef FW_RAM_DUMP_TO_FILE
+		if(sectionCount != 2) {
+			crash_dump_write(fw_dump_filename, bufferLoc, result[sectionCount]);
+		}
 #endif
 		amountRead += result[sectionCount];
 		bufferLoc += result[sectionCount];

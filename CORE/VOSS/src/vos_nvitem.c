@@ -2150,7 +2150,9 @@ static int create_linux_regulatory_entry(struct wiphy *wiphy,
                                     channels[j].center_freq),
                                     0, &reg_rule);
 #endif
+#ifdef CLD_REGDB
                 wiphy->bands[i]->channels[j].flags |= IEEE80211_CHAN_DISABLED;
+#endif
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)) || defined(WITH_BACKPORTS)
                 if (!IS_ERR(reg_rule)) {
