@@ -1785,6 +1785,14 @@ ifeq ($(CONFIG_USB_RECOVERY),y)
 CDEFINES += -DWLAN_FEATURE_USB_RECOVERY
 endif
 
+ifeq ($(CONFIG_VOS_MEM_PRE_ALLOC),y)
+ifneq ($(CONFIG_WCNSS_MEM_PRE_ALLOC), y)
+CDEFINES += -DCONFIG_VOS_MEM_PRE_ALLOC
+obj-m += wlan_prealloc.o
+wlan_prealloc-y += $(VOSS_SRC_DIR)/vos_memory_prealloc.o
+endif
+endif
+
 ifeq ($(CONFIG_DPTRACE_ENABLE), y)
 CDEFINES += -DFEATURE_DPTRACE_ENABLE
 endif
