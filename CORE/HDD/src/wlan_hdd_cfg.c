@@ -60,8 +60,6 @@
 #include <pmcApi.h>
 #include <wlan_hdd_misc.h>
 
-extern int qca_request_firmware(const struct firmware **firmware_p, const char *name,struct device *device);
-
 #if  defined (WLAN_FEATURE_VOWIFI_11R) || defined (FEATURE_WLAN_ESE) || defined(FEATURE_WLAN_LFR)
 static void
 cbNotifySetRoamPrefer5GHz(hdd_context_t *pHddCtx, unsigned long NotifyId)
