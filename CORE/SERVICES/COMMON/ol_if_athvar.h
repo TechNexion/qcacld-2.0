@@ -260,7 +260,7 @@ struct ol_softc {
     bool                    fastfwdump_fw;
 #ifdef HIF_USB
     /* structure to save FW RAM dump (Rome USB) */
-#ifdef FW_RAM_DUMP_TO_FILE
+#ifndef FW_RAM_DUMP_TO_FILE
     struct fw_ramdump       *ramdump[FW_RAM_SEG_CNT];
 #else
     struct fw_ramdump       *ramdump[FW_RAM_SEG_CNT + 1];
