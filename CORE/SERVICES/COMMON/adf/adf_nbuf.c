@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -157,7 +157,7 @@ void adf_nbuf_set_state(adf_nbuf_t nbuf, uint8_t current_state)
 
 adf_nbuf_trace_update_t  trace_update_cb = NULL;
 
-#if defined(CONFIG_WCNSS_MEM_PRE_ALLOC) && defined(FEATURE_SKB_PRE_ALLOC)
+#if (defined(CONFIG_WCNSS_MEM_PRE_ALLOC) || defined(CONFIG_VOS_MEM_PRE_ALLOC)) && defined(FEATURE_SKB_PRE_ALLOC)
 struct sk_buff *__adf_nbuf_pre_alloc(adf_os_device_t osdev, size_t size)
 {
 	struct sk_buff *skb = NULL;
@@ -205,13 +205,21 @@ __adf_nbuf_alloc(adf_os_device_t osdev, size_t size, int reserve, int align, int
 
     if(align)
         size += (align - 1);
+#if defined(CONFIG_VOS_MEM_PRE_ALLOC) && defined(FEATURE_SKB_PRE_ALLOC)
+    skb = __adf_nbuf_pre_alloc(osdev, size);
 
+    if (skb)
+       goto skb_cb;
+
+    skb = dev_alloc_skb(size);
+#else
     skb = dev_alloc_skb(size);
 
     if (skb)
        goto skb_cb;
 
     skb = __adf_nbuf_pre_alloc(osdev, size);
+#endif
 
     if (!skb) {
         printk("ERROR:NBUF alloc failed\n");

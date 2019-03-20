@@ -92,6 +92,12 @@ v_VOID_t * vos_mem_malloc( v_SIZE_t size );
 #ifdef CONFIG_VOS_MEM_PRE_ALLOC
 #define WCNSS_PRE_ALLOC_GET_THRESHOLD (16*1024)
 
+#ifdef FEATURE_SKB_PRE_ALLOC
+#define WCNSS_PRE_SKB_ALLOC_GET_THRESHOLD (16*1024)
+extern struct sk_buff *wcnss_skb_prealloc_get(unsigned int size);
+extern int wcnss_skb_prealloc_put(struct sk_buff *skb);
+#endif
+
 v_VOID_t wcnss_prealloc_reset(v_VOID_t);
 v_SINT_t wcnss_prealloc_put(v_VOID_t *ptr);
 v_VOID_t *wcnss_prealloc_get(v_UINT_t size);

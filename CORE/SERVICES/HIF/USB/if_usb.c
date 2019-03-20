@@ -513,6 +513,9 @@ _hdd_removed_processing:
 	A_FREE(scn);
 	A_FREE(sc);
 	usb_sc = NULL;
+#ifdef CONFIG_VOS_MEM_PRE_ALLOC
+	wcnss_prealloc_reset();
+#endif
 	pr_info("hif_usb_remove!!!!!!\n");
 }
 
