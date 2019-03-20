@@ -147,6 +147,10 @@ void hif_usb_recovery(void) {
 	char *gpio_sym_name_low = SYM_GPIO_SET_LOW;
 	char *gpio_sym_name_high = SYM_GPIO_SET_HIGH;
 
+	if (vos_is_logp_in_progress(VOS_MODULE_ID_HIF, NULL)) {
+		printk("%s: LOGP in progress, ignore!", __func__);
+		return;
+	}
 	if (gpio_sym_name_low[0] == '\0' || gpio_sym_name_high[0] == '\0') {
 		printk("TODO: define GPIO set low/high function.");
 		return;
