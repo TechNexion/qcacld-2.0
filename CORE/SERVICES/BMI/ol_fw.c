@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -200,7 +200,11 @@ int _readwrite_file(const char *filename, char *rbuf,
 		}
 
 		if (wbuf) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0))
+			ret = kernel_write(
+#else
 			ret = vfs_write(
+#endif
 				filp, wbuf, length, &filp->f_pos);
 			if (ret < 0) {
 				printk(KERN_ERR
@@ -208,7 +212,11 @@ int _readwrite_file(const char *filename, char *rbuf,
 				break;
 			}
 		} else {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0))
+			ret = kernel_read(
+#else
 			ret = vfs_read(
+#endif
 				filp, rbuf, length, &filp->f_pos);
 			if (ret < 0) {
 				printk(KERN_ERR
