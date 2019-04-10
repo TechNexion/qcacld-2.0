@@ -8871,7 +8871,11 @@ __wlan_hdd_cfr_capture_cfg_handler(struct wiphy *wiphy,
 
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_PEER_CFR_MAX,
                   data, data_len,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                   qca_vendor_peer_cfr_capture_cfg_policy)) {
+#else
+				  qca_vendor_peer_cfr_capture_cfg_policy, NULL)) {
+#endif
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid CFR capture policy attribute"));
         return -EINVAL;
     }
