@@ -1105,7 +1105,7 @@ eHalStatus hdd_wlan_get_ibss_peer_info_all(hdd_adapter_t *pAdapter)
 
 int hdd_wlan_get_rts_threshold(hdd_adapter_t *pAdapter, union iwreq_data *wrqu)
 {
-    tHalHandle hHal = WLAN_HDD_GET_HAL_CTX(pAdapter);
+    tHalHandle hHal;
     v_U32_t threshold = 0;
     hdd_context_t *hdd_ctx;
     int ret;
@@ -1117,6 +1117,8 @@ int hdd_wlan_get_rts_threshold(hdd_adapter_t *pAdapter, union iwreq_data *wrqu)
                   "%s: Adapter is NULL", __func__);
         return -EINVAL;
     }
+
+    hHal = WLAN_HDD_GET_HAL_CTX(pAdapter);
 
     hdd_ctx = WLAN_HDD_GET_CTX(pAdapter);
     ret = wlan_hdd_validate_context(hdd_ctx);
