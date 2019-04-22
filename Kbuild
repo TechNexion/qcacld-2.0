@@ -344,9 +344,6 @@ CONFIG_FEATURE_STATS_EXT := 1
 #for these channels has not yet been added to the kernel.
 CONFIG_STATICALLY_ADD_11P_CHANNELS := n
 
-#Enable thermal shutdown
-CONFIG_WLAN_THERMAL_SHUTDOWN := 1
-
 #Enable the Disable Channel Switch
 CONFIG_WLAN_DISABLE_CHANNEL_SWITCH := 1
 

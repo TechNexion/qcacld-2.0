@@ -8750,6 +8750,8 @@ wlan_hdd_cfg80211_thermal_cmd(struct wiphy *wiphy,
 	return ret;
 }
 
+#endif /* FEATURE_WLAN_THERMAL_SHUTDOWN */
+
 static const struct nla_policy
 qca_vendor_peer_cfr_capture_cfg_policy[QCA_WLAN_VENDOR_ATTR_PEER_CFR_MAX + 1] = {
     [QCA_WLAN_VENDOR_ATTR_CFR_PEER_MAC_ADDR] = { .type = NLA_UNSPEC, .len = ETH_ALEN },
@@ -8919,8 +8921,6 @@ wlan_hdd_cfr_capture_cfg_handler(struct wiphy *wiphy,
     vos_ssr_unprotect(__func__);
     return ret;
 }
-
-#endif /* FEATURE_WLAN_THERMAL_SHUTDOWN */
 
 #ifdef FEATURE_WLAN_TDLS
 /* EXT TDLS */
