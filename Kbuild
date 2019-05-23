@@ -6,6 +6,30 @@ else
 	KERNEL_BUILD := 0
 endif
 
+# if CONFIG_QCA_CLD_WLAN=m or y set in kernel config, build this module in-tree with kernel
+ifneq ($(CONFIG_QCA_CLD_WLAN),)
+	CONFIG_CLD_HL_SDIO_CORE := y
+	CONFIG_QCACLD_WLAN_LFR3 := y
+	CONFIG_PRIMA_WLAN_OKC := y
+	CONFIG_PRIMA_WLAN_11AC_HIGH_TP := n
+	CONFIG_QCOM_VOWIFI_11R := y
+	# These are control flags to build the modules in-tree
+	CONFIG_QCA_WIFI_AUTOMOTIVE_CONC := y
+	CONFIG_QCOM_LTE_COEX := y
+	CONFIG_PER_VDEV_TX_DESC_POOL := 1
+	SAP_AUTH_OFFLOAD := 1
+	CONFIG_QCA_LL_TX_FLOW_CT := 1
+	CONFIG_WLAN_FEATURE_FILS := y
+	CONFIG_WLAN_FEATURE_11W := y
+	CONFIG_WLAN_FEATURE_DSRC := y
+	CONFIG_FEATURE_COEX_PTA_CONFIG_ENABLE := y
+	CONFIG_QCA_SUPPORT_TXRX_DRIVER_TCP_DEL_ACK := y
+	CONFIG_WLAN_WAPI_MODE_11AC_DISABLE := y
+	TARGET_BUILD_VARIANT := user
+	CONFIG_NON_QC_PLATFORM := y
+	CONFIG_HDD_WLAN_WAIT_TIME := 10000
+endif
+
 ifeq ($(CONFIG_CLD_HL_SDIO_CORE), y)
 	CONFIG_QCA_WIFI_SDIO := 1
 	CONFIG_ROME_IF = sdio
@@ -19,7 +43,7 @@ ifeq ($(KERNEL_BUILD),1)
 	# These are provided in external module based builds
 	# Need to explicitly define for Kernel-based builds
 	MODNAME := wlan
-	WLAN_ROOT := drivers/staging/qcacld-2.0
+	WLAN_ROOT := drivers/net/wireless/qcacld-2.0
 	WLAN_OPEN_SOURCE := 1
 endif
 
@@ -1008,6 +1032,10 @@ OBJS +=		$(PKTLOG_OBJS)
 endif
 
 EXTRA_CFLAGS += $(INCS)
+
+ifeq ($(KERNEL_BUILD), 1)
+EXTRA_CFLAGS += -Wno-implicit-function-declaration -Wno-incompatible-pointer-types
+endif
 
 CDEFINES :=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DANI_LITTLE_BIT_ENDIAN \
