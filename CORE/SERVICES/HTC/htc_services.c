@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, 2016-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, 2016-2019 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -144,7 +144,7 @@ A_STATUS HTCConnectService(HTC_HANDLE               HTCHandle,
 #ifdef HIF_SDIO
             HTC_SET_FIELD(pConnectMsg, HTC_CONNECT_SERVICE_MSG,
                             LOOKAHEADV2, HIF_BUNDLE_DIFF_BLK_FRAMES);
-            AR_DEBUG_PRINTF(ATH_DEBUG_ERR, ("HTCConnectService, host indicate %s b2b bundle\n",
+            AR_DEBUG_PRINTF(ATH_DEBUG_TRC, ("HTCConnectService, host indicate %s b2b bundle\n",
                                             (HIF_BUNDLE_DIFF_BLK_FRAMES == 1) ? "support" : "not support"));
 #endif
             SET_HTC_PACKET_INFO_TX(pSendPacket,
@@ -213,7 +213,7 @@ A_STATUS HTCConnectService(HTC_HANDLE               HTCHandle,
 #ifdef HIF_SDIO
             rsp_msg_enable_b2b = HTC_GET_FIELD(pResponseMsg,
                     HTC_CONNECT_SERVICE_RESPONSE_MSG, LOOKAHEADV2);
-            AR_DEBUG_PRINTF(ATH_DEBUG_ERR, ("HTCConnectService, firmware decide to %s b2b bundle\n",
+            AR_DEBUG_PRINTF(ATH_DEBUG_TRC, ("HTCConnectService, firmware decide to %s b2b bundle\n",
                                             (rsp_msg_enable_b2b == 1) ? "enabled" : "disabled"));
             target->enable_b2b = (rsp_msg_enable_b2b == 1) ? TRUE : FALSE;
 #endif
@@ -329,12 +329,12 @@ A_STATUS HTCConnectService(HTC_HANDLE               HTCHandle,
                 pEndpoint, ADF_DEFERRABLE_TIMER);
         }
 
-        AR_DEBUG_PRINTF(ATH_DEBUG_SETUP, ("HTC Service:0x%4.4X, ULpipe:%d DLpipe:%d id:%d Ready\n",
+        AR_DEBUG_PRINTF(ATH_DEBUG_TRC, ("HTC Service:0x%4.4X, ULpipe:%d DLpipe:%d id:%d Ready\n",
                        pEndpoint->ServiceID,pEndpoint->UL_PipeID,pEndpoint->DL_PipeID,pEndpoint->Id));
 
         if (disableCreditFlowCtrl && pEndpoint->TxCreditFlowEnabled) {
             pEndpoint->TxCreditFlowEnabled = FALSE;
-            AR_DEBUG_PRINTF(ATH_DEBUG_WARN,("HTC Service:0x%4.4X ep:%d TX flow control disabled\n",
+            AR_DEBUG_PRINTF(ATH_DEBUG_TRC,("HTC Service:0x%4.4X ep:%d TX flow control disabled\n",
                                 pEndpoint->ServiceID, assignedEndpoint));
         }
 
