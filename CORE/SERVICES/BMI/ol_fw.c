@@ -2137,9 +2137,6 @@ ol_configure_target(struct ol_softc *scn)
 		param |= (0 << HI_OPTION_FW_BRIDGE_SHIFT);  //firmware_bridge
 		param |= (0 << HI_OPTION_FW_SUBMODE_SHIFT); //fwsubmode
 
-		printk("NUM_DEV=%d FWMODE=0x%x FWSUBMODE=0x%x FWBR_BUF %d\n",
-				1, HI_OPTION_FW_MODE_AP, 0, 0);
-
 		if (BMIWriteMemory(scn->hif_hdl,
 					host_interest_item_address(scn->target_type, offsetof(struct host_interest_s, hi_option_flag)),
 					(A_UCHAR *)&param,
@@ -2783,7 +2780,6 @@ int ol_download_firmware(struct ol_softc *scn)
 	} else {
 		/* Transfer One Time Programmable data */
 		address = BMI_SEGMENTED_WRITE_ADDR;
-		printk("%s: Using 0x%x for the remainder of init\n", __func__, address);
 
 		if ( scn->enablesinglebinary == FALSE ) {
 #ifdef HIF_PCI
@@ -3634,12 +3630,10 @@ ol_target_ready(struct ol_softc *scn, void *cfg_ctx)
 	}
 
 	if (value & HI_ACS_FLAGS_SDIO_SWAP_MAILBOX_FW_ACK) {
-		printk("MAILBOX SWAP Service is enabled!\n");
 		HIFSetMailboxSwap(scn->hif_hdl);
 	}
 
 	if (value & HI_ACS_FLAGS_SDIO_REDUCE_TX_COMPL_FW_ACK) {
-		printk("Reduced Tx Complete service is enabled!\n");
 		ol_cfg_set_tx_free_at_download(cfg_ctx);
 
 	}
@@ -3688,7 +3682,5 @@ void ol_pktlog_init(void *hif_sc)
 
 	if (ret)
 		pr_err("%s: pktlogmod_init failed ret:%d\n", __func__, ret);
-	else
-		pr_info("%s: pktlogmod_init successfull\n", __func__);
 }
 #endif
