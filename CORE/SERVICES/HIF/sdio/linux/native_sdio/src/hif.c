@@ -1343,7 +1343,7 @@ HIFConfigureDevice(HIF_DEVICE *device, HIF_DEVICE_CONFIG_OPCODE opcode,
 
             break;
         case HIF_DEVICE_GET_PENDING_EVENTS_FUNC:
-            AR_DEBUG_PRINTF(ATH_DEBUG_WARN,
+            AR_DEBUG_PRINTF(ATH_DEBUG_TRC,
                             ("AR6000: configuration opcode %d is not used for Linux SDIO stack \n", opcode));
             status = A_ERROR;
             break;
@@ -1351,7 +1351,7 @@ HIFConfigureDevice(HIF_DEVICE *device, HIF_DEVICE_CONFIG_OPCODE opcode,
             *((HIF_DEVICE_IRQ_PROCESSING_MODE *)config) = HIF_DEVICE_IRQ_SYNC_ONLY;
             break;
         case HIF_DEVICE_GET_RECV_EVENT_MASK_UNMASK_FUNC:
-            AR_DEBUG_PRINTF(ATH_DEBUG_WARN,
+            AR_DEBUG_PRINTF(ATH_DEBUG_TRC,
                             ("AR6000: configuration opcode %d is not used for Linux SDIO stack \n", opcode));
             status = A_ERROR;
             break;
@@ -1372,7 +1372,7 @@ HIFConfigureDevice(HIF_DEVICE *device, HIF_DEVICE_CONFIG_OPCODE opcode,
             status = PowerStateChangeNotify(device, *(HIF_DEVICE_POWER_CHANGE_TYPE *)config);
             break;
         case HIF_DEVICE_GET_IRQ_YIELD_PARAMS:
-            AR_DEBUG_PRINTF(ATH_DEBUG_WARN,
+            AR_DEBUG_PRINTF(ATH_DEBUG_TRC,
                             ("AR6000: configuration opcode %d is only used for RTOS systems, not Linux systems\n", opcode));
             status = A_ERROR;
             break;
@@ -2169,7 +2169,6 @@ static A_STATUS hifEnableFunc(HIF_DEVICE *device, struct sdio_func *func)
                 sdio_release_host(func);
                 return A_ERROR;
             }
-            printk(KERN_ERR"AR6000: Set async interrupt delay clock as %d.\n", asyncintdelay);
         }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)

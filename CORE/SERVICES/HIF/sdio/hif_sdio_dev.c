@@ -475,7 +475,7 @@ A_STATUS HIFDevSetup(HIF_SDIO_DEVICE *pDev)
 
     switch (pDev->HifIRQProcessingMode) {
     case HIF_DEVICE_IRQ_SYNC_ONLY:
-        AR_DEBUG_PRINTF(ATH_DEBUG_WARN,
+        AR_DEBUG_PRINTF(ATH_DEBUG_TRC,
                 ("HIF Interrupt processing is SYNC ONLY\n"));
         /* see if HIF layer wants HTC to yield */
         HIFConfigureDevice(hif_device,
