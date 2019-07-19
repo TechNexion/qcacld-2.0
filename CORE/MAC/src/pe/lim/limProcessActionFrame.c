@@ -1243,7 +1243,7 @@ __limProcessQosMapConfigureFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,
      limSendSmeMgmtFrameInd(pMac, pHdr->fc.subType, (tANI_U8*)pHdr,
                                frameLen + sizeof(tSirMacMgmtHdr), 0,
                                WDA_GET_RX_CH( pRxPacketInfo ),
-                               psessionEntry, 0);
+                               psessionEntry, 0, RXMGMT_FLAG_NONE);
 }
 
 static void
@@ -1331,7 +1331,8 @@ __limProcessRadioMeasureRequest( tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo ,tp
 
      limSendSmeMgmtFrameInd(pMac, pHdr->fc.subType, (tANI_U8*)pHdr,
           frameLen + sizeof(tSirMacMgmtHdr), 0, WDA_GET_RX_CH(pRxPacketInfo),
-          psessionEntry, WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo));
+          psessionEntry, WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo),
+          RXMGMT_FLAG_NONE);
 
      /**Unpack the received frame */
      nStatus = dot11fUnpackRadioMeasurementRequest( pMac, pBody, frameLen, &frm );
@@ -1534,7 +1535,8 @@ static void __limProcessSAQueryResponseActionFrame(tpAniSirGlobal pMac, tANI_U8 
                                frameLen + sizeof(tSirMacMgmtHdr), 0,
                                WDA_GET_RX_CH( pRxPacketInfo ),
                                psessionEntry,
-                               WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo));
+                               WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo),
+                               RXMGMT_FLAG_NONE);
         return;
     }
 
@@ -1797,7 +1799,7 @@ limProcessActionFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,tpPESession ps
                        frameLen + sizeof(tSirMacMgmtHdr),
                        psessionEntry->smeSessionId,
                        WDA_GET_RX_CH( pRxPacketInfo ),
-                       psessionEntry, rssi);
+                       psessionEntry, rssi, RXMGMT_FLAG_NONE);
                break;
             }
             default:
@@ -1866,7 +1868,8 @@ limProcessActionFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,tpPESession ps
                  limSendSmeMgmtFrameInd(pMac, pHdr->fc.subType,
                     (tANI_U8*)pHdr, frameLen + sizeof(tSirMacMgmtHdr),
                     psessionEntry->smeSessionId,
-                    WDA_GET_RX_CH( pRxPacketInfo ), psessionEntry, 0);
+                    WDA_GET_RX_CH( pRxPacketInfo ), psessionEntry, 0,
+                    RXMGMT_FLAG_NONE);
               }
               else {
                  limLog(pMac, LOG1, FL("Dropping the vendor specific action frame because of( "
@@ -1904,7 +1907,8 @@ limProcessActionFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,tpPESession ps
                     (tANI_U8*)pHdr, frameLen + sizeof(tSirMacMgmtHdr),
                     psessionEntry->smeSessionId,
                     WDA_GET_RX_CH( pRxPacketInfo ), psessionEntry,
-                    WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo));
+                    WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo),
+                    RXMGMT_FLAG_NONE);
               }
               else
               {
@@ -1922,7 +1926,8 @@ limProcessActionFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,tpPESession ps
                     (tANI_U8*)pHdr, frameLen + sizeof(tSirMacMgmtHdr),
                     psessionEntry->smeSessionId,
                     WDA_GET_RX_CH( pRxPacketInfo ), psessionEntry,
-                    WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo));
+                    WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo),
+                    RXMGMT_FLAG_NONE);
             }
             break;
 #ifdef FEATURE_WLAN_TDLS
@@ -1937,7 +1942,8 @@ limProcessActionFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,tpPESession ps
                limSendSmeMgmtFrameInd(pMac, pHdr->fc.subType,
                   (tANI_U8*)pHdr, frameLen + sizeof(tSirMacMgmtHdr),
                   psessionEntry->smeSessionId,
-                  WDA_GET_RX_CH( pRxPacketInfo ), psessionEntry, rssi);
+                  WDA_GET_RX_CH( pRxPacketInfo ), psessionEntry, rssi,
+                  RXMGMT_FLAG_NONE);
            }
                break;
 #endif
@@ -2011,7 +2017,8 @@ limProcessActionFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo,tpPESession ps
                                psessionEntry->smeSessionId,
                                WDA_GET_RX_CH(pRxPacketInfo),
                                psessionEntry,
-                               WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo));
+                               WDA_GET_RX_RSSI_NORMALIZED(pRxPacketInfo),
+                               RXMGMT_FLAG_NONE);
         break;
     }
     default:
@@ -2075,7 +2082,8 @@ limProcessActionFrameNoSession(tpAniSirGlobal pMac, tANI_U8 *pBd)
                   // type is ACTION
                   limSendSmeMgmtFrameInd(pMac, pHdr->fc.subType,
                       (tANI_U8*)pHdr, frameLen + sizeof(tSirMacMgmtHdr), 0,
-                      WDA_GET_RX_CH( pBd ), NULL, WDA_GET_RX_RSSI_RAW(pBd));
+                      WDA_GET_RX_CH( pBd ), NULL, WDA_GET_RX_RSSI_RAW(pBd),
+                      RXMGMT_FLAG_NONE);
                 }
                 else
                 {
@@ -2101,7 +2109,8 @@ limProcessActionFrameNoSession(tpAniSirGlobal pMac, tANI_U8 *pBd)
           header = WDA_GET_RX_MAC_HEADER(pBd);
           limSendSmeMgmtFrameInd(pMac, header->fc.subType,
               (uint8_t*)header, frameLen + sizeof(tSirMacMgmtHdr), 0,
-              WDA_GET_RX_CH(pBd), NULL, WDA_GET_RX_RSSI_RAW(pBd));
+              WDA_GET_RX_CH(pBd), NULL, WDA_GET_RX_RSSI_RAW(pBd),
+              RXMGMT_FLAG_NONE);
           break;
       }
       default:
