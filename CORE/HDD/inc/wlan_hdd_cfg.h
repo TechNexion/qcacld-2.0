@@ -5557,6 +5557,12 @@ FG_BTC_BT_INTERVAL_PAGE_P2P_STA_DEFAULT
 #define CFG_IS_SAE_ENABLED_MIN     (0)
 #define CFG_IS_SAE_ENABLED_MAX     (1)
 
+#ifdef MULTI_IF_LOG
+#define CFG_HOST_LOG_CUSTOM_NETLINK_PROTO        "host_log_custom_nl_proto"
+#define CFG_HOST_LOG_CUSTOM_NETLINK_PROTO_DEFAULT (2)
+#define CFG_HOST_LOG_CUSTOM_NETLINK_PROTO_MIN     (0)
+#define CFG_HOST_LOG_CUSTOM_NETLINK_PROTO_MAX     (32)
+#endif
 /*---------------------------------------------------------------------------
   Type declarations
   -------------------------------------------------------------------------*/
@@ -6488,6 +6494,10 @@ struct hdd_config {
    uint32_t dpd_recalib_duration_max;
 #ifdef WLAN_FEATURE_SAE
    bool is_sae_enabled;
+#endif
+
+#ifdef MULTI_IF_LOG
+   uint32_t host_log_custom_nl_proto;
 #endif
 };
 
