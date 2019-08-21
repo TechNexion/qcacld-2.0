@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2019 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -346,6 +346,8 @@ enum {
 	WNI_CFG_EDCA_HOSTAPD_ACBK_LOCAL,
 	WNI_CFG_EDCA_HOSTAPD_ACBE_LOCAL,
 	WNI_CFG_REMOVE_TIME_SYNC_CMD,
+	WNI_CFG_MASK_TX_LEGACY_RATE,
+	WNI_CFG_MASK_TX_HT_RATE,
 
 	WNI_CFG_MAX,
 };
@@ -1648,6 +1650,14 @@ enum {
 #define WNI_CFG_MAX_HT_MCS_TX_DATA_STAMAX  0x17f
 #define WNI_CFG_MAX_HT_MCS_TX_DATA_STADEF  0x0
 
+#define WNI_CFG_MASK_LEGACY_RATE_STAMIN  0
+#define WNI_CFG_MASK_LEGACY_RATE_STAMAX  65535
+#define WNI_CFG_MASK_LEGACY_RATE_STADEF  0
+
+#define WNI_CFG_MASK_HT_RATE_STAMIN  0
+#define WNI_CFG_MASK_HT_RATE_STAMAX  65535
+#define WNI_CFG_MASK_HT_RATE_STADEF  0
+
 #define WNI_CFG_DISABLE_ABG_RATE_FOR_TX_DATA_STAMIN  0
 #define WNI_CFG_DISABLE_ABG_RATE_FOR_TX_DATA_STAMAX  1
 #define WNI_CFG_DISABLE_ABG_RATE_FOR_TX_DATA_STADEF  0
@@ -1668,7 +1678,7 @@ enum {
 #define WNI_CFG_REMOVE_TIME_SYNC_CMD_STAMAX    1
 #define WNI_CFG_REMOVE_TIME_SYNC_CMD_STADEF    0
 
-#define CFG_STA_IBUF_MAX_SIZE    250
+#define CFG_STA_IBUF_MAX_SIZE    252
 #define CFG_STA_SBUF_MAX_SIZE    3465
 
 #define CFG_STA_MAGIC_DWORD    0xbeefbeef
