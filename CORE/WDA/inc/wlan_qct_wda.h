@@ -1120,7 +1120,10 @@ tSirRetStatus uMacPostCtrlMsg(void* pSirGlobal, tSirMbMsg* pMb);
 #define WDA_PERIODIC_CFR_ENABLE_CMD           SIR_HAL_PERIODIC_CFR_ENABLE_CMD
 
 #define WDA_SET_HPCS_PULSE_PARAMS             SIR_HAL_SET_HPCS_PULSE_PARMAS
-
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+#define WDA_ADD_MULTICAST_GROUP              SIR_HAL_ADD_MULTICAST_GROUP
+#define WDA_SET_MULTICAST_RATE              SIR_HAL_SET_MULTICAST_RATE
+#endif
 tSirRetStatus wdaPostCtrlMsg(tpAniSirGlobal pMac, tSirMsgQ *pMsg);
 
 #define HAL_USE_BD_RATE2_FOR_MANAGEMENT_FRAME 0x40 // Bit 6 will be used to control BD rate for Management frames

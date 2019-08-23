@@ -1479,6 +1479,10 @@ struct hdd_adapter_s
     char ifname[IFNAMSIZ];
 #endif
 
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+    struct audio_multicast_aggr multicast_aggr;
+#endif
+
 };
 
 #define WLAN_HDD_GET_STATION_CTX_PTR(pAdapter) (&(pAdapter)->sessionCtx.station)
