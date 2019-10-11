@@ -84,7 +84,7 @@ static inline void athdiag_procfs_remove(void) { return; }
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
 #define DMA_MAPPING_ERROR(dev, addr) dma_mapping_error((addr))
-#else
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)
 #define DMA_MAPPING_ERROR(dev, addr) dma_mapping_error((dev), (addr))
 #endif
 
