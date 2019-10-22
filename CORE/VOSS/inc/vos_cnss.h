@@ -89,7 +89,11 @@ static inline void vos_flush_delayed_work(void *dwork)
 static inline void vos_pm_wake_lock_init(struct wakeup_source *ws,
 					const char *name)
 {
-	wakeup_source_init(ws, name);
+	if (ws) {
+		memset(ws, 0, sizeof(*ws));
+		ws->name = name;
+	}
+	wakeup_source_add(ws);
 }
 
 static inline void vos_pm_wake_lock(struct wakeup_source *ws)
