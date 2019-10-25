@@ -101,6 +101,8 @@ A_STATUS HTCConnectService(HTC_HANDLE               HTCHandle,
 
             if (NULL == pConnectMsg) {
                 AR_DEBUG_ASSERT(0);
+                HTCFreeControlTxPacket(target, pSendPacket);
+                pSendPacket = NULL;
                 status = A_EFAULT;
                 break;
             }
