@@ -72,7 +72,6 @@ int qdf_get_hash(uint8_t *type,
     } desc;
 
     desc.shash.tfm = tfm;
-    desc.shash.flags = 0;
     ret = crypto_shash_init(&desc.shash);
     if (ret)
         goto fail;
@@ -105,7 +104,6 @@ int qdf_get_hmac_hash(uint8_t *type, uint8_t *key,
     } desc;
 
     desc.shash.tfm = tfm;
-    desc.shash.flags = 0;
     ret = crypto_shash_setkey(desc.shash.tfm, key, keylen);
     if (ret)
         goto fail;
@@ -175,7 +173,6 @@ int qdf_get_keyed_hash(const char *alg, const uint8_t *key,
     do {
         SHASH_DESC_ON_STACK(desc, tfm);
         desc->tfm = tfm;
-        desc->flags = crypto_shash_get_flags(tfm);
 
         ret = crypto_shash_init(desc);
         if (ret) {
