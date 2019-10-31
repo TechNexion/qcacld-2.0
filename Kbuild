@@ -1563,7 +1563,9 @@ CDEFINES += -DQCA_HT_20_24G_STA_ONLY
 else #CONFIG_MOBILE_ROUTER
 
 #Open P2P device interface only for non-Mobile router use cases
+ifeq ($(CONFIG_P2P_INTERFACE), y)
 CDEFINES += -DWLAN_OPEN_P2P_INTERFACE
+endif
 
 #Enable 2.4 GHz social channels in 5 GHz only mode for p2p usage
 CDEFINES += -DWLAN_ENABLE_SOCIAL_CHANNELS_5G_ONLY
