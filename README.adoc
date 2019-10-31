@@ -14,6 +14,10 @@ $: KERNEL_SRC=<your kernel path> INSTALL_MOD_PATH=<modules> make modules_install
 
 (NOTE: The "modules" directory should be already installed kernel module inside)
 
+If you want to enable P2P device interface you must add this parameter to make command line:
+[source,console]
+CONFIG_P2P_INTERFACE=y
 
-*Support kernel:* `4.9.x`
+
+*Support kernel:* `4.9.x` `4.14.x`
 
