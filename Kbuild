@@ -1617,7 +1617,9 @@ else #CONFIG_MOBILE_ROUTER
 
 #Open P2P device interface only for non-Mobile router use cases
 ifneq ($(CONFIG_SUPPORT_IFTYPE_P2P_DEVICE_VIF), y)
+ifeq ($(CONFIG_P2P_INTERFACE), y)
 CDEFINES += -DWLAN_OPEN_P2P_INTERFACE
+endif
 endif
 
 #Enable 2.4 GHz social channels in 5 GHz only mode for p2p usage
