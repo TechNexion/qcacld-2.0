@@ -30,7 +30,7 @@
 #include "vos_status.h"
 #include "vos_mq.h"
 #include "vos_api.h"
-#include "msg.h"
+#include <linux/msg.h>
 #include "halTypes.h"
 #include "vos_types.h"
 #include <wlan_ptt_sock_svc.h>
