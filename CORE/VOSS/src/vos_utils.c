@@ -76,7 +76,7 @@
 #ifdef CONFIG_CNSS
 #include <linux/qcomwlan_secif.h>
 #endif
-#include <errno.h>
+#include <linux/errno.h>
 
 #include "ieee80211_common.h"
 /*----------------------------------------------------------------------------
