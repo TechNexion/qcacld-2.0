@@ -16583,6 +16583,8 @@ int hdd_wlan_startup(struct device *dev, v_VOID_t *hif_sc)
    vos_mem_zero(pHddCtx->cfg_ini, sizeof( hdd_config_t ));
 
    // Read and parse the qcom_cfg.ini file
+   hif_get_hw_info(hif_sc, &pHddCtx->target_hw_version,
+                   &pHddCtx->target_hw_revision);
    status = hdd_parse_config_ini( pHddCtx );
    if ( VOS_STATUS_SUCCESS != status )
    {

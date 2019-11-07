@@ -5545,7 +5545,20 @@ VOS_STATUS hdd_parse_config_ini(hdd_context_t* pHddCtx)
 
    memset(cfgIniTable, 0, sizeof(cfgIniTable));
 
-   status = request_firmware(&fw, WLAN_INI_FILE, pHddCtx->parent_dev);
+   switch (pHddCtx->target_hw_revision) {
+   case 0x1:
+   case 0xC:
+   case 0xD:
+      status = request_firmware(&fw, QCA9377_INI_FILE, pHddCtx->parent_dev);
+      break;
+   case 0x9:
+   case 0xA:
+      status = request_firmware(&fw, QCA6174_INI_FILE, pHddCtx->parent_dev);
+      break;
+   default:
+      status = request_firmware(&fw, WLAN_INI_FILE, pHddCtx->parent_dev);
+      break;
+   }
 
    if(status)
    {

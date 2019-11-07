@@ -34,8 +34,12 @@
  */
 #ifdef MULTI_IF_NAME
 #define PREFIX MULTI_IF_NAME "/"
+#define PREFIX_QCA9377  MULTI_IF_NAME "/"
+#define PREFIX_QCA6174  MULTI_IF_NAME "/"
 #else
 #define PREFIX ""
+#define PREFIX_QCA9377 "qca9377/"
+#define PREFIX_QCA6174 "qca6174/"
 #endif
 
 #ifdef MSM_PLATFORM
@@ -44,6 +48,8 @@
 #define WLAN_MAC_FILE              "wlan/qca_cld/" PREFIX "wlan_mac.bin"
 #else
 #define WLAN_INI_FILE              "wlan/" PREFIX "qcom_cfg.ini"
+#define QCA9377_INI_FILE           "wlan/" PREFIX_QCA9377 "qcom_cfg.ini"
+#define QCA6174_INI_FILE           "wlan/" PREFIX_QCA6174 "qcom_cfg.ini"
 #define WLAN_CFG_FILE              "wlan/" PREFIX "cfg.dat"
 #define WLAN_MAC_FILE              "wlan/" PREFIX "wlan_mac.bin"
 #endif // MSM_PLATFORM

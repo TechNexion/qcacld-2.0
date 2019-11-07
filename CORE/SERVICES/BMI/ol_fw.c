@@ -80,8 +80,12 @@ static u_int32_t refclk_speed_to_hz[] = {
 
 #ifdef MULTI_IF_NAME
 #define PREFIX MULTI_IF_NAME "/"
+#define PREFIX_QCA9377  MULTI_IF_NAME "/"
+#define PREFIX_QCA6174  MULTI_IF_NAME "/"
 #else
 #define PREFIX ""
+#define PREFIX_QCA9377 "qca9377/"
+#define PREFIX_QCA6174 "qca6174/"
 #endif
 
 static struct ol_fw_files FW_FILES_QCA6174_FW_1_1 = {
@@ -100,10 +104,15 @@ static struct ol_fw_files FW_FILES_QCA6174_FW_1_3 = {
 	PREFIX "utfbd13.bin", PREFIX "qsetup13.bin",
 	PREFIX "epping13.bin"};
 static struct ol_fw_files FW_FILES_QCA6174_FW_3_0 = {
-	PREFIX "qwlan30.bin", PREFIX "qwlan30i.bin", PREFIX "bdwlan30.bin",
-	PREFIX "otp30.bin", PREFIX "utf30.bin",
-	PREFIX "utfbd30.bin", PREFIX "qsetup30.bin",
-	PREFIX "epping30.bin"};
+	PREFIX_QCA6174 "qwlan30.bin", PREFIX_QCA6174 "qwlan30i.bin", PREFIX_QCA6174 "bdwlan30.bin",
+	PREFIX_QCA6174 "otp30.bin", PREFIX_QCA6174 "utf30.bin",
+	PREFIX_QCA6174 "utfbd30.bin", PREFIX_QCA6174 "qsetup30.bin",
+	PREFIX_QCA6174 "epping30.bin"};
+static struct ol_fw_files FW_FILES_QCA9377_FW_3_0 = {
+	PREFIX_QCA9377 "qwlan30.bin", PREFIX_QCA9377 "qwlan30i.bin", PREFIX_QCA9377 "bdwlan30.bin",
+	PREFIX_QCA9377 "otp30.bin", PREFIX_QCA9377 "utf30.bin",
+	PREFIX_QCA9377 "utfbd30.bin", PREFIX_QCA9377 "qsetup30.bin",
+	PREFIX_QCA9377 "epping30.bin"};
 static struct ol_fw_files FW_FILES_DEFAULT = {
 	PREFIX "qwlan.bin", "", PREFIX "bdwlan.bin",
 	PREFIX "otp.bin", PREFIX "utf.bin",
@@ -138,7 +147,7 @@ static int ol_get_fw_files_for_target(struct ol_fw_files *pfw_files,
 #ifdef CONFIG_TUFELLO_DUAL_FW_SUPPORT
             memcpy(pfw_files, &FW_FILES_DEFAULT, sizeof(*pfw_files));
 #else
-            memcpy(pfw_files, &FW_FILES_QCA6174_FW_3_0, sizeof(*pfw_files));
+            memcpy(pfw_files, &FW_FILES_QCA9377_FW_3_0, sizeof(*pfw_files));
 #endif
             break;
     default:
