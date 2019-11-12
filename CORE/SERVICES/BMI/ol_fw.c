@@ -737,6 +737,7 @@ defined(CONFIG_NON_QC_PLATFORM_PCI)
 		printk("%s: no Patch file defined\n", __func__);
 		return EOK;
 	case ATH_BOARD_DATA_FILE:
+#ifdef CONFIG_QCA_BOARD_DATA_USE_BOARD_ID
 		bd_id_filename = ol_board_id_to_filename(scn, scn->board_id);
 		if (bd_id_filename)
 			filename = bd_id_filename;
@@ -745,6 +746,9 @@ defined(CONFIG_NON_QC_PLATFORM_PCI)
 							__func__);
 			return -1;
 		}
+#else
+		filename = scn->fw_files.board_data;
+#endif
 
 #ifdef QCA_WIFI_FTM
 		if (vos_get_conparam() == VOS_FTM_MODE) {
@@ -768,11 +772,17 @@ defined(CONFIG_NON_QC_PLATFORM_PCI)
 			printk("%s: no Setup file defined\n", __func__);
 			return -1;
 #else
+
+#ifdef CONFIG_QCA_FW_SETUP_FILE
 #ifdef HIF_SDIO
 			filename = scn->fw_files.setup_file;
 #else
 			filename = QCA_SETUP_FILE;
 #endif
+#else
+			return EOK;
+#endif
+
 #ifdef QCA_SIGNED_SPLIT_BINARY_SUPPORT
 			bin_sign = TRUE;
 #endif
