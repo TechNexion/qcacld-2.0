@@ -108,6 +108,11 @@ static struct ol_fw_files FW_FILES_QCA6174_FW_3_0 = {
 	PREFIX_QCA6174 "otp30.bin", PREFIX_QCA6174 "utf30.bin",
 	PREFIX_QCA6174 "utfbd30.bin", PREFIX_QCA6174 "qsetup30.bin",
 	PREFIX_QCA6174 "epping30.bin"};
+static struct ol_fw_files FW_FILES_QCA9377_FW_3_0_OLD = {
+	PREFIX "qwlan30.bin", PREFIX "qwlan30i.bin", PREFIX "bdwlan30.bin",
+	PREFIX "otp30.bin", PREFIX "utf30.bin",
+	PREFIX "utfbd30.bin", PREFIX "qsetup30.bin",
+	PREFIX "epping30.bin"};
 static struct ol_fw_files FW_FILES_QCA9377_FW_3_0 = {
 	PREFIX_QCA9377 "qwlan30.bin", PREFIX_QCA9377 "qwlan30i.bin", PREFIX_QCA9377 "bdwlan30.bin",
 	PREFIX_QCA9377 "otp30.bin", PREFIX_QCA9377 "utf30.bin",
@@ -124,6 +129,10 @@ static A_STATUS ol_sdio_extra_initialization(struct ol_softc *scn);
 static int ol_get_fw_files_for_target(struct ol_fw_files *pfw_files,
                                  u32 target_version)
 {
+    struct file* filp = NULL;
+    mm_segment_t old_fs;
+    char str_firmware_path[64] = "/lib/firmware/";
+
     if (!pfw_files)
         return -ENODEV;
 
@@ -147,7 +156,24 @@ static int ol_get_fw_files_for_target(struct ol_fw_files *pfw_files,
 #ifdef CONFIG_TUFELLO_DUAL_FW_SUPPORT
             memcpy(pfw_files, &FW_FILES_DEFAULT, sizeof(*pfw_files));
 #else
-            memcpy(pfw_files, &FW_FILES_QCA9377_FW_3_0, sizeof(*pfw_files));
+            old_fs = get_fs();
+            set_fs(KERNEL_DS);
+            memcpy(&str_firmware_path[14], FW_FILES_QCA9377_FW_3_0.board_data, strlen(FW_FILES_QCA9377_FW_3_0.board_data) + 1);
+            filp = filp_open(str_firmware_path , O_RDONLY, 0);
+            if (IS_ERR(filp) || filp == NULL) {
+                memcpy(&str_firmware_path[14], FW_FILES_QCA9377_FW_3_0_OLD.board_data, strlen(FW_FILES_QCA9377_FW_3_0_OLD.board_data) + 1);
+                filp = filp_open(str_firmware_path, O_RDONLY, 0);
+                if (IS_ERR(filp) || filp == NULL)
+                    pr_err("%s: cannot find firmware ([qca9377/]%s)", __func__, FW_FILES_QCA9377_FW_3_0_OLD.board_data);
+                else {
+                    filp_close(filp, NULL);
+                    memcpy(pfw_files, &FW_FILES_QCA9377_FW_3_0_OLD, sizeof(*pfw_files));
+                }
+            }else{
+                filp_close(filp, NULL);
+                memcpy(pfw_files, &FW_FILES_QCA9377_FW_3_0, sizeof(*pfw_files));
+            }
+            set_fs(old_fs);
 #endif
             break;
     default:

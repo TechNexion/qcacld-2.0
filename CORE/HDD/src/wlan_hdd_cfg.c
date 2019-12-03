@@ -5542,6 +5542,8 @@ VOS_STATUS hdd_parse_config_ini(hdd_context_t* pHddCtx)
    /* cfgIniTable is static to avoid excess stack usage */
    static tCfgIniEntry cfgIniTable[MAX_CFG_INI_ITEMS];
    VOS_STATUS vos_status = VOS_STATUS_SUCCESS;
+	struct file* filp = NULL;
+	mm_segment_t old_fs;
 
    memset(cfgIniTable, 0, sizeof(cfgIniTable));
 
@@ -5549,7 +5551,18 @@ VOS_STATUS hdd_parse_config_ini(hdd_context_t* pHddCtx)
    case 0x1:
    case 0xC:
    case 0xD:
-      status = request_firmware(&fw, QCA9377_INI_FILE, pHddCtx->parent_dev);
+      old_fs = get_fs();
+      set_fs(KERNEL_DS);
+      filp = filp_open("/lib/firmware/" QCA9377_INI_FILE, O_RDONLY, 0);
+      if (IS_ERR(filp) || (filp == NULL)) {
+            status = request_firmware(&fw, WLAN_INI_FILE, pHddCtx->parent_dev);
+            if(status)
+               pr_err("%s: cannot find ini file (" QCA9377_INI_FILE ")", __func__);
+      }else{
+            filp_close(filp, NULL);
+            status = request_firmware(&fw, QCA9377_INI_FILE, pHddCtx->parent_dev);
+      }
+      set_fs(old_fs);
       break;
    case 0x9:
    case 0xA:
