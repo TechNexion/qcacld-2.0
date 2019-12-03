@@ -5046,4 +5046,9 @@ static inline eHalStatus sme_handle_sae_msg(tHalHandle hal, uint8_t session_id,
 }
 #endif
 
+eHalStatus sme_spectral_scan_enable(tHalHandle hal,
+				    sir_spectral_enable_params_t *params);
+
+eHalStatus sme_spectral_scan_config(tHalHandle hal,
+				    sir_spectral_config_params_t *params);
 #endif //#if !defined( __SME_API_H )
