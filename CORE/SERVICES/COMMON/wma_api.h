@@ -196,4 +196,13 @@ void wma_tx_failure_cb(void *ctx, uint32_t num_msdu,
 		       uint8_t tid, uint32_t status);
 
 VOS_STATUS wma_set_ac_txq_optimize(void *wda_handle, uint8_t *value);
+
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+int wma_cli_au_get_global_info(void *wmapvosContext, int vdev_id,
+			 char *extra);
+int wma_cli_au_get_group_info(void *wmapvosContext, int vdev_id,
+			int info_mask, char *extra, int group_index);
+int wma_add_multicast_group(void *wmapvosContext, int vdev_id,
+			struct audio_multicast_add_group * multi_group);
+#endif
 #endif
