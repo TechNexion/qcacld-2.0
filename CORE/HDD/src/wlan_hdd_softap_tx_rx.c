@@ -558,7 +558,11 @@ static void __hdd_softap_tx_timeout(struct net_device *dev)
  *
  * Return: none
  */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0))
+void hdd_softap_tx_timeout(struct net_device *dev, unsigned int txqueue)
+#else
 void hdd_softap_tx_timeout(struct net_device *dev)
+#endif
 {
 	vos_ssr_protect(__func__);
 	__hdd_softap_tx_timeout(dev);
