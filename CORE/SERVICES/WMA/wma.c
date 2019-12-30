@@ -35630,6 +35630,7 @@ VOS_STATUS wma_set_hpcs_pulse_params(tp_wma_handle wma_handle,
     return VOS_STATUS_SUCCESS;
 }
 
+#ifdef WLAN_SPECTRAL_SCAN
 static VOS_STATUS wma_spectral_scan_enable(tp_wma_handle wma_handle,
 					   sir_spectral_enable_params_t *params)
 {
@@ -35748,6 +35749,7 @@ static VOS_STATUS wma_spectral_scan_config(tp_wma_handle wma_handle,
 
 	return VOS_STATUS_SUCCESS;
 }
+#endif
 
 /*
  * function   : wma_mc_process_msg
@@ -36767,6 +36769,7 @@ VOS_STATUS wma_mc_process_msg(v_VOID_t *vos_context, vos_msg_t *msg)
 			vos_mem_free(msg->bodyptr);
 			break;
 #endif
+#ifdef WLAN_SPECTRAL_SCAN
 		case WDA_SPECTRAL_SCAN_ENABLE_CMDID:
 			wma_spectral_scan_enable(wma_handle, msg->bodyptr);
 			vos_mem_free(msg->bodyptr);
@@ -36775,6 +36778,7 @@ VOS_STATUS wma_mc_process_msg(v_VOID_t *vos_context, vos_msg_t *msg)
 			wma_spectral_scan_config(wma_handle, msg->bodyptr);
 			vos_mem_free(msg->bodyptr);
 			break;
+#endif
 		default:
 			WMA_LOGD("unknow msg type %x", msg->type);
 			/* Do Nothing? MSG Body should be freed at here */

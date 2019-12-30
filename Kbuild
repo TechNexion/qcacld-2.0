@@ -1890,6 +1890,10 @@ ifdef WLAN_HDD_ADAPTER_MAGIC
 CDEFINES += -DWLAN_HDD_ADAPTER_MAGIC=$(WLAN_HDD_ADAPTER_MAGIC)
 endif
 
+ifeq ($(CONFIG_SPECTRAL_SCAN), y)
+CDEFINES += -DWLAN_SPECTRAL_SCAN
+endif
+
 # Module information used by KBuild framework
 ifeq ($(CONFIG_FEATURE_LARGE_PREALLOC),y)
 obj-$(CONFIG_QCA_CLD_WLAN) += wlan_prealloc.o

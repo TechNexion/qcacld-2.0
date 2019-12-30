@@ -8745,6 +8745,7 @@ struct sir_sae_msg {
 	tSirMacAddr peer_mac_addr;
 };
 
+#ifdef WLAN_SPECTRAL_SCAN
 typedef struct sir_spectral_enable_params {
 	uint32_t vdev_id;
 	uint32_t trigger_cmd;
@@ -8772,5 +8773,6 @@ typedef struct sir_spectral_config_params {
 	uint32_t spectral_scan_dbm_adj;
 	uint32_t spectral_scan_chn_mask;
 } sir_spectral_config_params_t;
+#endif
 
 #endif /* __SIR_API_H */

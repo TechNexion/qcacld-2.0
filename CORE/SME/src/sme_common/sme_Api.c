@@ -21272,6 +21272,7 @@ eHalStatus sme_handle_sae_msg(tHalHandle hal, uint8_t session_id,
 }
 #endif
 
+#ifdef WLAN_SPECTRAL_SCAN
 eHalStatus sme_spectral_scan_enable(tHalHandle hal,
 				    sir_spectral_enable_params_t *params)
 {
@@ -21353,3 +21354,4 @@ eHalStatus sme_spectral_scan_config(tHalHandle hal,
 
 	return status;
 }
+#endif
