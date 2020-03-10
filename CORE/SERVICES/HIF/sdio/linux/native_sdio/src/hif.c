@@ -2730,6 +2730,7 @@ static int hif_reset_target(HIF_DEVICE *hif_device)
 			("AR6000: %s invalid HIF DEVICE \n", __func__));
 		return -ENODEV;
 	}
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,19,0))
 	/* Disable sdio func->pull down WLAN_EN-->pull down DAT_2 line */
 	ret = mmc_power_save_host(hif_device->func->card->host);
 	if(ret) {
@@ -2746,7 +2747,7 @@ static int hif_reset_target(HIF_DEVICE *hif_device)
 			("AR6000: %s Failed to restore mmc Power host %d\n",
 			__func__, ret));
 	}
-
+#endif
 done:
 	return ret;
 }

@@ -1839,7 +1839,11 @@ hdd_wmm_classify_pkt(hdd_adapter_t* pAdapter, struct sk_buff *skb,
   ===========================================================================*/
 v_U16_t hdd_hostapd_select_queue(struct net_device * dev, struct sk_buff *skb
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,0))
+                                 , struct net_device *sb_dev
+#else
                                  , void *accel_priv
+#endif
 #endif
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,0))
                                  , select_queue_fallback_t fallback
