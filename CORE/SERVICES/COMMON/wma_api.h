@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -205,5 +205,7 @@ int wma_cli_au_get_group_info(void *wmapvosContext, int vdev_id,
 			int info_mask, char *extra, int group_index);
 int wma_add_multicast_group(void *wmapvosContext, int vdev_id,
 			struct audio_multicast_add_group * multi_group);
+int wma_cli_au_get_rx_group_info(void *wmapvosContext, int vdev_id,
+			 char *extra);
 #endif
 #endif

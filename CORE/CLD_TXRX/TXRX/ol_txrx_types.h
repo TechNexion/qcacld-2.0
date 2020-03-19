@@ -375,6 +375,10 @@ struct ol_audio_multicast_aggr_conf
 	u_int32_t enqeue_count;
 	u_int32_t packet_success;
 	u_int32_t sched_count;
+	/* rx_bitmap is used on Rx side. It indicates the groups
+	 * joined and received by this station when bit is set 1.
+	 */
+	u_int32_t rx_bitmap;
 };
 #endif
 

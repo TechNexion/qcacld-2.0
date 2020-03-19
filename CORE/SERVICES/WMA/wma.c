@@ -18423,6 +18423,9 @@ wma_set_multicast_sta(tp_wma_handle wma_handle,
 	int32_t len = sizeof(wmi_audio_aggr_update_sta_group_info_cmd_fixed_param);
 	wmi_mac_addr *pgroup_addr;
 	int i;
+	ol_txrx_vdev_handle vdev = NULL;
+	struct ol_audio_multicast_aggr_conf* au_mcast_conf = NULL;
+	struct ol_audio_multicast_group* pMultiGroup = NULL;
 
 	if (!wma_handle || !wma_handle->wmi_handle) {
 		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
@@ -18440,6 +18443,13 @@ wma_set_multicast_sta(tp_wma_handle wma_handle,
 		return -ENOMEM;
 	}
 
+	vdev = wma_find_vdev_by_id(wma_handle, multi_group->param_vdev_id);
+	if (!vdev) {
+		WMA_LOGE("%s:Invalid vdev handle", __func__);
+		return -EINVAL;
+	}
+
+	au_mcast_conf = &vdev->au_mcast_conf;
 	buf_ptr = (u_int8_t *) wmi_buf_data(buf);
 	cmd = (wmi_audio_aggr_update_sta_group_info_cmd_fixed_param *) buf_ptr;
 	WMITLV_SET_HDR(&cmd->tlv_header,
@@ -18471,7 +18481,86 @@ wma_set_multicast_sta(tp_wma_handle wma_handle,
 		return VOS_STATUS_E_FAILURE;
 	}
 
+	if (multi_group->group_num > 0) {
+		au_mcast_conf->group_num = multi_group->group_num;
+		au_mcast_conf->rx_bitmap = multi_group->bitmap;
+		for(i=0; i < multi_group->group_num; i++) {
+			pMultiGroup = &au_mcast_conf->multicast_group[i];
+			pMultiGroup->multicast_addr.mac_addr31to0 = multi_group->group_addr[i].mac_addr31to0;
+			pMultiGroup->multicast_addr.mac_addr47to32 = multi_group->group_addr[i].mac_addr47to32;
+		}
+	}
+	else {
+		au_mcast_conf->group_num = 0;
+		au_mcast_conf->rx_bitmap = 0;
+	}
+
 	return VOS_STATUS_SUCCESS;
+}
+
+/**
+ * wma_cli_au_get_rx_group_info() - Get multicast aggregation group info on Rx side
+ *
+ * @wmapvosContext: pointer to wma Context
+ * @vdev_id: vdev ID
+ * @output: pointer to output info
+ *
+ * Return: output info length or -EINVAL
+ */
+int wma_cli_au_get_rx_group_info(void *wmapvosContext, int vdev_id,
+			char *output)
+{
+	int length = 0, i = 0 ;
+	tp_wma_handle wma;
+	ol_txrx_vdev_handle vdev = NULL;
+	struct ol_audio_multicast_aggr_conf* au_mcast_conf = NULL;
+
+	wma = (tp_wma_handle) vos_get_context(VOS_MODULE_ID_WDA,
+						wmapvosContext);
+
+	if (NULL == wma)
+	{
+		WMA_LOGE("%s: Invalid wma handle", __func__);
+		return -EINVAL;
+	}
+
+	vdev = wma_find_vdev_by_id(wma, vdev_id);
+	if (!vdev) {
+		WMA_LOGE("%s:Invalid vdev handle", __func__);
+		return -EINVAL;
+	}
+
+	au_mcast_conf = &vdev->au_mcast_conf;
+
+	length += scnprintf(output+length, IW_PRIV_SIZE_MASK - length,
+		"\n<Rx>\n");
+
+	for (i = 0; i < au_mcast_conf->group_num ; i++ )
+	{
+		if (au_mcast_conf->rx_bitmap & (0x1 << i))
+		{
+			length += scnprintf(output+length, IW_PRIV_SIZE_MASK - length,
+				"Group mac addr: [0x%x, 0x%x]\n",
+				au_mcast_conf->multicast_group[i].multicast_addr.mac_addr31to0,
+				au_mcast_conf->multicast_group[i].multicast_addr.mac_addr47to32);
+		}
+	}
+
+	length += scnprintf(output+length, IW_PRIV_SIZE_MASK - length,
+		"<Filtered>\n");
+
+	for (i = 0; i < au_mcast_conf->group_num ; i++ )
+	{
+		if (!(au_mcast_conf->rx_bitmap & (0x1 << i)))
+		{
+			length += scnprintf(output+length, IW_PRIV_SIZE_MASK - length,
+				"Group mac addr: [0x%x, 0x%x]\n",
+				au_mcast_conf->multicast_group[i].multicast_addr.mac_addr31to0,
+				au_mcast_conf->multicast_group[i].multicast_addr.mac_addr47to32);
+		}
+	}
+
+	return length;
 }
 #endif
 

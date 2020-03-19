@@ -368,6 +368,9 @@ typedef enum eMonFilterType{
 #endif
 #define WE_GET_SNR                                14
 #define WE_GET_PS_TDCC                            15
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+#define WE_AUDIO_GET_RX_GROUP_INFO                16
+#endif
 
 /* Private ioctls and their sub-ioctls */
 #define WLAN_PRIV_SET_NONE_GET_NONE               (SIOCIWFIRSTPRIV + 6)
@@ -8494,6 +8497,12 @@ static int __iw_get_char_setnone(struct net_device *dev,
             return hdd_wlan_get_ps_tdcc_info(pAdapter, &(wrqu->data.length),
                                              extra, WE_MAX_STR_LEN);
         }
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+        case WE_AUDIO_GET_RX_GROUP_INFO:
+        {
+           return wlan_hdd_get_rx_group(pAdapter, wrqu, extra);
+        }
+#endif
         default:
         {
             hddLog(LOGE, "%s: Invalid IOCTL command %d", __func__, sub_cmd );
@@ -8907,6 +8916,37 @@ static int wlan_hdd_set_multicast_sta(hdd_adapter_t *pAdapter,
 	}
 
 	return VOS_STATUS_SUCCESS;
+}
+
+int wlan_hdd_get_rx_group(hdd_adapter_t *pAdapter,
+			union iwreq_data *wrqu, char *extra)
+{
+	int ret, length = 0;
+	hdd_context_t *pHddCtx;
+	tHalHandle hHal = WLAN_HDD_GET_HAL_CTX(pAdapter);
+
+	pHddCtx = WLAN_HDD_GET_CTX(pAdapter);
+	ret = wlan_hdd_validate_context(pHddCtx);
+	if (0 != ret)
+		return ret;
+
+	if (VOS_STATUS_SUCCESS != sme_is_session_valid(hHal,
+	    pAdapter->sessionId)) {
+		hddLog(LOGE, FL("session id is not valid %d"),
+		pAdapter->sessionId);
+		return -EINVAL;
+	}
+
+	length = wma_cli_au_get_rx_group_info(pHddCtx->pvosContext,
+				(int)pAdapter->sessionId,
+				extra);
+	if (length < 0) {
+		hddLog(LOGE, FL("get group info fail\n"));
+		wrqu->data.length = 0;
+		return length;
+	}
+	wrqu->data.length += length;
+	return 0;
 }
 #endif
 
@@ -13110,6 +13150,10 @@ static const struct iw_priv_args we_private_args[] = {
     {   WE_AUDIO_AGGR_SET_STA,
         IW_PRIV_TYPE_INT | MAX_VAR_ARGS,
         0, "au_set_sta" },
+    {   WE_AUDIO_GET_RX_GROUP_INFO,
+         0,
+        IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
+        "au_rx_show_grp" },
 #endif
 };
 

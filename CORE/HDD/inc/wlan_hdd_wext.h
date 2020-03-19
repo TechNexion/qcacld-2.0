@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -530,5 +530,7 @@ int wlan_hdd_multicast_aggr_enable(hdd_adapter_t *adapter,
 						int aggr_enable, int tbd_enable);
 int wlan_hdd_set_multicast_probe(hdd_adapter_t *adapter,
 			int group_id,int interval);
+int wlan_hdd_get_rx_group(hdd_adapter_t *adapter,
+			union iwreq_data *wrqu, char *extra);
 #endif
 #endif // __WEXT_IW_H__
