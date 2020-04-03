@@ -17808,18 +17808,23 @@ wma_set_multicast_rate(tp_wma_handle wma_handle,
 	ol_txrx_vdev_handle vdev = NULL;
 	struct ol_audio_multicast_aggr_conf* au_mcast_conf = NULL;
 	struct ol_audio_multicast_group* pMultiGroup = NULL;
+	u_int32_t short_gi;
+	u_int8_t vdev_id = 0;
+	struct wma_txrx_node *intr = NULL;
 
 	if (!wma_handle || !wma_handle->wmi_handle) {
 		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
 		return VOS_STATUS_E_INVAL;
 	}
 
-	vdev = wma_find_vdev_by_id(wma_handle, multi_group->param_vdev_id);
+	vdev_id = multi_group->param_vdev_id;
+	vdev = wma_find_vdev_by_id(wma_handle, vdev_id);
 	if (!vdev) {
 		WMA_LOGE("%s:Invalid vdev handle", __func__);
 		return VOS_STATUS_E_INVAL;
 	}
 
+	intr = wma_handle->interfaces;
 	au_mcast_conf = &vdev->au_mcast_conf;
 	group_id = multi_group->group_id;
 	group_index = group_id - MIN_GROUP_ID;
@@ -17863,6 +17868,17 @@ wma_set_multicast_rate(tp_wma_handle wma_handle,
 		WMA_LOGE("%s: wmi_unified_cmd_send WMI_AUDIO_AGGR_SET_GROUP_RATE_CMDID"
 			" returned Error %d", __func__, status);
 		wmi_buf_free(buf);
+		return VOS_STATUS_E_FAILURE;
+	}
+
+	short_gi = intr[vdev_id].config.shortgi;
+	if (short_gi == 0)
+		short_gi = (intr[vdev_id].rate_flags & eHAL_TX_RATE_SGI) ? TRUE : FALSE;
+	status = wmi_unified_vdev_set_param_send(wma_handle->wmi_handle, vdev_id,
+			WMI_VDEV_PARAM_SGI, short_gi);
+	if (status) {
+		WMA_LOGE("%s: Failed to Set WMI_VDEV_PARAM_SGI (%d), ret = %d",
+			__func__, short_gi, status);
 		return VOS_STATUS_E_FAILURE;
 	}
 
