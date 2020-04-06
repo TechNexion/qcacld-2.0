@@ -148,6 +148,26 @@ typedef struct {
 #define WLAN_AKM_SUITE_FT_FILS_SHA384 0x000FAC11
 #endif
 
+#ifndef WLAN_AKM_SUITE_SAE
+#define WLAN_AKM_SUITE_SAE 0x000FAC08
+#endif
+
+#ifndef WLAN_AKM_SUITE_OWE
+#define WLAN_AKM_SUITE_OWE 0x000FAC12
+#endif
+
+/* For kernel version >= 5.2, driver needs to provide policy */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0))
+#define vendor_command_policy(__policy, __maxattr) \
+	.policy = __policy,                        \
+	.maxattr = __maxattr
+#define VENDOR_NLA_POLICY_NESTED(__policy) \
+	NLA_POLICY_NESTED(__policy)
+#else
+#define vendor_command_policy(__policy, __maxattr)
+#define VENDOR_NLA_POLICY_NESTED(__policy) {.type = NLA_NESTED}
+#endif /*End of (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0) */
+
 /* Vendor id to be used in vendor specific command and events
  * to user space.
  * NOTE: The authoritative place for definition of QCA_NL80211_VENDOR_ID,
@@ -2947,6 +2967,8 @@ void wlan_hdd_cfg80211_set_key_wapi(hdd_adapter_t* pAdapter,
                                     const u8 *key , int key_Len);
 #endif
 struct wiphy *wlan_hdd_cfg80211_wiphy_alloc(int priv_size);
+
+#define EXTSCAN_PARAM_MAX QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX
 
 int wlan_hdd_cfg80211_scan( struct wiphy *wiphy,
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,6,0)) && !defined(WITH_BACKPORTS)

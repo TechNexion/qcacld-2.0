@@ -248,7 +248,27 @@ enum qca_wlan_vendor_attr_dcc_update_ndl {
 	QCA_WLAN_VENDOR_ATTR_DCC_UPDATE_NDL_MAX =
 		QCA_WLAN_VENDOR_ATTR_DCC_UPDATE_NDL_AFTER_LAST - 1,
 };
+
 #ifdef WLAN_FEATURE_DSRC
+extern const struct nla_policy qca_wlan_vendor_ocb_set_config_policy[
+		QCA_WLAN_VENDOR_ATTR_OCB_SET_CONFIG_MAX + 1];
+
+extern const struct nla_policy qca_wlan_vendor_ocb_set_utc_time_policy[
+		QCA_WLAN_VENDOR_ATTR_OCB_SET_UTC_TIME_MAX + 1];
+
+extern const struct nla_policy qca_wlan_vendor_ocb_start_timing_advert_policy[
+		QCA_WLAN_VENDOR_ATTR_OCB_START_TIMING_ADVERT_MAX + 1];
+
+extern const struct nla_policy  qca_wlan_vendor_ocb_stop_timing_advert_policy[
+		QCA_WLAN_VENDOR_ATTR_OCB_STOP_TIMING_ADVERT_MAX + 1];
+
+extern const struct nla_policy qca_wlan_vendor_dcc_get_stats[];
+
+extern const struct nla_policy qca_wlan_vendor_dcc_clear_stats[];
+
+extern const struct nla_policy qca_wlan_vendor_dcc_update_ndl[
+		QCA_WLAN_VENDOR_ATTR_DCC_UPDATE_NDL_MAX + 1];
+
 void hdd_set_dot11p_config(hdd_context_t *hdd_ctx);
 
 int iw_set_dot11p_channel_sched(struct net_device *dev,

@@ -43,7 +43,6 @@ struct wireless_dev;
 #define NDP_SCID_BUF_LEN 256
 #define NDP_NUM_INSTANCE_ID 255
 
-
 #define HDD_MAX_NUM_NDP_STA           (HDD_MAX_NUM_IBSS_STA)
 #define NDP_BROADCAST_STAID           (IBSS_BROADCAST_STAID)
 
@@ -105,6 +104,9 @@ enum qca_wlan_vendor_attr_ndp_params {
 	QCA_WLAN_VENDOR_ATTR_NDP_PARAMS_MAX =
 		QCA_WLAN_VENDOR_ATTR_NDP_PARAMS_AFTER_LAST - 1,
 };
+
+extern const struct nla_policy
+qca_wlan_vendor_ndp_policy[QCA_WLAN_VENDOR_ATTR_NDP_PARAMS_MAX + 1];
 
 /**
  * enum qca_wlan_vendor_attr_ndp_cfg_security - vendor security attribute
