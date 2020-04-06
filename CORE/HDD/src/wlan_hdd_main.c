@@ -10951,7 +10951,10 @@ static void hdd_set_multicast_list(struct net_device *dev)
   \return - ac, Queue Index/access category corresponding to UP in IP header
 
   --------------------------------------------------------------------------*/
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
+uint16_t hdd_select_queue(struct net_device *dev, struct sk_buff *skb,
+			  struct net_device *sb_dev)
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0))
 uint16_t hdd_select_queue(struct net_device *dev, struct sk_buff *skb,
 			  struct net_device *sb_dev,
 			  select_queue_fallback_t fallback)

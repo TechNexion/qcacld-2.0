@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012,2014, 2016, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2012,2014, 2016, 2019-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -267,7 +267,10 @@ v_U16_t hdd_wmm_select_queue(struct net_device * dev, struct sk_buff *skb);
 
   @return         : Qdisc queue index
   ===========================================================================*/
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
+uint16_t hdd_hostapd_select_queue(struct net_device * dev, struct sk_buff *skb,
+                                  struct net_device *sb_dev);
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,0))
 uint16_t hdd_hostapd_select_queue(struct net_device * dev, struct sk_buff *skb,
                                   struct net_device *sb_dev,
                                   select_queue_fallback_t fallback);
