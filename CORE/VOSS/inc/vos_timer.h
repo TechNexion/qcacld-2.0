@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2016-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2016-2018, 2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -346,6 +346,14 @@ v_TIME_t vos_timer_get_system_ticks( v_VOID_t );
 
   ------------------------------------------------------------------------*/
 v_TIME_t vos_timer_get_system_time( v_VOID_t );
+
+/**
+ * vos_timer_get_timeval() - get struct timeval
+ * tv: pointer to struct timeval
+ *
+ * Return: void
+ */
+void vos_timer_get_timeval(struct timeval *tv);
 
 /**
  * vos_system_ticks() - get system ticks

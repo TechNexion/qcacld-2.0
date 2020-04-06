@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -310,7 +310,7 @@ int wlan_log_to_user(VOS_TRACE_LEVEL log_level, char *to_be_sent, int length)
 	} else {
 
 		/* Format the Log time R#: [hr:min:sec.microsec] */
-		do_gettimeofday(&tv);
+		vos_timer_get_timeval(&tv);
 		/* Convert rtc to local time */
 		local_time = (u32)(tv.tv_sec - (sys_tz.tz_minuteswest * 60));
 		rtc_time_to_tm(local_time, &tm);

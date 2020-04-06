@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, 2016 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2014, 2016, 2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -347,7 +347,7 @@ void vos_pkt_trace_buf_update
    trace_buffer[slot].order = trace_buffer_order;
    trace_buffer_order++;
    adf_os_spin_unlock_bh(&trace_buffer_lock);
-   do_gettimeofday(&tv);
+   vos_timer_get_timeval(&tv);
    trace_buffer[slot].event_sec_time = tv.tv_sec;
    trace_buffer[slot].event_msec_time = tv.tv_usec;
    strlcpy(trace_buffer[slot].event_string, event_string,

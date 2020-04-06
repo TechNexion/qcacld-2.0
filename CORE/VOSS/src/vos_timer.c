@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, 2015-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2013, 2015-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -866,18 +866,60 @@ v_TIME_t vos_timer_get_system_ticks( v_VOID_t )
   \sa
 
   ------------------------------------------------------------------------*/
-v_TIME_t vos_timer_get_system_time( v_VOID_t )
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0))
+v_TIME_t vos_timer_get_system_time(void)
+{
+	struct timespec64 tv;
+
+	ktime_get_real_ts64(&tv);
+	return tv.tv_sec * 1000 + tv.tv_nsec / 1000000;
+}
+#else
+v_TIME_t vos_timer_get_system_time(void)
 {
    struct timeval tv;
    do_gettimeofday(&tv);
    return tv.tv_sec*1000 + tv.tv_usec/1000;
 }
+#endif
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0))
+void vos_timer_get_timeval(struct timeval *tv)
+{
+	struct timespec64 tv_spec;
+
+	ktime_get_real_ts64(&tv_spec);
+	tv->tv_sec = tv_spec.tv_sec;
+	tv->tv_usec = tv_spec.tv_nsec / 1000;
+}
+#else
+void vos_timer_get_timeval(struct timeval *tv)
+{
+	do_gettimeofday(tv);
+}
+#endif
 
 /**
  * vos_get_time_of_the_day_ms() - get time in milisec
  *
  * Return: time of the day in ms
  */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0))
+unsigned long vos_get_time_of_the_day_ms(void)
+{
+	struct timespec64 tv;
+	unsigned long local_time;
+	struct rtc_time tm;
+
+	ktime_get_real_ts64(&tv);
+	local_time = (unsigned long)(tv.tv_sec - (sys_tz.tz_minuteswest * 60));
+	rtc_time_to_tm(local_time, &tm);
+
+	return (tm.tm_hour * 60 * 60 * 1000) +
+		(tm.tm_min * 60 * 1000) + (tm.tm_sec * 1000) +
+		(tv.tv_nsec / 1000000);
+}
+#else
 unsigned long vos_get_time_of_the_day_ms(void)
 {
 	struct timeval tv;
@@ -893,7 +935,25 @@ unsigned long vos_get_time_of_the_day_ms(void)
 		(tm.tm_min *60 * 1000) + (tm.tm_sec * 1000)+
 		(tv.tv_usec/1000));
 }
+#endif
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0))
+void vos_get_time_of_the_day_in_hr_min_sec_usec(char *tbuf, int len)
+{
+	struct timespec64 tv;
+	struct rtc_time tm;
+	unsigned long local_time;
+
+	/* Format the Log time R#: [hr:min:sec.microsec] */
+	ktime_get_real_ts64(&tv);
+	/* Convert rtc to local time */
+	local_time = (u32)(tv.tv_sec - (sys_tz.tz_minuteswest * 60));
+	rtc_time_to_tm(local_time, &tm);
+	scnprintf(tbuf, len,
+		  "[%02d:%02d:%02d.%06lu]",
+		  tm.tm_hour, tm.tm_min, tm.tm_sec, tv.tv_nsec / 1000);
+}
+#else
 void vos_get_time_of_the_day_in_hr_min_sec_usec(char *tbuf, int len)
 {
        struct timeval tv;
@@ -909,6 +969,7 @@ void vos_get_time_of_the_day_in_hr_min_sec_usec(char *tbuf, int len)
                "[%02d:%02d:%02d.%06lu] ",
                tm.tm_hour, tm.tm_min, tm.tm_sec, tv.tv_usec);
 }
+#endif
 
 /**
  * vos_wdthread_init_timer_work() -  Initialize timer work
