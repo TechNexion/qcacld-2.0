@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 2018-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014 2018-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -80,12 +80,6 @@ void athdiag_procfs_remove(void);
 #else
 static inline int athdiag_procfs_init(void *scn) { return 0; }
 static inline void athdiag_procfs_remove(void) { return; }
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
-#define DMA_MAPPING_ERROR(dev, addr) dma_mapping_error((addr))
-#else
-#define DMA_MAPPING_ERROR(dev, addr) dma_mapping_error((dev), (addr))
 #endif
 
 int ath_sdio_probe(void *context, void *hif_handle);
