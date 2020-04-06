@@ -13341,8 +13341,11 @@ static void hdd_connect_bss(struct net_device *dev, const u8 *bssid,
 #endif
 
 #ifdef WLAN_FEATURE_FILS_SK
-#ifdef CFG80211_CONNECT_DONE
-#ifdef CFG80211_FILS_SK_OFFLOAD_SUPPORT
+#if (defined(CFG80211_CONNECT_DONE) || \
+	(LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))) && \
+	(LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0))
+#if defined(CFG80211_FILS_SK_OFFLOAD_SUPPORT) || \
+		 (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))
 /**
  * hdd_populate_fils_params() - Populate FILS keys to connect response
  * @fils_params: connect response to supplicant
@@ -13379,6 +13382,39 @@ static inline void hdd_populate_fils_params(struct cfg80211_connect_resp_params
                         uint16_t fils_seq_num)
 { }
 #endif /* CFG80211_FILS_SK_OFFLOAD_SUPPORT */
+
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0))
+/**
+ * hdd_populate_fils_params() - Populate FILS keys to connect response
+ * @fils_params: connect response to supplicant
+ * @fils_kek: FILS kek
+ * @fils_kek_len: FILS kek length
+ * @pmk: FILS PMK
+ * @pmk_len: FILS PMK length
+ * @pmkid: PMKID
+ * @fils_seq_num: FILS Seq number
+ *
+ * Return: None
+ */
+static void hdd_populate_fils_params(struct cfg80211_connect_resp_params
+				     *fils_params, const uint8_t *fils_kek,
+				     size_t fils_kek_len, const uint8_t *pmk,
+				     size_t pmk_len, const uint8_t *pmkid,
+				     uint16_t fils_seq_num)
+{
+	/* Increament seq number to be used for next FILS */
+	fils_params->fils.erp_next_seq_num = fils_seq_num + 1;
+	fils_params->fils.update_erp_next_seq_num = true;
+	fils_params->fils.kek = fils_kek;
+	fils_params->fils.kek_len = fils_kek_len;
+	fils_params->fils.pmk = pmk;
+	fils_params->fils.pmk_len = pmk_len;
+	fils_params->fils.pmkid = pmkid;
+}
+#endif /* CFG80211_CONNECT_DONE */
+
+#if defined(CFG80211_CONNECT_DONE) || \
+	(LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))
 
 /**
  * hdd_connect_done() - Wrapper API to call cfg80211_connect_done
@@ -13432,9 +13468,8 @@ static void hdd_connect_done(struct net_device *dev, const u8 *bssid,
                      roam_fils_params->fils_pmkid,
                      roam_info->fils_seq_num);
     }
-    hddLog(LOG1, "FILS indicate connect status %d seq no %d",
-          fils_params.status,
-          fils_params.fils_erp_next_seq_num);
+    hddLog(LOG1, "FILS indicate connect status %d",
+          fils_params.status);
 
     cfg80211_connect_done(dev, &fils_params, gfp);
 
