@@ -504,7 +504,7 @@ VOS_STATUS vos_spin_lock_destroy(vos_spin_lock_t *pLock)
 VOS_STATUS vos_wake_lock_init(vos_wake_lock_t *pLock, const char *name)
 {
 	if (!pLock->is_initialized) {
-		vos_pm_wake_lock_init(&pLock->lock, name);
+		vos_pm_wake_lock_init(pLock, name);
 		pLock->is_initialized = true;
 
 		return VOS_STATUS_SUCCESS;
@@ -549,7 +549,7 @@ VOS_STATUS vos_wake_lock_acquire(vos_wake_lock_t *pLock,
 		vos_log_wlock_diag(reason, vos_wake_lock_name(pLock),
 				WIFI_POWER_EVENT_DEFAULT_WAKELOCK_TIMEOUT,
 				WIFI_POWER_EVENT_WAKELOCK_TAKEN);
-		vos_pm_wake_lock(&pLock->lock);
+		vos_pm_wake_lock(pLock);
 		return VOS_STATUS_SUCCESS;
         } else {
 		VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_ERROR,
@@ -583,7 +583,7 @@ VOS_STATUS vos_wake_lock_timeout_acquire(vos_wake_lock_t *pLock, v_U32_t msec,
 				vos_wake_lock_name(pLock), msec,
 				WIFI_POWER_EVENT_WAKELOCK_TAKEN);
 		}
-		vos_pm_wake_lock_timeout(&pLock->lock, msec);
+		vos_pm_wake_lock_timeout(pLock, msec);
 		return VOS_STATUS_SUCCESS;
         } else {
 			VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_ERROR,
@@ -607,7 +607,7 @@ VOS_STATUS vos_wake_lock_release(vos_wake_lock_t *pLock, uint32_t reason)
 		vos_log_wlock_diag(reason, vos_wake_lock_name(pLock),
 			WIFI_POWER_EVENT_DEFAULT_WAKELOCK_TIMEOUT,
 			WIFI_POWER_EVENT_WAKELOCK_RELEASED);
-		vos_pm_wake_lock_release(&pLock->lock);
+		vos_pm_wake_lock_release(pLock);
 		return VOS_STATUS_SUCCESS;
 	} else {
 		VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_ERROR,
@@ -628,7 +628,7 @@ VOS_STATUS vos_wake_lock_release(vos_wake_lock_t *pLock, uint32_t reason)
 VOS_STATUS vos_wake_lock_destroy(vos_wake_lock_t *pLock)
 {
 	if (pLock->is_initialized) {
-		vos_pm_wake_lock_destroy(&pLock->lock);
+		vos_pm_wake_lock_destroy(pLock);
 		pLock->is_initialized = false;
 		return VOS_STATUS_SUCCESS;
 	}
