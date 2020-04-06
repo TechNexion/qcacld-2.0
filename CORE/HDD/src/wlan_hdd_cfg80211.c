@@ -23000,14 +23000,24 @@ int __wlan_hdd_cfg80211_scan( struct wiphy *wiphy,
 
     if (request->n_channels)
     {
-       char chList [(request->n_channels*5)+1];
+       uint32_t buff_len;
+       char *chl;
        int len;
+
+       buff_len = request->n_channels * 5 + 1;
+       chl = vos_mem_malloc(buff_len);
+       if (!chl) {
+          status = -ENOMEM;
+          goto free_mem;
+       }
        channelList = vos_mem_malloc(request->n_channels);
        if (NULL == channelList)
        {
           hddLog(VOS_TRACE_LEVEL_ERROR,
                  "channelList memory alloc failed channelList");
           status = -ENOMEM;
+          vos_mem_free(chl);
+          chl = NULL;
           goto free_mem;
        }
        for (i = 0, len = 0; i < request->n_channels ; i++ )
@@ -23015,13 +23025,15 @@ int __wlan_hdd_cfg80211_scan( struct wiphy *wiphy,
           if (!vos_is_dsrc_channel(vos_chan_to_freq(
                    request->channels[i]->hw_value))) {
               channelList[num_chan] = request->channels[i]->hw_value;
-              len += snprintf(chList+len, 5, "%d ", channelList[i]);
+              len += snprintf(chl+len, 5, "%d ", channelList[i]);
               num_chan++;
           }
        }
 
        hddLog(LOG1, "No of Scan Channels: %d", num_chan);
-       hddLog(VOS_TRACE_LEVEL_INFO, "Channel-List: %s", chList);
+       hddLog(VOS_TRACE_LEVEL_INFO, "Channel-List: %s", chl);
+       vos_mem_free(chl);
+       chl = NULL;
     }
 
     if (!num_chan) {
@@ -29008,8 +29020,18 @@ static int __wlan_hdd_cfg80211_sched_scan_start(struct wiphy *wiphy,
     num_ch = 0;
     if (request->n_channels)
     {
-        char chList [(request->n_channels*5)+1];
+        uint32_t buff_len;
+        char *chl;
         int len;
+
+        buff_len = request->n_channels * 5 + 1;
+        chl = vos_mem_malloc(buff_len);
+        if (!chl) {
+            VOS_TRACE(VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_INFO,
+                 "channel list alloc error");
+            ret = -ENOMEM;
+            goto error;
+        }
         for (i = 0, len = 0; i < request->n_channels; i++)
         {
             for (indx = 0; indx < num_channels_allowed; indx++)
@@ -29037,7 +29059,7 @@ static int __wlan_hdd_cfg80211_sched_scan_start(struct wiphy *wiphy,
                     if (!vos_is_dsrc_channel(vos_chan_to_freq(
                         request->channels[i]->hw_value))) {
                        valid_ch[num_ch++] = request->channels[i]->hw_value;
-                       len += snprintf(chList+len, 5, "%d ",
+                       len += snprintf(chl+len, 5, "%d ",
                                        request->channels[i]->hw_value);
                     }
                     break ;
@@ -29050,10 +29072,14 @@ static int __wlan_hdd_cfg80211_sched_scan_start(struct wiphy *wiphy,
                  "%s : Channel list empty due to filtering of DSRC,DFS channels",
                  __func__);
              ret = -EINVAL;
+             vos_mem_free(chl);
+             chl = NULL;
              goto error;
          }
 
-         hddLog(VOS_TRACE_LEVEL_INFO,"Channel-List: %s ", chList);
+         hddLog(VOS_TRACE_LEVEL_INFO,"Channel-List: %s ", chl);
+         vos_mem_free(chl);
+         chl = NULL;
     }
 
     /* Filling per profile  params */
