@@ -61,6 +61,27 @@ int alloc_tfm(uint8_t *type)
     return 0;
 }
 
+/**
+ * set_desc_flags() - set flags variable in the shash_desc struct
+ * @desc: pointer to shash_desc struct
+ * @flags: flags to set
+ *
+ * Set the flags variable in the shash_desc struct by getting the flag
+ * from the crypto_hash struct. The flag is not actually used, prompting
+ * its removal from kernel code in versions 5.2 and above. Thus, for
+ * versions 5.2 and above, do not set the flag variable of shash_desc.
+ */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 2, 0))
+static void set_desc_flags(struct shash_desc *desc, uint32_t flags)
+{
+	desc->flags = flags;
+}
+#else
+static void set_desc_flags(struct shash_desc *desc, uint32_t flags)
+{
+}
+#endif
+
 int qdf_get_hash(uint8_t *type,
         uint8_t element_cnt, uint8_t *addr[], uint32_t *addr_len,
         int8_t *hash)
@@ -68,11 +89,10 @@ int qdf_get_hash(uint8_t *type,
     int ret = 0,i;
     struct {
         struct shash_desc shash;
-        char ctx[crypto_shash_descsize(tfm)];
     } desc;
 
     desc.shash.tfm = tfm;
-    desc.shash.flags = 0;
+    set_desc_flags(&desc.shash, 0);
     ret = crypto_shash_init(&desc.shash);
     if (ret)
         goto fail;
@@ -101,11 +121,10 @@ int qdf_get_hmac_hash(uint8_t *type, uint8_t *key,
     int ret,i;
     struct {
         struct shash_desc shash;
-        char ctx[crypto_shash_descsize(tfm)];
     } desc;
 
     desc.shash.tfm = tfm;
-    desc.shash.flags = 0;
+    set_desc_flags(&desc.shash, 0);
     ret = crypto_shash_setkey(desc.shash.tfm, key, keylen);
     if (ret)
         goto fail;
@@ -175,7 +194,7 @@ int qdf_get_keyed_hash(const char *alg, const uint8_t *key,
     do {
         SHASH_DESC_ON_STACK(desc, tfm);
         desc->tfm = tfm;
-        desc->flags = crypto_shash_get_flags(tfm);
+        set_desc_flags(desc, crypto_shash_get_flags(tfm));
 
         ret = crypto_shash_init(desc);
         if (ret) {
