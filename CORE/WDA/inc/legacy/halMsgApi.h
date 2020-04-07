@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -1568,7 +1568,8 @@ struct hal_hpcs_pulse_params
 #define MIN_GROUP_ID        1
 #define MAX_GROUP_NUM       5
 #define MAX_GROUP_ID        (MIN_GROUP_ID + MAX_GROUP_NUM)
-#define MAX_CLIENT_NUM      10
+/* Max client number per group */
+#define MAX_CLIENT_NUM      5
 #define MAX_NUM_RATE_SET    4
 #define MAX_RETRY_LIMIT     MAX_NUM_RATE_SET-1
 #define MAX_PERIOD_LIMIT    60000
