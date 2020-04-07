@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -2626,7 +2626,12 @@ out:
  * Get kernel boot time.
  * @return Time in microseconds
  */
-
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
+uint64_t vos_get_monotonic_boottime(void)
+{
+	return (uint64_t)ktime_to_us(ktime_get_boottime());
+}
+#else
 v_U64_t vos_get_monotonic_boottime(void)
 {
 #ifdef CONFIG_CNSS
@@ -2638,6 +2643,7 @@ v_U64_t vos_get_monotonic_boottime(void)
    return ((v_U64_t)adf_os_ticks_to_msecs(adf_os_ticks()) * 1000);
 #endif
 }
+#endif
 
 #ifdef FEATURE_WLAN_D0WOW
 v_VOID_t vos_pm_control(v_BOOL_t vote)

@@ -32513,7 +32513,6 @@ wlan_hdd_cfg80211_extscan_full_scan_result_event(void *ctx,
 {
 	hdd_context_t *pHddCtx  = (hdd_context_t *)ctx;
 	struct sk_buff *skb;
-	struct timespec ts;
 	int flags = vos_get_gfp_flags();
 	struct hdd_ext_scan_context *context;
 
@@ -32549,8 +32548,7 @@ wlan_hdd_cfg80211_extscan_full_scan_result_event(void *ctx,
 	pData->ap.channel = vos_chan_to_freq(pData->ap.channel);
 	/* Android does not want the time stamp from the frame.
 	   Instead it wants a monotonic increasing value since boot */
-	vos_get_monotonic_boottime_ts(&ts);
-	pData->ap.ts = ((u64)ts.tv_sec * 1000000) + (ts.tv_nsec / 1000);
+	pData->ap.ts = vos_get_monotonic_boottime();
 	hddLog(LOG1, "AP Info: Timestamp %llu Ssid: %s "
 				"Bssid (" MAC_ADDRESS_STR ") "
 				"Channel %u "

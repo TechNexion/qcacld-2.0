@@ -157,11 +157,6 @@ static inline int vos_wlan_pm_control(bool vote)
 static inline void vos_lock_pm_sem(void) { return; }
 static inline void vos_release_pm_sem(void) { return; }
 
-static inline void vos_get_monotonic_bootime_ts(struct timespec *ts)
-{
-	get_monotonic_boottime(ts);
-}
-
 static inline void vos_get_boottime_ts(struct timespec *ts)
 {
 	ktime_get_ts(ts);
@@ -235,10 +230,12 @@ static inline int vos_wlan_get_dfs_nol(void *info, u16 info_len)
 	return -EINVAL;
 }
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 static inline void vos_get_monotonic_boottime_ts(struct timespec *ts)
 {
 	get_monotonic_boottime(ts);
 }
+#endif
 
 static inline void vos_schedule_recovery_work(struct device *dev) { return; }
 
