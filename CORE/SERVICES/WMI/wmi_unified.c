@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -833,6 +833,8 @@ static u_int8_t* get_wmi_cmd_string(WMI_CMD_ID wmi_command)
 		CASE_RETURN_STRING(WMI_AUDIO_AGGR_SET_GROUP_AUTO_RATE_CMDID);
 		CASE_RETURN_STRING(WMI_AUDIO_AGGR_SET_GROUP_PROBE_CMDID);
 		CASE_RETURN_STRING(WMI_AUDIO_AGGR_UPDATE_STA_GROUP_INFO_CMDID);
+		CASE_RETURN_STRING(WMI_AUDIO_AGGR_GET_STATISTICS_CMDID);
+		CASE_RETURN_STRING(WMI_AUDIO_AGGR_RESET_STATISTICS_CMDID);
 	}
 	return "Invalid WMI cmd";
 }

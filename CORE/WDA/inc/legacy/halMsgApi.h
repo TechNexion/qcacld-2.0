@@ -1566,10 +1566,7 @@ struct hal_hpcs_pulse_params
 
 #ifdef AUDIO_MULTICAST_AGGR_SUPPORT
 #define MIN_GROUP_ID        1
-#define MAX_GROUP_NUM       5
 #define MAX_GROUP_ID        (MIN_GROUP_ID + MAX_GROUP_NUM)
-/* Max client number per group */
-#define MAX_CLIENT_NUM      5
 #define MAX_NUM_RATE_SET    4
 #define MAX_RETRY_LIMIT     MAX_NUM_RATE_SET-1
 #define MAX_PERIOD_LIMIT    60000
@@ -1585,12 +1582,6 @@ struct audio_multicast_rate
 {
     uint32_t mcs;
     uint32_t bandwidth;
-};
-
-/** 2 word representation of MAC addr */
-struct mac_addr_s {
-    uint32_t mac_addr31to0;
-    uint32_t mac_addr47to32;
 };
 
 struct audio_multicast_add_group

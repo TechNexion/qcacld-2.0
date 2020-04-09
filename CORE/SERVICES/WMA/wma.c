@@ -18598,6 +18598,109 @@ int wma_cli_au_get_rx_group_info(void *wmapvosContext, int vdev_id,
 
 	return length;
 }
+
+/**
+ * wma_multicast_aggr_get_txrx_stat() - request audio aggregation txrx stats from fw
+ * @wma_handle: pointer to wma handle
+ * @vdev: pointer to vdev
+ *
+ * This is called to send Multicast group txrx stats request to fw via WMI cmd
+ *
+ * Return: VOS_STATUS Success/Failure
+ */
+static VOS_STATUS
+wma_multicast_aggr_get_txrx_stat(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev)
+{
+	wmi_audio_aggr_get_statistics_cmd_fixed_param *cmd;
+	int status = 0;
+	wmi_buf_t buf;
+	u_int8_t *buf_ptr;
+	int32_t len = sizeof(wmi_audio_aggr_get_statistics_cmd_fixed_param);
+
+	if (!wma_handle || !wma_handle->wmi_handle) {
+		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
+		return VOS_STATUS_E_INVAL;
+	}
+
+	buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
+	if (!buf) {
+		WMA_LOGP(FL("wmi_buf_alloc failed"));
+		return -ENOMEM;
+	}
+
+	buf_ptr = (u_int8_t *) wmi_buf_data(buf);
+	cmd = (wmi_audio_aggr_get_statistics_cmd_fixed_param *) buf_ptr;
+	WMITLV_SET_HDR(&cmd->tlv_header,
+			WMITLV_TAG_STRUC_wmi_audio_aggr_get_statistics,
+			WMITLV_GET_STRUCT_TLVLEN(
+				wmi_audio_aggr_get_statistics_cmd_fixed_param));
+
+	cmd->vdev_id = vdev->vdev_id;
+	cmd->request_id = 0;
+
+	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
+					WMI_AUDIO_AGGR_GET_STATISTICS_CMDID);
+
+	if (status != EOK) {
+		WMA_LOGE("%s: wmi_unified_cmd_send WMI_AUDIO_AGGR_GET_STATISTICS_CMDID"
+			" returned Error %d", __func__, status);
+		wmi_buf_free(buf);
+		return VOS_STATUS_E_FAILURE;
+	}
+
+	return VOS_STATUS_SUCCESS;
+}
+
+/**
+ * wma_multicast_aggr_reset_txrx_stat() - reset audio aggregation txrx stats
+ * @wma_handle: pointer to wma handle
+ * @vdev: pointer to vdev
+ *
+ * This is called to send reset audio aggregation request to fw via WMI cmd
+ *
+ * Return: VOS_STATUS Success/Failure
+ */
+static VOS_STATUS
+wma_multicast_aggr_reset_txrx_stat(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev)
+{
+	wmi_audio_aggr_reset_statistics_cmd_fixed_param *cmd;
+	int status = 0;
+	wmi_buf_t buf;
+	u_int8_t *buf_ptr;
+	int32_t len = sizeof(wmi_audio_aggr_reset_statistics_cmd_fixed_param);
+
+	if (!wma_handle || !wma_handle->wmi_handle) {
+		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
+		return VOS_STATUS_E_INVAL;
+	}
+
+	buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
+	if (!buf) {
+		WMA_LOGP(FL("wmi_buf_alloc failed"));
+		return -ENOMEM;
+	}
+
+	buf_ptr = (u_int8_t *) wmi_buf_data(buf);
+	cmd = (wmi_audio_aggr_reset_statistics_cmd_fixed_param *) buf_ptr;
+	WMITLV_SET_HDR(&cmd->tlv_header,
+			WMITLV_TAG_STRUC_wmi_audio_aggr_reset_statistics,
+			WMITLV_GET_STRUCT_TLVLEN(
+				wmi_audio_aggr_reset_statistics_cmd_fixed_param));
+
+	cmd->vdev_id = vdev->vdev_id;
+
+	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
+					WMI_AUDIO_AGGR_RESET_STATISTICS_CMDID);
+
+	if (status != EOK) {
+		WMA_LOGE("%s: wmi_unified_cmd_send WMI_AUDIO_AGGR_RESET_STATISTICS_CMDID"
+			" returned Error %d", __func__, status);
+		wmi_buf_free(buf);
+		return VOS_STATUS_E_FAILURE;
+	}
+
+	return VOS_STATUS_SUCCESS;
+}
 #endif
 
 static void wma_process_cli_set_cmd(tp_wma_handle wma,
@@ -18749,6 +18852,12 @@ static void wma_process_cli_set_cmd(tp_wma_handle wma,
 		case GEN_PARAM_MULTICAST_SET_PROBE:
 			wma_multicast_set_probe(wma, vdev,
 				privcmd->param_value, privcmd->param_sec_value);
+			break;
+		case GEN_PARAM_MULTICAST_GET_TXRX_STAT:
+			wma_multicast_aggr_get_txrx_stat(wma, vdev);
+			break;
+		case GEN_PARAM_MULTICAST_RESET_TXRX_STAT:
+			wma_multicast_aggr_reset_txrx_stat(wma, vdev);
 			break;
 #endif
 		default:
@@ -24910,6 +25019,139 @@ static int wma_flush_complete_evt_handler(void *handle,
 	}
 	return 0;
 }
+
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+/**
+ * wma_audio_aggr_report_stats_evt_handler() - handle audio aggregation txrx stats event
+ * @handle: WMA handle
+ * @event:  Event received from FW
+ * @len:    Length of the event
+ *
+ */
+static int wma_audio_aggr_report_stats_evt_handler(void *handle,
+			u_int8_t *event,
+			u_int32_t len)
+{
+	uint8_t *buf_ptr;
+	uint32_t evt_len, buf_len, i, num_groups = 0, num_peers = 0, ret = 0;
+
+	WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID_param_tlvs *param_buf;
+	wmi_audio_aggr_statistics_event_fixed_param *wmi_event;
+
+	wmi_audio_aggr_group_stats* group_ptr;
+	wmi_audio_aggr_peer_stats* peer_ptr;
+
+	struct sir_au_get_txrx_stat_resp *au_txrx_stat;
+	struct sir_au_group_stat *au_group_stat;
+	struct sir_au_peer_stat *au_peer_stat;
+	vos_msg_t sme_msg = {0};
+
+	WMA_LOGI("Received WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID");
+
+	param_buf = (WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID_param_tlvs *) event;
+	if (!param_buf) {
+		WMA_LOGE("Invalid event buffer");
+		return -EINVAL;
+	}
+
+	au_txrx_stat = vos_mem_malloc(sizeof(struct sir_au_get_txrx_stat_resp));
+	if (!au_txrx_stat) {
+		WMA_LOGE("Unable to alloc memory for au_txrx_stat");
+		return VOS_STATUS_E_NOMEM;
+	}
+	vos_mem_zero(au_txrx_stat , sizeof(struct sir_au_get_txrx_stat_resp));
+
+	wmi_event = param_buf->fixed_param;
+	au_txrx_stat->vdev_id = wmi_event->vdev_id;
+	buf_len = wmi_event->tlv_header & 0xffff;
+	evt_len = len;
+
+	/* event: wmi_audio_aggr_statistics_event
+	*	+ WMI_TLV_HDR + wmi_audio_aggr_group_stats[N]
+	*	+ WMI_TLV_HDR + wmi_audio_aggr_peer_stats[M]
+	*/
+	if (evt_len < WMI_TLV_HDR_SIZE + buf_len)
+		goto fail_len;
+
+	evt_len -= (buf_len + WMI_TLV_HDR_SIZE);
+	buf_ptr = (uint8_t *)wmi_event + sizeof(wmi_audio_aggr_statistics_event_fixed_param);
+
+	/* Handle group stats TLV */
+	if( evt_len > WMI_TLV_HDR_SIZE ){
+		buf_len = (*(uint32_t *)buf_ptr) & 0xffff;
+		num_groups = buf_len / sizeof(wmi_audio_aggr_group_stats);
+		evt_len -= WMI_TLV_HDR_SIZE;
+
+		if ((evt_len < buf_len))
+			goto fail_len;
+
+		au_txrx_stat->num_groups = num_groups;
+		evt_len -= buf_len;
+
+		buf_ptr += WMI_TLV_HDR_SIZE;
+		group_ptr = (wmi_audio_aggr_group_stats *)buf_ptr;
+		for (i = 0; i < num_groups ; i++) {
+			au_group_stat = &au_txrx_stat->au_group_stat[i];
+			au_group_stat->group_addr.mac_addr31to0 = group_ptr->group_addr.mac_addr31to0;
+			au_group_stat->group_addr.mac_addr47to32 = group_ptr->group_addr.mac_addr47to32;
+			au_group_stat->group_id = group_ptr->group_id;
+			au_group_stat->mcast_tx = group_ptr->mcast_tx;
+			au_group_stat->mcast_tx_ok = group_ptr->mcast_tx_ok;
+			au_group_stat->mcast_tx_ok_retry = group_ptr->mcast_tx_ok_retry;
+			au_group_stat->mcast_tx_tbd_lost = group_ptr->mcast_tx_tbd_lost;
+			au_group_stat->mcast_tx_tbd_lost_retry = group_ptr->mcast_tx_tbd_lost_retry;
+			group_ptr++ ;
+		}
+		buf_ptr = (uint8_t *)group_ptr;
+	}
+
+	/* Handle peer stats TLV */
+	if( evt_len > WMI_TLV_HDR_SIZE ){
+		buf_len = (*(uint32_t *)buf_ptr) & 0xffff;
+		num_peers = buf_len / sizeof(wmi_audio_aggr_peer_stats);
+		evt_len -= WMI_TLV_HDR_SIZE;
+
+		if ((evt_len != buf_len) || ((MAX_GROUP_NUM * MAX_CLIENT_NUM) < num_peers))
+			goto fail_len;
+
+		au_txrx_stat->num_peers = num_peers;
+
+		buf_ptr += WMI_TLV_HDR_SIZE;
+		peer_ptr = (wmi_audio_aggr_peer_stats *)buf_ptr;
+
+		for (i = 0; i < num_peers ; i++) {
+			au_peer_stat = &au_txrx_stat->au_peer_stat[i];
+			au_peer_stat->peer_addr.mac_addr31to0 = peer_ptr->peer_addr.mac_addr31to0;
+			au_peer_stat->peer_addr.mac_addr47to32 = peer_ptr->peer_addr.mac_addr47to32;
+			au_peer_stat->ucast_rx = peer_ptr->ucast_rx;
+			au_peer_stat->ucast_tx = peer_ptr->ucast_tx;
+			au_peer_stat->ucast_tx_retry = peer_ptr->ucast_tx_retry;
+			au_peer_stat->ucast_tx_ok = peer_ptr->ucast_tx_ok;
+			au_peer_stat->ucast_tx_lost = peer_ptr->ucast_tx_lost;
+			au_peer_stat->null_frame_tx = peer_ptr->null_frame_tx;
+			au_peer_stat->null_frame_tx_lost = peer_ptr->null_frame_tx_lost;
+			peer_ptr++ ;
+		}
+	}
+
+	sme_msg.type = eWNI_SME_AU_TXRX_STAT_IND;
+	sme_msg.bodyptr = au_txrx_stat;
+	sme_msg.bodyval = 0;
+
+	ret = vos_mq_post_message(VOS_MODULE_ID_SME, &sme_msg);
+	if (!VOS_IS_STATUS_SUCCESS(ret) ) {
+		WMA_LOGE("%s: Fail to post eWNI_SME_AU_TXRX_STAT_IND msg", __func__);
+		vos_mem_free(au_txrx_stat);
+	}
+
+	return ret;
+
+fail_len:
+	WMA_LOGE("Invalid AU_TXRX_STAT event len. len = %d, buf_len = %d", len , buf_len);
+	vos_mem_free(au_txrx_stat);
+	return -EINVAL;
+}
+#endif
 
 #ifdef FEATURE_WLAN_EXTSCAN
 /**
@@ -39950,6 +40192,17 @@ v_VOID_t wma_rx_service_ready_event(WMA_HANDLE handle, void *cmd_param_info)
 		WMA_LOGE("Failed to register log supported event cb");
 		return;
 	}
+
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+	status = wmi_unified_register_event_handler(wma_handle->wmi_handle,
+			WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID,
+			wma_audio_aggr_report_stats_evt_handler);
+
+	if (status != VOS_STATUS_SUCCESS) {
+		WMA_LOGE("Failed to register WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID cb");
+		return;
+	}
+#endif
 
 	ol_tx_mark_first_wakeup_packet(
 		WMI_SERVICE_IS_ENABLED(wma_handle->wmi_service_bitmap,

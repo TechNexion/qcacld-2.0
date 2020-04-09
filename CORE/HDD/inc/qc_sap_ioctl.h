@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -164,6 +164,8 @@ typedef struct
 #define QCSAP_GET_STATS                         1
 #define QCSAP_GET_ALL_GROUP_INFO                2
 #define QCSAP_GET_PS_TDCC                       3
+#define QCSAP_AUDIO_AGGR_GET_TXRX_STAT          4
+#define QCSAP_AUDIO_AGGR_RESET_TXRX_STAT        5
 
 #define QCSAP_IOCTL_CLR_STATS                   (SIOCIWFIRSTPRIV+14)
 #define QCSAP_IOCTL_PRIV_SET_THREE_INT_GET_NONE (SIOCIWFIRSTPRIV+15)
@@ -296,7 +298,6 @@ enum {
     QCSAP_GET_DYNAMIC_BW,
     QCSAP_SET_CANDIDATE_CH,
     QCSAP_MULTICAST_DEL_GROUP,
-    QCSAP_GET_MULTICAST_GROUP_INFO,
 };
 
 int iw_get_channel_list(struct net_device *dev,

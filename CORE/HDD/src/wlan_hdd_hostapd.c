@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -4016,6 +4016,7 @@ wlan_hdd_multicast_del_group(hdd_adapter_t * adapter, int group_id)
 		group_id, GEN_CMD);
 
 	if (!ret) {
+		hddLog(LOGW, FL("Delete group fail, id %d"), group_id);
 	}
 	return ret;
 }
@@ -4066,6 +4067,181 @@ wlan_hdd_get_all_group_info(hdd_adapter_t * pAdapter,
 	wrqu->data.length ++;
 	return 0;
  }
+
+struct au_txrx_stat_priv {
+	eHalStatus status;
+	int buf_len;
+	char buf[WE_MAX_STR_LEN];
+};
+
+void hdd_au_txrx_stat_ind_cb(struct sir_au_get_txrx_stat_resp *au_txrx_stat, void *context)
+{
+	struct hdd_request *request;
+	struct au_txrx_stat_priv *priv;
+	struct sir_au_group_stat *au_group_stat;
+	struct sir_au_peer_stat *au_peer_stat;
+	char *buf;
+	int i = 0, length = 0;
+
+	request = hdd_request_get(context);
+	if (!request) {
+		hddLog(VOS_TRACE_LEVEL_ERROR,
+		       "Obsolete request %pK", context);
+		return;
+	}
+	priv = hdd_request_priv(request);
+
+	if (!au_txrx_stat) {
+		hddLog(VOS_TRACE_LEVEL_ERROR,
+		       "%s: Bad param,  au_txrx_stat [%pK] context [%pK]",
+		       __func__, au_txrx_stat, context);
+		priv->status = eHAL_STATUS_INVALID_PARAMETER;
+		hdd_request_complete(request);
+		hdd_request_put(request);
+
+		return;
+	}
+
+	buf = priv->buf;
+	length += scnprintf(buf+length, WE_MAX_STR_LEN - length,
+		"\nGroups number:%d\n", au_txrx_stat->num_groups);
+
+	for (i = 0 ; i < au_txrx_stat->num_groups ; i++) {
+		au_group_stat = &au_txrx_stat->au_group_stat[i];
+		length += scnprintf(buf+length, WE_MAX_STR_LEN - length,
+			"[group id:%d]\n"
+			"mac addr: [0x%x , 0x%x]\n"
+			"mcast_tx: %d\n"
+			"mcast_tx_ok: %d\n"
+			"mcast_tx_ok_retry: %d\n"
+			"mcast_tx_tbd_lost: %d\n"
+			"mcast_tx_tbd_lost_retry: %d\n",
+			au_group_stat->group_id,
+			au_group_stat->group_addr.mac_addr31to0,
+			au_group_stat->group_addr.mac_addr47to32,
+			au_group_stat->mcast_tx,
+			au_group_stat->mcast_tx_ok,
+			au_group_stat->mcast_tx_ok_retry,
+			au_group_stat->mcast_tx_tbd_lost,
+			au_group_stat->mcast_tx_tbd_lost_retry);
+	}
+
+	length += scnprintf(buf+length, WE_MAX_STR_LEN - length,
+		"\nPeers number:%d\n", au_txrx_stat->num_peers);
+	for (i = 0 ; i < au_txrx_stat->num_peers ; i++) {
+		au_peer_stat = &au_txrx_stat->au_peer_stat[i];
+		length += scnprintf(buf+length, WE_MAX_STR_LEN - length,
+			"[peer id:%d]\n"
+			"mac addr: [0x%x , 0x%x]\n"
+			"ucast_rx: %d\n"
+			"ucast_tx: %d\n"
+			"ucast_tx_ok: %d\n"
+			"ucast_tx_retry: %d\n"
+			"ucast_tx_lost: %d\n"
+			"null_frame_tx: %d\n"
+			"null_frame_tx_lost: %d\n",
+			i,
+			au_peer_stat->peer_addr.mac_addr31to0,
+			au_peer_stat->peer_addr.mac_addr47to32,
+			au_peer_stat->ucast_rx,
+			au_peer_stat->ucast_tx,
+			au_peer_stat->ucast_tx_ok,
+			au_peer_stat->ucast_tx_retry,
+			au_peer_stat->ucast_tx_lost,
+			au_peer_stat->null_frame_tx,
+			au_peer_stat->null_frame_tx_lost);
+	}
+	priv->status = eHAL_STATUS_SUCCESS;
+	priv->buf_len = length;
+	hdd_request_complete(request);
+	hdd_request_put(request);
+
+	return;
+}
+
+static int
+wlan_hdd_au_get_txrx_stat(hdd_adapter_t * pAdapter,
+		union iwreq_data *wrqu, char *extra)
+{
+	int length = 0, ret = 0;
+	void *cookie;
+	struct hdd_request *request = NULL;
+	struct au_txrx_stat_priv *priv;
+	static const struct hdd_request_params params = {
+		.priv_size = sizeof(*priv),
+		.timeout_ms = WLAN_WAIT_TIME_STATS,
+	};
+
+	if (NULL == pAdapter) {
+		hddLog(VOS_TRACE_LEVEL_ERROR, "%s: pAdapter is NULL", __func__);
+		return VOS_STATUS_E_FAULT;
+	}
+
+	request = hdd_request_alloc(&params);
+	if (!request) {
+		hddLog(VOS_TRACE_LEVEL_ERROR,
+			"%s: Request allocation failure", __func__);
+		return VOS_STATUS_E_NOMEM;
+	}
+	cookie = hdd_request_cookie(request);
+	priv = hdd_request_priv(request);
+	priv->status = eHAL_STATUS_FAILURE;
+
+	ret = sme_au_get_txrx_stat(WLAN_HDD_GET_HAL_CTX(pAdapter),
+				    pAdapter->sessionId,
+				    cookie,
+				    hdd_au_txrx_stat_ind_cb);
+
+	if (ret) {
+		hddLog(LOGW, FL("Get group txrx stat fail"));
+	} else {
+		/* request was sent -- wait for the response */
+		ret = hdd_request_wait_for_response(request);
+		if (ret) {
+			hddLog(VOS_TRACE_LEVEL_ERROR,
+				FL("timed out while retrieving au txrx stats"));
+			/* we'll returned a cached value below */
+		} else {
+			/* update the adapter with the fresh results */
+			priv = hdd_request_priv(request);
+			length = priv->buf_len;
+
+			if (priv->buf_len >= WE_MAX_STR_LEN)
+				length = WE_MAX_STR_LEN - 1;
+
+			if (priv->status != eHAL_STATUS_SUCCESS || (length <= 0))
+				ret = -EINVAL;
+		}
+	}
+
+	if (!ret)
+		vos_mem_copy(extra, priv->buf, length);
+	else
+		scnprintf(extra, WE_MAX_STR_LEN,
+			"\nGet group txrx stat fail, ret:%d\n", ret);
+
+        wrqu->data.length = strlen(extra)+1;
+
+	hdd_request_put(request);
+
+	return ret;
+}
+
+static int
+wlan_hdd_au_reset_txrx_stat(hdd_adapter_t * pAdapter,
+		union iwreq_data *wrqu, char *extra)
+{
+	int ret;
+
+	ret = process_wma_set_command((int)pAdapter->sessionId,
+		(int)GEN_PARAM_MULTICAST_RESET_TXRX_STAT,
+		0, GEN_CMD);
+
+	if (!ret) {
+		hddLog(LOGW, FL("Reset group txrx stat fail"));
+	}
+	return ret;
+}
 #endif
 
 int
@@ -5910,6 +6086,16 @@ static __iw_get_char_setnone(struct net_device *dev,
         case QCSAP_GET_ALL_GROUP_INFO:
         {
             return wlan_hdd_get_all_group_info(pAdapter, wrqu,
+                               extra);
+        }
+        case QCSAP_AUDIO_AGGR_GET_TXRX_STAT:
+        {
+            return wlan_hdd_au_get_txrx_stat(pAdapter, wrqu,
+                               extra);
+        }
+        case QCSAP_AUDIO_AGGR_RESET_TXRX_STAT:
+        {
+            return wlan_hdd_au_reset_txrx_stat(pAdapter, wrqu,
                                extra);
         }
 #endif
@@ -8154,6 +8340,16 @@ static const struct iw_priv_args hostapd_private_args[] = {
         IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
         IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
         "au_get_retry" },
+
+    {   QCSAP_AUDIO_AGGR_GET_TXRX_STAT,
+         0,
+        IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
+        "au_get_stat" },
+
+    {   QCSAP_AUDIO_AGGR_RESET_TXRX_STAT,
+         0,
+        IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
+        "au_reset_stat" },
 #endif
 };
 

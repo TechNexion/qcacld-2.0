@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -8775,4 +8775,55 @@ typedef struct sir_spectral_config_params {
 } sir_spectral_config_params_t;
 #endif
 
+
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+/* Max group number */
+#define MAX_GROUP_NUM       5
+/* Max client number per group */
+#define MAX_CLIENT_NUM      5
+/** 2 word representation of MAC addr */
+struct mac_addr_s {
+    uint32_t mac_addr31to0;
+    uint32_t mac_addr47to32;
+};
+
+/**
+ * struct sir_au_group_stat - audio multicast aggr group txrx stat
+ */
+struct sir_au_group_stat {
+	struct mac_addr_s group_addr;
+	uint32_t group_id;
+	uint32_t mcast_tx;
+	uint32_t mcast_tx_ok;
+	uint32_t mcast_tx_ok_retry;
+	uint32_t mcast_tx_tbd_lost;
+	uint32_t mcast_tx_tbd_lost_retry;
+};
+
+/**
+ * struct sir_au_peer_stat - associated peer txrx stat
+ */
+struct sir_au_peer_stat {
+	struct mac_addr_s peer_addr;
+	uint32_t ucast_rx;
+	uint32_t ucast_tx;
+	uint32_t ucast_tx_retry;
+	uint32_t ucast_tx_ok;
+	uint32_t ucast_tx_lost;
+	uint32_t null_frame_tx;
+	uint32_t null_frame_tx_lost;
+};
+
+/**
+ * struct sir_au_get_txrx_stat_resp - audio multicast aggr txrx stats
+ * This struct restore txrx stats from firmware event
+ */
+struct sir_au_get_txrx_stat_resp {
+	uint32_t vdev_id;
+	uint32_t num_groups;
+	struct sir_au_group_stat au_group_stat[MAX_GROUP_NUM + 1];
+	uint32_t num_peers;
+	struct sir_au_peer_stat au_peer_stat[MAX_CLIENT_NUM * MAX_GROUP_NUM];
+};
+#endif
 #endif /* __SIR_API_H */

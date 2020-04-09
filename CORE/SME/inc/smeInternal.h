@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2018,2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -274,6 +274,12 @@ typedef struct tagSmeStruct
     /*call back to indicate CSA notification received on STA interfce to SAP*/
     void (*pCSASAPIndCb) (void * hdd_context, void *indi_param);
 #endif//#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+    /* get audio multicast txrx stat callback */
+    void (*pau_txrx_stat_ind_cb) (struct sir_au_get_txrx_stat_resp *param,
+		    void *pcontext);
+    void *pau_get_txrx_stat_cb_context;
+#endif
 } tSmeStruct, *tpSmeStruct;
 
 

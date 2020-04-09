@@ -5053,4 +5053,12 @@ eHalStatus sme_spectral_scan_enable(tHalHandle hal,
 eHalStatus sme_spectral_scan_config(tHalHandle hal,
 				    sir_spectral_config_params_t *params);
 #endif
+
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+eHalStatus sme_au_get_txrx_stat(tHalHandle hal,
+			uint8_t sessionid,
+			void *context,
+			void (*callbackfn)(struct sir_au_get_txrx_stat_resp *param,
+						void *pcontext));
+#endif
 #endif //#if !defined( __SME_API_H )

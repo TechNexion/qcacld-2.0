@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -434,6 +434,10 @@ enum eWniMsgTypes
     eWNI_SME_TRIGGER_SAE,
     eWNI_SME_SEND_MGMT_FRAME_TX,
     eWNI_SME_SEND_SAE_MSG,
+
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+    eWNI_SME_AU_TXRX_STAT_IND,
+#endif
 
     eWNI_SME_MSG_TYPES_END
 };
