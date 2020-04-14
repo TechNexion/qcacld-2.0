@@ -651,4 +651,6 @@ void lim_send_chan_switch_action_frame(tpAniSirGlobal mac_ctx,
 bool lim_check_if_vendor_oui_match(tpAniSirGlobal mac_ctx,
                 uint8_t *oui, uint8_t oui_len,
                 uint8_t *ie, uint8_t ie_len);
+
+void lim_process_sme_aid_set(tpAniSirGlobal mac, sir_aid_set_t *aid_set);
 #endif /* __LIM_UTILS_H */

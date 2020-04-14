@@ -5635,6 +5635,11 @@ FG_BTC_BT_INTERVAL_PAGE_P2P_STA_DEFAULT
 #define CFG_HOST_LOG_CUSTOM_NETLINK_PROTO_MIN     (0)
 #define CFG_HOST_LOG_CUSTOM_NETLINK_PROTO_MAX     (32)
 #endif
+
+#define CFG_AID_BY_USER_NAME    "aid_by_user"
+#define CFG_AID_BY_USER_DEFAULT (0)
+#define CFG_AID_BY_USER_MIN     (0)
+#define CFG_AID_BY_USER_MAX     (1)
 /*---------------------------------------------------------------------------
   Type declarations
   -------------------------------------------------------------------------*/
@@ -6575,6 +6580,7 @@ struct hdd_config {
 
    uint32_t  mask_tx_legacy_rate;
    uint32_t  mask_tx_ht_rate;
+   bool aid_by_user;
 };
 
 typedef struct hdd_config hdd_config_t;

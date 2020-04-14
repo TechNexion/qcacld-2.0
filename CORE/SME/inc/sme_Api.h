@@ -5061,4 +5061,9 @@ eHalStatus sme_au_get_txrx_stat(tHalHandle hal,
 			void (*callbackfn)(struct sir_au_get_txrx_stat_resp *param,
 						void *pcontext));
 #endif
+
+void sme_enable_aid_by_user(tHalHandle hal, bool aid_by_user);
+eHalStatus sme_register_aid_req_callback(tHalHandle hal_hal,
+			void (*aid_req_cb)(void *, sir_aid_req_t *));
+eHalStatus sme_aid_set(tHalHandle hal, sir_aid_set_t *aid_set);
 #endif //#if !defined( __SME_API_H )

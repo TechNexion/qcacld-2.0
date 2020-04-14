@@ -3221,4 +3221,5 @@ wlan_cfg80211_nla_parse_nested(struct nlattr *tb[],
 #define nla_parse(...) (obsolete, use wlan_cfg80211_nla_parse)
 #define nla_parse_nested(...) (obsolete, use wlan_cfg80211_nla_parse_nested)
 
+void wlan_hdd_cfg80211_aid_req_callback(void *ctx, sir_aid_req_t *pmsg);
 #endif

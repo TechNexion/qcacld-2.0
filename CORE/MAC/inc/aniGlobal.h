@@ -1299,6 +1299,7 @@ typedef struct sAniSirGlobal
     bool     sta_change_cc_via_beacon;
     bool max_power_cmd_pending;
     uint32_t sta_auth_retries_for_code17;
+    bool aid_by_user;
 } tAniSirGlobal;
 
 typedef enum

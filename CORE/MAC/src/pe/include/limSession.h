@@ -104,6 +104,13 @@ typedef struct
     tANI_U8                 gHTObssMode;
 }tBeaconParams, *tpBeaconParams;
 
+typedef struct aid {
+	struct mutex lock;
+	bool valid;
+	uint8_t aid;
+	struct completion timeout;
+} aid_t;
+
 typedef struct sPESession           // Added to Support BT-AMP
 {
     /* To check session table is in use or free*/
@@ -534,6 +541,8 @@ typedef struct sPESession           // Added to Support BT-AMP
     bool sae_pmk_cached;
     /* previous auth frame's sequence number */
     uint16_t prev_auth_seq_num;
+    aid_t aid;
+    bool aid_by_user;
 } tPESession, *tpPESession;
 
 /*-------------------------------------------------------------------------

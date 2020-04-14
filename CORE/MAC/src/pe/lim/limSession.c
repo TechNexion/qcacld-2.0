@@ -54,6 +54,7 @@
 #include "pmmApi.h"
 #include "schApi.h"
 #include "limSendMessages.h"
+#include "limAssocUtils.h"
 
 /*--------------------------------------------------------------------------
 
@@ -514,6 +515,11 @@ tpPESession peCreateSession(tpAniSirGlobal pMac,
             }
 
             pe_init_fils_info(&pMac->lim.gpSession[i]);
+
+            if ((eSIR_INFRA_AP_MODE == bssType) && (pMac->aid_by_user)) {
+                lim_aid_init(&pMac->lim.gpSession[i].aid);
+                pMac->lim.gpSession[i].aid_by_user = true;
+            }
 
             return(&pMac->lim.gpSession[i]);
         }

@@ -77,6 +77,7 @@
 #include "sme_nan_datapath.h"
 #include "csrApi.h"
 #include "utilsApi.h"
+#include "limUtils.h"
 
 extern tSirRetStatus uMacPostCtrlMsg(void* pSirGlobal, tSirMbMsg* pMb);
 
@@ -21438,3 +21439,34 @@ eHalStatus sme_au_get_txrx_stat(tHalHandle hal,
 	return status;
 }
 #endif
+
+void sme_enable_aid_by_user(tHalHandle hal, bool aid_by_user)
+{
+    tpAniSirGlobal mac = PMAC_STRUCT(hal);
+    mac->aid_by_user = aid_by_user;
+}
+
+eHalStatus sme_register_aid_req_callback(tHalHandle hal,
+			void (*aid_req_cb)(void *, sir_aid_req_t *))
+{
+	eHalStatus status = eHAL_STATUS_SUCCESS;
+	tpAniSirGlobal mac = PMAC_STRUCT(hal);
+
+	status = sme_AcquireGlobalLock(&mac->sme);
+	if (status == eHAL_STATUS_SUCCESS) {
+		mac->sme.aid_req_cb = aid_req_cb;
+		sme_ReleaseGlobalLock(&mac->sme);
+	}
+
+	return status;
+}
+
+eHalStatus sme_aid_set(tHalHandle hal, sir_aid_set_t *aid_set)
+{
+	eHalStatus status = eHAL_STATUS_SUCCESS;
+	tpAniSirGlobal mac = PMAC_STRUCT(hal);
+
+	lim_process_sme_aid_set(mac, aid_set);
+
+	return status;
+}

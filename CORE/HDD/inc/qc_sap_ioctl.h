@@ -298,6 +298,7 @@ enum {
     QCSAP_GET_DYNAMIC_BW,
     QCSAP_SET_CANDIDATE_CH,
     QCSAP_MULTICAST_DEL_GROUP,
+    QCSAP_SET_AID,
 };
 
 int iw_get_channel_list(struct net_device *dev,

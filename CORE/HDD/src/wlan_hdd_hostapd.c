@@ -4991,6 +4991,18 @@ static __iw_softap_setparam(struct net_device *dev,
                 break;
 #endif
 
+	case QCSAP_SET_AID:
+	{
+		sir_aid_set_t aid_set;
+
+		vos_mem_copy(aid_set.bssid,
+			     pHostapdAdapter->macAddressCurrent.bytes,
+			     VOS_MAC_ADDR_SIZE);
+		aid_set.aid = set_value;
+		sme_aid_set(hHal, &aid_set);
+		break;
+	}
+
         default:
             hddLog(LOGE, FL("Invalid setparam command %d value %d"),
                     sub_cmd, set_value);
@@ -8356,6 +8368,10 @@ static const struct iw_priv_args hostapd_private_args[] = {
         IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
         "au_reset_stat" },
 #endif
+    {   QCSAP_SET_AID,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "set_aid" },
 };
 
 static const iw_handler hostapd_private[] = {

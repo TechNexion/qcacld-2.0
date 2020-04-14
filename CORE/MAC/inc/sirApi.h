@@ -8826,4 +8826,27 @@ struct sir_au_get_txrx_stat_resp {
 	struct sir_au_peer_stat au_peer_stat[MAX_CLIENT_NUM * MAX_GROUP_NUM];
 };
 #endif
+
+/**
+ * struct sir_aid_req - aid req
+ * @bssid: pe session bssid
+ * @sa: assoc source address
+ * @type: assoc type
+ */
+typedef struct sir_aid_req {
+	uint8_t bssid[VOS_MAC_ADDR_SIZE];
+	uint8_t sa[VOS_MAC_ADDR_SIZE];
+	uint8_t type;
+} sir_aid_req_t;
+
+/**
+ * struct sir_aid_set - aid set
+ * @bssid: adapter bssid
+ * @aid: aid assigned by user
+ */
+typedef struct sir_aid_set {
+	uint8_t bssid[VOS_MAC_ADDR_SIZE];
+	uint8_t aid;
+} sir_aid_set_t;
+
 #endif /* __SIR_API_H */

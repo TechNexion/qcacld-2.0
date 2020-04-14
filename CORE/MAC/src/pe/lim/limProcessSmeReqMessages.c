@@ -6162,6 +6162,34 @@ static void lim_process_sme_set_sub20_channelwidth(
 }
 #endif
 
+void lim_process_sme_aid_set(tpAniSirGlobal mac, sir_aid_set_t *aid_set)
+{
+	tpPESession session;
+	uint8_t session_id;
+	aid_t *aid;
+
+	if (!aid_set) {
+		limLog(mac, LOGE, FL("invalid aid_set"));
+		return;
+	}
+
+	session = peFindSessionByBssid(mac, aid_set->bssid, &session_id);
+	if (!session) {
+		limLog(mac, LOGE, FL("failed to find pe session"));
+		return;
+	}
+
+	aid = &session->aid;
+	mutex_lock(&aid->lock);
+	if (aid->valid) {
+		aid->aid = aid_set->aid;
+		complete(&aid->timeout);
+	}
+	mutex_unlock(&aid->lock);
+
+	return;
+}
+
 /**
  * limProcessSmeReqMessages()
  *

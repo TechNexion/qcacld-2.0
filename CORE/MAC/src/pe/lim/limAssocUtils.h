@@ -193,4 +193,11 @@ void limSendSmeTsmIEInd( tpAniSirGlobal pMac, tpPESession psessionEntry,
                             tANI_U8 tid, tANI_U8 state, tANI_U16 measInterval);
 #endif /* FEATURE_WLAN_ESE && FEATURE_WLAN_ESE_UPLOAD */
 
+void lim_aid_init(aid_t *aid);
+
+tSirRetStatus lim_get_peer_idx_by_user(tpAniSirGlobal mac,
+				       tpPESession session,
+				       uint8_t *sa,
+				       uint8_t type,
+				       uint16_t *peer_idx);
 #endif /* __LIM_ASSOC_UTILS_H */

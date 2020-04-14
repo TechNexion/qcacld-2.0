@@ -562,14 +562,33 @@ bool lim_send_assoc_ind_to_sme(tpAniSirGlobal pMac,
 	limLog(pMac, LOGE, FL("Received %s Req  successful from "MAC_ADDRESS_STR),
 		(LIM_ASSOC == subType) ? "Assoc" : "ReAssoc", MAC_ADDR_ARRAY(pHdr->sa));
 
-	/**
-	 * AID for this association will be same as the peer Index used in DPH table.
-	 * Assign unused/least recently used peer Index from perStaDs.
-	 * NOTE: limAssignPeerIdx() assigns AID values ranging
-	 * between 1 - cfg_item(WNI_CFG_ASSOC_STA_LIMIT)
-	 */
 
-	peerIdx = limAssignPeerIdx(pMac, psessionEntry);
+	if (psessionEntry->aid_by_user) {
+		if (!lim_get_peer_idx_by_user(pMac,
+					      psessionEntry,
+					      pHdr->sa,
+					      subType,
+					      &peerIdx))
+			limLog(pMac, LOGE, FL("get aid from user %d"), peerIdx);
+		else {
+			limLog(pMac, LOGE, FL("failed to get aid from user"));
+			limRejectAssociation(pMac, pHdr->sa,
+				subType, true, authType,
+				peerIdx, false,
+				(tSirResultCodes) eSIR_MAC_UNSPEC_FAILURE_STATUS, psessionEntry);
+
+			return false;
+		}
+	} else {
+		/**
+		 * AID for this association will be same as the peer Index used in DPH table.
+		 * Assign unused/least recently used peer Index from perStaDs.
+		 * NOTE: limAssignPeerIdx() assigns AID values ranging
+		 * between 1 - cfg_item(WNI_CFG_ASSOC_STA_LIMIT)
+		 */
+
+		peerIdx = limAssignPeerIdx(pMac, psessionEntry);
+	}
 
 	if (!peerIdx) {
 		// Could not assign AID

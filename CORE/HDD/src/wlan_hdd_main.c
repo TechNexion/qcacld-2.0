@@ -18083,6 +18083,11 @@ int hdd_wlan_startup(struct device *dev, v_VOID_t *hif_sc)
 
    wlan_hdd_dcc_register_for_dcc_stats_event(pHddCtx);
 
+   hal_status = sme_register_aid_req_callback(pHddCtx->hHal,
+                                              wlan_hdd_cfg80211_aid_req_callback);
+   if (eHAL_STATUS_SUCCESS != hal_status)
+       hddLog(LOGE, FL("set aid req callback failed"));
+
    wlan_hdd_init_chan_info(pHddCtx);
 
    /*
@@ -18182,6 +18187,7 @@ int hdd_wlan_startup(struct device *dev, v_VOID_t *hif_sc)
    /* set chip power save failure detected callback */
    sme_set_chip_pwr_save_fail_cb(pHddCtx->hHal,
                                  hdd_chip_pwr_save_fail_detected_cb);
+   sme_enable_aid_by_user(pHddCtx->hHal, pHddCtx->cfg_ini->aid_by_user);
 
    wlan_comp.status = 0;
    complete(&wlan_comp.wlan_start_comp);

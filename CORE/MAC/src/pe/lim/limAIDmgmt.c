@@ -196,6 +196,7 @@ limReleasePeerIdx(tpAniSirGlobal pMac, tANI_U16 peerIdx, tpPESession pSessionEnt
 {
     pSessionEntry->gLimNumOfCurrentSTAs--;
 
+    if (!pSessionEntry->aid_by_user) {
     /* insert at tail of free list */
     if (pSessionEntry->freePeerIdxTail)
     {
@@ -207,4 +208,5 @@ limReleasePeerIdx(tpAniSirGlobal pMac, tANI_U16 peerIdx, tpPESession pSessionEnt
         pSessionEntry->freePeerIdxTail=pSessionEntry->freePeerIdxHead=(tANI_U8)peerIdx;
     }
     pSessionEntry->gpLimPeerIdxpool[(tANI_U8)peerIdx]=0;
+    }
 }

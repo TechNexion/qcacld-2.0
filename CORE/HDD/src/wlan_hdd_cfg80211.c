@@ -33398,6 +33398,38 @@ void hdd_send_update_owe_info_event(hdd_adapter_t *adapter,
 }
 #endif
 
+void wlan_hdd_cfg80211_aid_req_callback(void *ctx, sir_aid_req_t *pmsg)
+{
+	hdd_context_t *hdd_ctx = (hdd_context_t *)ctx;
+	hdd_adapter_t *adapter;
+	struct device *dev;
+	char buf_sa[64];
+	char buf_type[64];
+	char *report_list[3] = {buf_sa, buf_type, NULL};
+
+	ENTER();
+
+	if (!hdd_ctx || !pmsg)
+		return;
+
+	adapter = hdd_get_adapter_by_macaddr(hdd_ctx, pmsg->bssid);
+	if (!adapter) {
+		hddLog(LOGE, FL("failed to get adapter"));
+		return;
+	}
+
+	dev = &adapter->dev->dev;
+	scnprintf(buf_sa, sizeof(buf_sa), "assoc_sa=" MAC_ADDRESS_STR,
+		  MAC_ADDR_ARRAY(pmsg->sa));
+	scnprintf(buf_type, sizeof(buf_type), "assoc_type=%d", pmsg->type);
+	kobject_uevent_env(&dev->kobj, KOBJ_CHANGE, report_list);
+	hddLog(LOG1, FL("send uevent %s req from "MAC_ADDRESS_STR" to %s"),
+	       (0 == pmsg->type) ? "assoc" : "reassoc",
+	       MAC_ADDR_ARRAY(pmsg->sa), adapter->dev->name);
+
+	EXIT();
+}
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,5,0)) || \
     defined(CFG80211_ABORT_SCAN)
 /**

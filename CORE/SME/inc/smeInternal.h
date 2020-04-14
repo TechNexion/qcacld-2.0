@@ -280,6 +280,7 @@ typedef struct tagSmeStruct
 		    void *pcontext);
     void *pau_get_txrx_stat_cb_context;
 #endif
+    void (*aid_req_cb)(void *ctx, sir_aid_req_t *);
 } tSmeStruct, *tpSmeStruct;
 
 

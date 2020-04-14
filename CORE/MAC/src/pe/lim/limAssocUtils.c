@@ -5132,3 +5132,56 @@ void limSendSmeTsmIEInd(tpAniSirGlobal pMac, tpPESession psessionEntry,
     return;
 }
 #endif /* FEATURE_WLAN_ESE && FEATURE_WLAN_ESE_UPLOAD */
+
+void lim_aid_init(aid_t *aid)
+{
+	mutex_init(&aid->lock);
+	aid->valid = false;
+}
+
+void lim_send_aid_req_to_sme(tpAniSirGlobal mac, sir_aid_req_t *aid_req)
+{
+	mac->sme.aid_req_cb(mac->hHdd, aid_req);
+
+	return;
+}
+
+tSirRetStatus lim_get_peer_idx_by_user(tpAniSirGlobal mac,
+				       tpPESession session,
+				       uint8_t *sa,
+				       uint8_t type,
+				       uint16_t *peer_idx)
+{
+	tSirRetStatus ret = eSIR_SUCCESS;
+	aid_t *aid;
+	sir_aid_req_t aid_req;
+
+	vos_mem_copy(aid_req.bssid, session->bssId, VOS_MAC_ADDR_SIZE);
+	vos_mem_copy(aid_req.sa, sa, VOS_MAC_ADDR_SIZE);
+	aid_req.type = type;
+	lim_send_aid_req_to_sme(mac, &aid_req);
+
+	aid = &session->aid;
+	init_completion(&aid->timeout);
+	mutex_lock(&aid->lock);
+	aid->valid = true;
+	mutex_unlock(&aid->lock);
+
+	if (!wait_for_completion_timeout(&aid->timeout, msecs_to_jiffies(100))) {
+		limLog(mac, LOGE, FL("timeout to get peer idx"));
+		mutex_lock(&aid->lock);
+		aid->valid = false;
+		mutex_unlock(&aid->lock);
+		ret = eSIR_FAILURE;
+	} else {
+		mutex_lock(&aid->lock);
+		*peer_idx = aid->aid;
+		aid->valid = false;
+		mutex_unlock(&aid->lock);
+		// add current sta num
+		session->gLimNumOfCurrentSTAs++;
+		ret = eSIR_SUCCESS;
+	}
+
+	return ret;
+}
