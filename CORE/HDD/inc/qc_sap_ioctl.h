@@ -218,6 +218,7 @@ typedef struct
 #define QCSAP_AUDIO_AGGR_SET_GROUP_RETRY        4
 #define QCSAP_AUDIO_AGGR_ENABLE                 5
 #define QCSAP_AUDIO_AGGR_SET_GROUP_PROBE        6
+#define QCSAP_AUDIO_AGGR_SET_CTS                7
 
 
 

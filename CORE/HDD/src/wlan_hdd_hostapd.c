@@ -3758,6 +3758,10 @@ static int __iw_softap_set_two_ints_getnone(struct net_device *dev,
                         value[1], value[2]);
                 ret = wlan_hdd_set_multicast_probe(pAdapter, value[1], value[2]);
                 break;
+   case QCSAP_AUDIO_AGGR_SET_CTS:
+                hddLog(LOG1, "au_set_cts: %d %d", value[1], value[2]);
+                ret = wlan_hdd_au_set_cts(pAdapter, value[1], value[2]);
+                break;
 #endif
     default:
         hddLog(LOGE, "%s: Invalid IOCTL command %d", __func__, sub_cmd);
@@ -4115,12 +4119,12 @@ void hdd_au_txrx_stat_ind_cb(struct sir_au_get_txrx_stat_resp *au_txrx_stat, voi
 		au_group_stat = &au_txrx_stat->au_group_stat[i];
 		length += scnprintf(buf+length, WE_MAX_STR_LEN - length,
 			"[group id:%d]\n"
-			"mac addr: [0x%x , 0x%x]\n"
-			"mcast_tx: %d\n"
-			"mcast_tx_ok: %d\n"
-			"mcast_tx_ok_retry: %d\n"
-			"mcast_tx_tbd_lost: %d\n"
-			"mcast_tx_tbd_lost_retry: %d\n",
+			"mac addr:[0x%x,0x%x]\n"
+			"mc_tx:%d\n"
+			"mc_tx_ok:%d\n"
+			"mc_tx_ok_retry:%d\n"
+			"mc_tx_tbd_lost:%d\n"
+			"mc_tx_tbd_lost_retry:%d\n",
 			au_group_stat->group_id,
 			au_group_stat->group_addr.mac_addr31to0,
 			au_group_stat->group_addr.mac_addr47to32,
@@ -4137,14 +4141,14 @@ void hdd_au_txrx_stat_ind_cb(struct sir_au_get_txrx_stat_resp *au_txrx_stat, voi
 		au_peer_stat = &au_txrx_stat->au_peer_stat[i];
 		length += scnprintf(buf+length, WE_MAX_STR_LEN - length,
 			"[peer id:%d]\n"
-			"mac addr: [0x%x , 0x%x]\n"
-			"ucast_rx: %d\n"
-			"ucast_tx: %d\n"
-			"ucast_tx_ok: %d\n"
-			"ucast_tx_retry: %d\n"
-			"ucast_tx_lost: %d\n"
-			"null_frame_tx: %d\n"
-			"null_frame_tx_lost: %d\n",
+			"mac addr:[0x%x,0x%x]\n"
+			"uc_rx:%d\n"
+			"uc_tx:%d\n"
+			"uc_tx_ok:%d\n"
+			"uc_tx_retry:%d\n"
+			"uc_tx_lost:%d\n"
+			"null_frame_tx:%d\n"
+			"null_frame_tx_lost:%d\n",
 			i,
 			au_peer_stat->peer_addr.mac_addr31to0,
 			au_peer_stat->peer_addr.mac_addr47to32,
@@ -8367,6 +8371,10 @@ static const struct iw_priv_args hostapd_private_args[] = {
          0,
         IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
         "au_reset_stat" },
+
+    {   QCSAP_AUDIO_AGGR_SET_CTS,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2,
+        0, "au_set_cts"},
 #endif
     {   QCSAP_SET_AID,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,

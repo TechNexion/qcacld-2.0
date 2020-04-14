@@ -18715,6 +18715,62 @@ wma_multicast_aggr_reset_txrx_stat(tp_wma_handle wma_handle, ol_txrx_vdev_handle
 
 	return VOS_STATUS_SUCCESS;
 }
+
+/**
+ * wma_multicast_aggr_set_cts() - set audio aggregation cts mde
+ * @wma_handle: pointer to wma handle
+ * @vdev: pointer to vdev
+ * @mode: 0:disabled, 1:CTS-to-self per PPDU, 2:CTS-to-self pr cycle
+ * @profile: profile value
+ *
+ * This is called to set audio aggregation cts mode to fw via WMI cmd
+ *
+ * Return: VOS_STATUS Success/Failure
+ */
+static VOS_STATUS
+wma_multicast_aggr_set_cts(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
+				int mode, int profile)
+{
+	wmi_audio_aggr_set_rtscts_config_cmd_fixed_param *cmd;
+	int status = 0;
+	wmi_buf_t buf;
+	u_int8_t *buf_ptr;
+	int32_t len = sizeof(wmi_audio_aggr_set_rtscts_config_cmd_fixed_param);
+
+	if (!wma_handle || !wma_handle->wmi_handle) {
+		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
+		return VOS_STATUS_E_INVAL;
+	}
+
+	buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
+	if (!buf) {
+		WMA_LOGP(FL("wmi_buf_alloc failed"));
+		return -ENOMEM;
+	}
+
+	buf_ptr = (u_int8_t *) wmi_buf_data(buf);
+	cmd = (wmi_audio_aggr_set_rtscts_config_cmd_fixed_param *) buf_ptr;
+	WMITLV_SET_HDR(&cmd->tlv_header,
+			WMITLV_TAG_STRUC_wmi_audio_aggr_set_rtscts_config,
+			WMITLV_GET_STRUCT_TLVLEN(
+				wmi_audio_aggr_set_rtscts_config_cmd_fixed_param));
+
+	cmd->vdev_id = vdev->vdev_id;
+	cmd->user_mode = mode;
+	cmd->user_profile = profile;
+
+	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
+					WMI_AUDIO_AGGR_SET_RTSCTS_CONFIG_CMDID);
+
+	if (status != EOK) {
+		WMA_LOGE("%s: wmi_unified_cmd_send WMI_AUDIO_AGGR_SET_RTSCTS_CONFIG_CMDID"
+			" returned Error %d", __func__, status);
+		wmi_buf_free(buf);
+		return VOS_STATUS_E_FAILURE;
+	}
+
+	return VOS_STATUS_SUCCESS;
+}
 #endif
 
 static void wma_process_cli_set_cmd(tp_wma_handle wma,
@@ -18872,6 +18928,10 @@ static void wma_process_cli_set_cmd(tp_wma_handle wma,
 			break;
 		case GEN_PARAM_MULTICAST_RESET_TXRX_STAT:
 			wma_multicast_aggr_reset_txrx_stat(wma, vdev);
+			break;
+		case GEN_PARAM_MULTICAST_SET_CTS:
+			wma_multicast_aggr_set_cts(wma, vdev,
+				privcmd->param_value, privcmd->param_sec_value);
 			break;
 #endif
 		default:
@@ -25077,7 +25137,7 @@ static int wma_audio_aggr_report_stats_evt_handler(void *handle,
 
 	wmi_event = param_buf->fixed_param;
 	au_txrx_stat->vdev_id = wmi_event->vdev_id;
-	buf_len = wmi_event->tlv_header & 0xffff;
+	buf_len = WMITLV_GET_TLVLEN(wmi_event->tlv_header);
 	evt_len = len;
 
 	/* event: wmi_audio_aggr_statistics_event
@@ -25092,7 +25152,7 @@ static int wma_audio_aggr_report_stats_evt_handler(void *handle,
 
 	/* Handle group stats TLV */
 	if( evt_len > WMI_TLV_HDR_SIZE ){
-		buf_len = (*(uint32_t *)buf_ptr) & 0xffff;
+		buf_len = WMITLV_GET_TLVLEN(WMITLV_GET_HDR(buf_ptr));
 		num_groups = buf_len / sizeof(wmi_audio_aggr_group_stats);
 		evt_len -= WMI_TLV_HDR_SIZE;
 
@@ -25121,7 +25181,7 @@ static int wma_audio_aggr_report_stats_evt_handler(void *handle,
 
 	/* Handle peer stats TLV */
 	if( evt_len > WMI_TLV_HDR_SIZE ){
-		buf_len = (*(uint32_t *)buf_ptr) & 0xffff;
+		buf_len = WMITLV_GET_TLVLEN(WMITLV_GET_HDR(buf_ptr));
 		num_peers = buf_len / sizeof(wmi_audio_aggr_peer_stats);
 		evt_len -= WMI_TLV_HDR_SIZE;
 

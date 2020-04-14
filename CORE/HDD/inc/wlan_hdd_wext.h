@@ -532,5 +532,6 @@ int wlan_hdd_set_multicast_probe(hdd_adapter_t *adapter,
 			int group_id,int interval);
 int wlan_hdd_get_rx_group(hdd_adapter_t *adapter,
 			union iwreq_data *wrqu, char *extra);
+int wlan_hdd_au_set_cts(hdd_adapter_t * pAdapter, int mode, int profile);
 #endif
 #endif // __WEXT_IW_H__

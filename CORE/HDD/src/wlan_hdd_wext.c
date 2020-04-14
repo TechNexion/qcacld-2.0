@@ -8948,6 +8948,25 @@ int wlan_hdd_get_rx_group(hdd_adapter_t *pAdapter,
 	wrqu->data.length += length;
 	return 0;
 }
+
+int wlan_hdd_au_set_cts(hdd_adapter_t * pAdapter, int mode, int profile)
+{
+	int ret;
+
+	if (mode < 0 || mode > 2) {
+		hddLog(LOGW, FL("Invalid cts mode %d"), mode);
+		return -EINVAL;
+	}
+
+	ret = process_wma_set_command_twoargs((int)pAdapter->sessionId,
+		(int)GEN_PARAM_MULTICAST_SET_CTS,
+		mode, profile, GEN_CMD);
+
+	if (!ret) {
+		hddLog(LOGW, FL("Set CST mode fail, mode %d"), mode);
+	}
+	return ret;
+}
 #endif
 
 static int __iw_set_var_ints_getnone(struct net_device *dev,
