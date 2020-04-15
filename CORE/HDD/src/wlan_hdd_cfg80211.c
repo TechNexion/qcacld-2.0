@@ -16656,6 +16656,12 @@ int wlan_hdd_cfg80211_init(struct device *dev,
         wlan_hdd_band_5_GHZ.ht_cap.cap &= ~IEEE80211_HT_CAP_SUP_WIDTH_20_40;
     }
 
+    if( pCfg->enableRxLDPC )
+    {
+        wlan_hdd_band_2_4_GHZ.ht_cap.cap     |= IEEE80211_HT_CAP_LDPC_CODING;
+        wlan_hdd_band_5_GHZ.ht_cap.cap       |= IEEE80211_HT_CAP_LDPC_CODING;
+    }
+
     /*
      * In case of static linked driver at the time of driver unload,
      * module exit doesn't happens. Module cleanup helps in cleaning
