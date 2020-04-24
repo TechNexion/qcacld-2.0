@@ -17733,12 +17733,26 @@ int wma_add_multicast_group(void *wmapvosContext, int vdev_id,
 	}
 	au_mcast_conf = &vdev->au_mcast_conf;
 
-	group_index = find_available_multicast_group(au_mcast_conf);
-	if (group_index < 0 || group_index >= MAX_GROUP_NUM) {
-		WMA_LOGE(FL("No available group num !"));
-		return -EINVAL;
+	if (multi_group->group_id == 0xff) {
+		group_index = find_available_multicast_group(au_mcast_conf);
+		if (group_index < 0 || group_index >= MAX_GROUP_NUM) {
+			WMA_LOGE(FL("No available group num !"));
+			return -EINVAL;
+		}
+		group_id = group_index + MIN_GROUP_ID;
 	}
-	group_id = group_index + MIN_GROUP_ID;
+	else {
+		group_id = multi_group->group_id;
+		if( group_id < MIN_GROUP_ID || group_id >= MAX_GROUP_ID ) {
+			WMA_LOGE(FL("Group Id %d is invalid !"), group_id);
+			return -EINVAL;
+		}
+		group_index = group_id - MIN_GROUP_ID;
+		if (au_mcast_conf->multicast_group[group_index].in_use) {
+			WMA_LOGE(FL("Group Id %d is in use !"), group_id);
+			return -EINVAL;
+		}
+	}
 
 	len += WMI_TLV_HDR_SIZE;
 	len += (multi_group->client_num * sizeof(wmi_mac_addr));

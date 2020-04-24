@@ -1586,6 +1586,7 @@ struct audio_multicast_rate
 
 struct audio_multicast_add_group
 {
+    uint32_t group_id;
     uint32_t client_num;
     struct mac_addr_s multicast_addr;
     struct mac_addr_s client_addr[MAX_CLIENT_NUM];

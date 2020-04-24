@@ -3959,11 +3959,15 @@ static int wlan_hdd_add_multicast_grp(hdd_adapter_t *pAdapter,
 	if (num_args < 3)
 		return -EINVAL;
 
-	client_num = args[2];
+	if (num_args == 3)
+		client_num = 0;
+	else {
+		client_num = args[3];
 
-	if (client_num > MAX_CLIENT_NUM|| (num_args != (3+2*client_num))) {
-		hddLog(LOGW, FL("add_multicast_group: Invalid arguments"));
-		return -EINVAL;
+		if (client_num > MAX_CLIENT_NUM|| (num_args != (4+2*client_num))) {
+			hddLog(LOGW, FL("add_multicast_group: Invalid arguments"));
+			return -EINVAL;
+		}
 	}
 
 	pMultiGroup = vos_mem_malloc(sizeof(*pMultiGroup));
@@ -3973,12 +3977,13 @@ static int wlan_hdd_add_multicast_grp(hdd_adapter_t *pAdapter,
 	}
 	adf_os_mem_zero(pMultiGroup, sizeof(*pMultiGroup));
 
-	pMultiGroup->multicast_addr.mac_addr31to0 = args[0];
-	pMultiGroup->multicast_addr.mac_addr47to32 = args[1];
+	pMultiGroup->group_id = args[0];
+	pMultiGroup->multicast_addr.mac_addr31to0 = args[1];
+	pMultiGroup->multicast_addr.mac_addr47to32 = args[2];
 	pMultiGroup->client_num = client_num;
 	for (i = 0; i < client_num; i++) {
-		pMultiGroup->client_addr[i].mac_addr31to0 = args[3+2*i];
-		pMultiGroup->client_addr[i].mac_addr47to32 = args[4+2*i];
+		pMultiGroup->client_addr[i].mac_addr31to0 = args[4+2*i];
+		pMultiGroup->client_addr[i].mac_addr47to32 = args[5+2*i];
 	}
 
 	group_id = wma_add_multicast_group(pHddCtx->pvosContext,
