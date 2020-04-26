@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2017,2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -788,7 +788,9 @@ WLANSAP_RoamCallback
                         "sapdfs: no available channel for sapctx[%pK], StopBss",
                                   pSapContext);
 
-                        WLANSAP_StopBss(pSapContext);
+                        sapSignalHDDevent(sapContext, pCsrRoamInfo,
+                                         eSAP_MAC_TRIG_STOP_BSS_EVENT,
+                                         (v_PVOID_t) eSAP_STATUS_SUCCESS );
                      }
                }
                break;

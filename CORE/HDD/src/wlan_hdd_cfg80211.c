@@ -19351,6 +19351,9 @@ static int __wlan_hdd_cfg80211_stop_ap (struct wiphy *wiphy,
         status = hdd_get_next_adapter(pHddCtx, pAdapterNode, &pNext);
         pAdapterNode = pNext;
     }
+    /* Status won't be SUCCESS after passing through adapter nodes. Reset it */
+    status = VOS_STATUS_SUCCESS;
+
     /*
      * When ever stop ap adapter gets called, we need to check
      * whether any restart AP work is pending. If any restart is pending
