@@ -18934,6 +18934,11 @@ static void wma_process_cli_set_cmd(tp_wma_handle wma,
 				privcmd->param_value, privcmd->param_sec_value);
 			break;
 #endif
+#if !defined(WDI_API_AS_FUNCS)
+		case GEN_PARAM_SET_TXRX_PRINT_LEVEL:
+			wdi_in_print_level_set(privcmd->param_value);
+			break;
+#endif
 		default:
 			WMA_LOGE("Invalid param id 0x%x", privcmd->param_id);
 			break;

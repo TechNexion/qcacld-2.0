@@ -261,6 +261,7 @@ typedef enum eMonFilterType{
 #endif
 #define WE_SET_WOW_START                          95
 #define WE_SAP_TX_OFF                             96
+#define WE_SET_TXRX_PRINT_LEVEL                   97
 
 /* Private ioctls and their sub-ioctls */
 #define WLAN_PRIV_SET_NONE_GET_INT                (SIOCIWFIRSTPRIV + 1)
@@ -7187,6 +7188,20 @@ static int __iw_setint_getnone(struct net_device *dev,
             PMAC_STRUCT(hHal)->sap_tx_off = set_value;
             break;
         }
+#if !defined(WDI_API_AS_FUNCS)
+        case WE_SET_TXRX_PRINT_LEVEL:
+            {
+                if ( (set_value < 0) || (set_value > 0xff)) {
+                     hddLog(LOGE, FL("Invalid value %d in set_txrx_dbg"),
+                             set_value);
+                    return -EINVAL;
+                }
+                ret = process_wma_set_command((int)pAdapter->sessionId,
+                        (int)GEN_PARAM_SET_TXRX_PRINT_LEVEL,
+                        set_value, GEN_CMD);
+            }
+            break;
+#endif
         default:
         {
             hddLog(LOGE, "%s: Invalid sub command %d", __func__, sub_cmd);
@@ -13188,6 +13203,12 @@ static const struct iw_priv_args we_private_args[] = {
         WE_SAP_TX_OFF,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
         0, "sap_tx_off"},
+#if !defined(WDI_API_AS_FUNCS)
+    {   WE_SET_TXRX_PRINT_LEVEL,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "set_txrx_level" },
+#endif
 };
 
 

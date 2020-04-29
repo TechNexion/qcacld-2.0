@@ -5018,6 +5018,21 @@ static __iw_softap_setparam(struct net_device *dev,
 		break;
 	}
 
+#if !defined(WDI_API_AS_FUNCS)
+	case QCSAP_SET_TXRX_PRINT_LEVEL:
+            {
+                if ( (set_value < 0) || (set_value > 0xff)) {
+                     hddLog(LOGE, FL("Invalid value %d in set_txrx_dbg"),
+                             set_value);
+                    return -EINVAL;
+                }
+                ret = process_wma_set_command((int)pHostapdAdapter->sessionId,
+                        (int)GEN_PARAM_SET_TXRX_PRINT_LEVEL,
+                        set_value, GEN_CMD);
+            }
+            break;
+#endif
+
         default:
             hddLog(LOGE, FL("Invalid setparam command %d value %d"),
                     sub_cmd, set_value);
@@ -8395,6 +8410,13 @@ static const struct iw_priv_args hostapd_private_args[] = {
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
         0,
         "sap_tx_off" },
+
+#if !defined(WDI_API_AS_FUNCS)
+    {   QCSAP_SET_TXRX_PRINT_LEVEL,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "set_txrx_level" },
+#endif
 };
 
 static const iw_handler hostapd_private[] = {
