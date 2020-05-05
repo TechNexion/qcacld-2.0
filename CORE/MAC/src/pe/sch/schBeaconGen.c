@@ -927,7 +927,8 @@ schProcessPreBeaconInd(tpAniSirGlobal pMac, tpSirMsgQ limMsg)
          tANI_U8 *ptr = &psessionEntry->pSchBeaconFrameBegin[psessionEntry->schBeaconOffsetBegin];
          tANI_U16 timLength = 0;
 
-         if (psessionEntry->statypeForBss == STA_ENTRY_SELF) {
+         if ((psessionEntry->statypeForBss == STA_ENTRY_SELF) &&
+             (!pMac->sap_tx_off)) {
              pmmGenerateTIM(pMac, &ptr, &timLength, psessionEntry->dtimPeriod);
              beaconSize += 2 + timLength;
              writeBeaconToMemory(pMac, (tANI_U16) beaconSize,

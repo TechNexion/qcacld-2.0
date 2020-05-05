@@ -587,6 +587,7 @@ struct ol_txrx_pdev_t {
 		int host_addba;
 		int ll_pause_txq_limit;
                 int default_tx_comp_req;
+                bool sap_tx_off;
 	} cfg;
 
 	/* WDI subscriber's event list */

@@ -5007,6 +5007,17 @@ static __iw_softap_setparam(struct net_device *dev,
 		break;
 	}
 
+        case QCSAP_TX_OFF:
+	{
+		ol_txrx_pdev_handle pdev =
+			vos_get_context(VOS_MODULE_ID_TXRX, pVosContext);
+
+		pdev->cfg.sap_tx_off = set_value;
+		PMAC_STRUCT(hHal)->sap_tx_off = set_value;
+
+		break;
+	}
+
         default:
             hddLog(LOGE, FL("Invalid setparam command %d value %d"),
                     sub_cmd, set_value);
@@ -8380,6 +8391,10 @@ static const struct iw_priv_args hostapd_private_args[] = {
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
         0,
         "set_aid" },
+    {   QCSAP_TX_OFF,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "sap_tx_off" },
 };
 
 static const iw_handler hostapd_private[] = {

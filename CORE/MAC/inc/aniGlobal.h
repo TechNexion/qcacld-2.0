@@ -1300,6 +1300,7 @@ typedef struct sAniSirGlobal
     bool max_power_cmd_pending;
     uint32_t sta_auth_retries_for_code17;
     bool aid_by_user;
+    bool sap_tx_off;
 } tAniSirGlobal;
 
 typedef enum

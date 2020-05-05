@@ -260,6 +260,7 @@ typedef enum eMonFilterType{
 #define WE_MOTION_DET_BASE_LINE_START_STOP        94
 #endif
 #define WE_SET_WOW_START                          95
+#define WE_SAP_TX_OFF                             96
 
 /* Private ioctls and their sub-ioctls */
 #define WLAN_PRIV_SET_NONE_GET_INT                (SIOCIWFIRSTPRIV + 1)
@@ -7177,6 +7178,15 @@ static int __iw_setint_getnone(struct net_device *dev,
             }
             break;
 #endif
+        case WE_SAP_TX_OFF:
+        {
+            ol_txrx_pdev_handle pdev =
+                vos_get_context(VOS_MODULE_ID_TXRX, pHddCtx->pvosContext);
+
+            pdev->cfg.sap_tx_off = set_value;
+            PMAC_STRUCT(hHal)->sap_tx_off = set_value;
+            break;
+        }
         default:
         {
             hddLog(LOGE, "%s: Invalid sub command %d", __func__, sub_cmd);
@@ -13174,6 +13184,10 @@ static const struct iw_priv_args we_private_args[] = {
         IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
         "au_rx_show_grp" },
 #endif
+    {
+        WE_SAP_TX_OFF,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0, "sap_tx_off"},
 };
 
 

@@ -236,6 +236,8 @@ int __hdd_softap_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
    hdd_adapter_t *pAdapter = (hdd_adapter_t *)netdev_priv(dev);
    hdd_ap_ctx_t *pHddApCtx = WLAN_HDD_GET_AP_CTX_PTR(pAdapter);
    hdd_context_t *hddCtxt = WLAN_HDD_GET_CTX(pAdapter);
+   tHalHandle hal = WLAN_HDD_GET_HAL_CTX(pAdapter);
+   tpAniSirGlobal mac = PMAC_STRUCT(hal);
    v_MACADDR_t *pDestMacAddress;
    v_U8_t STAId;
    struct sk_buff *skb_next, *list_head = NULL, *list_tail = NULL;
@@ -246,6 +248,8 @@ int __hdd_softap_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 #endif /* QCA_PKT_PROTO_TRACE */
 
    ++pAdapter->hdd_stats.hddTxRxStats.txXmitCalled;
+   if (mac->sap_tx_off)
+       goto drop_list;
    /* Prevent this function to be called during SSR since TL context may
       not be reinitialized at this time which will lead crash. */
    if (hddCtxt->isLogpInProgress)

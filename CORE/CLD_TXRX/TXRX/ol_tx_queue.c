@@ -237,6 +237,8 @@ ol_tx_enqueue(
 #endif
 
     TX_SCHED_DEBUG_PRINT("Enter %s\n", __func__);
+    if (pdev->cfg.sap_tx_off)
+        return;
 
     /*
      * If too few tx descriptors are available, drop some currently-queued
