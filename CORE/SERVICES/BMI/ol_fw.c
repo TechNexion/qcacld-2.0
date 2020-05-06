@@ -994,7 +994,7 @@ static char *ol_board_id_to_filename(struct ol_softc *scn, uint16_t board_id)
 #ifdef HIF_SDIO
 #define MAX_SUPPORTED_PEERS 32
 #else
-#define MAX_SUPPORTED_PEERS 10
+#define MAX_SUPPORTED_PEERS 32
 #endif
 #else
 #define MAX_SUPPORTED_PEERS_REV1_1 14
