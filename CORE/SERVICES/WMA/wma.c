@@ -17714,7 +17714,7 @@ int wma_add_multicast_group(void *wmapvosContext, int vdev_id,
 	ol_txrx_vdev_handle vdev = NULL;
 	struct ol_audio_multicast_aggr_conf* au_mcast_conf = NULL;
 	struct ol_audio_multicast_group* pMultiGroup = NULL;
-	u_int8_t group_id, group_index;
+	u_int32_t group_id, group_index;
 	tp_wma_handle wma;
 
 	wma = (tp_wma_handle) vos_get_context(VOS_MODULE_ID_WDA,

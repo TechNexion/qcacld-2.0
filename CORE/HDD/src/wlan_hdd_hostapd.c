@@ -4007,7 +4007,7 @@ static int wlan_hdd_add_multicast_grp(hdd_adapter_t *pAdapter,
 	}
 
 	vos_mem_free(pMultiGroup);
-	return group_id;
+	return 0;
 }
 
 static int
