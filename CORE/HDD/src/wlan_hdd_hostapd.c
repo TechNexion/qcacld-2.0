@@ -4015,7 +4015,7 @@ wlan_hdd_multicast_del_group(hdd_adapter_t * adapter, int group_id)
 {
 	int ret;
 
-	if (group_id < MIN_GROUP_ID || group_id >= MAX_GROUP_ID) {
+	if ((group_id != 0xff) && (group_id < MIN_GROUP_ID || group_id >= MAX_GROUP_ID)) {
 		hddLog(LOGW, FL("Invalid group id %d"), group_id);
 		return -EINVAL;
 	}

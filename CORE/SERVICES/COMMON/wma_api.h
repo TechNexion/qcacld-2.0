@@ -211,5 +211,7 @@ int wma_add_multicast_group(void *wmapvosContext, int vdev_id,
 			struct audio_multicast_add_group * multi_group);
 int wma_cli_au_get_rx_group_info(void *wmapvosContext, int vdev_id,
 			 char *extra);
+VOS_STATUS wma_multicast_del_group(WMA_HANDLE wma_handle,
+			ol_txrx_vdev_handle vdev,  int group_id);
 #endif
 #endif

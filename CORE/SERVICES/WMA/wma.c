@@ -10199,6 +10199,9 @@ static VOS_STATUS wma_vdev_detach(tp_wma_handle wma_handle,
 	u_int8_t vdev_id = pdel_sta_self_req_param->sessionId;
 	struct wma_txrx_node *iface = &wma_handle->interfaces[vdev_id];
 	struct wma_target_req *msg;
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+        ol_txrx_vdev_handle vdev;
+#endif
 
 	if (((iface->type == WMI_VDEV_TYPE_AP) &&
 	     (iface->sub_type == WMI_UNIFIED_VDEV_SUBTYPE_P2P_DEVICE)) ||
@@ -10246,6 +10249,13 @@ static VOS_STATUS wma_vdev_detach(tp_wma_handle wma_handle,
         /* Unregister vdev from TL shim before vdev delete
          * Will protect from invalid vdev access */
         WLANTL_UnRegisterVdev(wma_handle->vos_context, vdev_id);
+
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+        vdev = wma_find_vdev_by_id(wma_handle, vdev_id);
+        if (vdev) {
+                wma_multicast_del_group(wma_handle, vdev, 0xff);
+        }
+#endif
 
         /* remove the interface from ath_dev */
         if (wma_unified_vdev_delete_send(wma_handle->wmi_handle, vdev_id)) {
@@ -17771,6 +17781,7 @@ int wma_add_multicast_group(void *wmapvosContext, int vdev_id,
 				wmi_audio_aggr_add_group_cmd_fixed_param));
 
 	cmd->group_id = group_id;
+	cmd->vdev_id = vdev_id;
 	cmd->multicast_addr.mac_addr31to0 = multi_group->multicast_addr.mac_addr31to0;
 	cmd->multicast_addr.mac_addr47to32 = multi_group->multicast_addr.mac_addr47to32;
 
@@ -17881,6 +17892,7 @@ wma_set_multicast_rate(tp_wma_handle wma_handle,
 				wmi_audio_aggr_set_group_rate_cmd_fixed_param));
 
 	cmd->group_id = group_id;
+	cmd->vdev_id = vdev_id;
 	buf_ptr += sizeof(*cmd);
 	WMITLV_SET_HDR(buf_ptr, WMITLV_TAG_ARRAY_STRUC,
 		(num_rate_set* sizeof(WMI_AUDIO_AGGR_RATE_SET_T)));
@@ -17976,6 +17988,7 @@ wma_set_multicast_retry_limit(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev
 				wmi_audio_aggr_set_group_retry_cmd_fixed_param));
 
 	cmd->group_id = group_id;
+	cmd->vdev_id = vdev->vdev_id;
 	cmd->retry_thresh= retry_limit;
 
 	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
@@ -18046,6 +18059,7 @@ wma_multicast_aggr_enable(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
 
 	cmd->aggr_enable = aggr_enable;
 	cmd->tbd_enable= tbd_enable;
+	cmd->vdev_id = vdev->vdev_id;
 
 	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
 								   WMI_AUDIO_AGGR_ENABLE_CMDID);
@@ -18067,7 +18081,7 @@ wma_multicast_aggr_enable(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
 /**
  * wma_multicast_del_group() - delete multicast aggregation group
  * configuration params of multicast group to firmware
- * @wma_handle: pointer to wma handle
+ * @handle: pointer to wma handle
  * @vdev: pointer to vdev
  * @group_id:the group id that would delete
  *
@@ -18075,8 +18089,8 @@ wma_multicast_aggr_enable(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
  *
  * Return: VOS_STATUS Success/Failure
  */
-static VOS_STATUS
-wma_multicast_del_group(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
+VOS_STATUS
+wma_multicast_del_group(WMA_HANDLE handle, ol_txrx_vdev_handle vdev,
 			 int group_id)
 {
 	wmi_audio_aggr_del_group_cmd_fixed_param *cmd;
@@ -18087,6 +18101,7 @@ wma_multicast_del_group(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
 	int32_t len = sizeof(wmi_audio_aggr_del_group_cmd_fixed_param);
 	struct ol_audio_multicast_aggr_conf* au_mcast_conf = NULL;
 	struct ol_audio_multicast_group* pMultiGroup = NULL;
+	tp_wma_handle wma_handle = (tp_wma_handle)handle;
 
 	if (!wma_handle || !wma_handle->wmi_handle) {
 		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
@@ -18094,11 +18109,17 @@ wma_multicast_del_group(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
 	}
 
 	au_mcast_conf = &vdev->au_mcast_conf;
-	group_index = group_id - MIN_GROUP_ID;
-	pMultiGroup = &au_mcast_conf->multicast_group[group_index];
-	if (pMultiGroup->in_use != 1) {
-		WMA_LOGP(FL("Group %d is not in used"), group_id);
-		return -EINVAL;
+	if (group_id != 0xff) {
+		if (group_id < MIN_GROUP_ID || group_id >= MAX_GROUP_ID) {
+			WMA_LOGE(FL("Group %d is Invalid"), group_id);
+			return -EINVAL;
+		}
+		group_index = group_id - MIN_GROUP_ID;
+		pMultiGroup = &au_mcast_conf->multicast_group[group_index];
+		if (pMultiGroup->in_use != 1) {
+			WMA_LOGI(FL("Group %d is not in used"), group_id);
+			return -EINVAL;
+		}
 	}
 
 	buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
@@ -18114,7 +18135,9 @@ wma_multicast_del_group(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
 				   wmi_audio_aggr_del_group_cmd_fixed_param));
 
 	cmd->group_id= group_id;
+	cmd->vdev_id = vdev->vdev_id;
 
+	WMA_LOGD(FL("Delete group %d"), group_id);
 	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
 								   WMI_AUDIO_AGGR_DEL_GROUP_CMDID);
 	if (status != EOK) {
@@ -18125,9 +18148,15 @@ wma_multicast_del_group(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
 	}
 
 	adf_os_spin_lock_bh(&au_mcast_conf->lock);
-	au_mcast_conf->group_num--;
-	au_mcast_conf->total_client_num -= pMultiGroup->client_num;
-	vos_mem_zero(pMultiGroup, sizeof(struct ol_audio_multicast_group));
+	// group_id 0xff clears all group info.
+	if (group_id == 0xff) {
+		vos_mem_zero(au_mcast_conf, sizeof(struct ol_audio_multicast_aggr_conf));
+	}
+	else {
+		au_mcast_conf->group_num--;
+		au_mcast_conf->total_client_num -= pMultiGroup->client_num;
+		vos_mem_zero(pMultiGroup, sizeof(struct ol_audio_multicast_group));
+	}
 	adf_os_spin_unlock_bh(&au_mcast_conf->lock);
 
 	return VOS_STATUS_SUCCESS;
