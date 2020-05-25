@@ -5800,6 +5800,10 @@ int sapStartDfsCacTimer(ptSapContext sapContext)
     {
         cacTimeOut = ETSI_WEATHER_CH_CAC_TIMEOUT;
     }
+
+    if (pMac->cac_time)
+        cacTimeOut = (pMac->cac_time * 1000);
+
     VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_INFO_MED,
               "sapdfs: SAP_DFS_CHANNEL_CAC_START on CH - %d, CAC TIMEOUT - %d sec",
               sapContext->channel, cacTimeOut/1000);

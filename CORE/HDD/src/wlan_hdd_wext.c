@@ -262,6 +262,8 @@ typedef enum eMonFilterType{
 #define WE_SET_WOW_START                          95
 #define WE_SAP_TX_OFF                             96
 #define WE_SET_TXRX_PRINT_LEVEL                   97
+#define WE_SAP_SET_TARGET_CHANNEL                 98
+#define WE_SAP_SET_CAC_TIME                       99
 
 /* Private ioctls and their sub-ioctls */
 #define WLAN_PRIV_SET_NONE_GET_INT                (SIOCIWFIRSTPRIV + 1)
@@ -7202,6 +7204,34 @@ static int __iw_setint_getnone(struct net_device *dev,
             }
             break;
 #endif
+        case WE_SAP_SET_TARGET_CHANNEL:
+        {
+                if ((set_value < 0) || (set_value > 0xff)) {
+                     hddLog(LOGE, FL("Invalid value %d in set_target_ch"),
+                             set_value);
+                    return -EINVAL;
+                }
+                if ((set_value != 0) &&
+                    ((set_value < 36) || (vos_nv_getChannelEnabledState(set_value) != NV_CHANNEL_ENABLE))) {
+                     hddLog(LOGE, FL("%d is not a valid non-DFS channel"),
+                             set_value);
+                    return -EINVAL;
+                }
+                PMAC_STRUCT(hHal)->target_channel = set_value;
+                break;
+        }
+
+        case WE_SAP_SET_CAC_TIME:
+        {
+                if ( (set_value < 10) || (set_value > 0xff)) {
+                     hddLog(LOGE, FL("Invalid value %d in set_cac_time"),
+                             set_value);
+                    return -EINVAL;
+                }
+                PMAC_STRUCT(hHal)->cac_time = set_value;
+                break;
+        }
+
         default:
         {
             hddLog(LOGE, "%s: Invalid sub command %d", __func__, sub_cmd);
@@ -13209,6 +13239,14 @@ static const struct iw_priv_args we_private_args[] = {
         0,
         "set_txrx_level" },
 #endif
+    {   WE_SAP_SET_TARGET_CHANNEL,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "set_target_ch" },
+    {   WE_SAP_SET_CAC_TIME,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "set_cac_time" },
 };
 
 

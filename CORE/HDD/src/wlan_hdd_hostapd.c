@@ -5033,6 +5033,34 @@ static __iw_softap_setparam(struct net_device *dev,
             break;
 #endif
 
+        case QCSAP_SET_TARGET_CHANNEL:
+        {
+                if ((set_value < 0) || (set_value > 0xff)) {
+                     hddLog(LOGE, FL("Invalid value %d in set_target_ch"),
+                             set_value);
+                    return -EINVAL;
+                }
+                if ((set_value != 0) &&
+                    ((set_value < 36) || (vos_nv_getChannelEnabledState(set_value) != NV_CHANNEL_ENABLE))) {
+                     hddLog(LOGE, FL("%d is not a valid non-DFS channel"),
+                             set_value);
+                    return -EINVAL;
+                }
+		PMAC_STRUCT(hHal)->target_channel = set_value;
+                break;
+        }
+
+        case QCSAP_SET_CAC_TIME:
+        {
+                if ((set_value < 10) || (set_value > 0xff)) {
+                     hddLog(LOGE, FL("Invalid value %d in set_cac_time"),
+                             set_value);
+                    return -EINVAL;
+                }
+                PMAC_STRUCT(hHal)->cac_time = set_value;
+                break;
+        }
+
         default:
             hddLog(LOGE, FL("Invalid setparam command %d value %d"),
                     sub_cmd, set_value);
@@ -8417,6 +8445,15 @@ static const struct iw_priv_args hostapd_private_args[] = {
         0,
         "set_txrx_level" },
 #endif
+
+    {   QCSAP_SET_TARGET_CHANNEL,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "set_target_ch" },
+    {   QCSAP_SET_CAC_TIME,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0,
+        "set_cac_time" },
 };
 
 static const iw_handler hostapd_private[] = {

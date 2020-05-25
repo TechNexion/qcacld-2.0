@@ -760,6 +760,11 @@ WLANSAP_RoamCallback
            pMac->sap.SapDfsInfo.target_channel =
                      sapIndicateRadar(sapContext, &pCsrRoamInfo->dfs_event);
 
+           if (0 < pMac->target_channel)
+           {
+               pMac->sap.SapDfsInfo.target_channel = pMac->target_channel;
+           }
+
            /* if there is an assigned next channel hopping */
            if (0 < pMac->sap.SapDfsInfo.user_provided_target_channel)
            {

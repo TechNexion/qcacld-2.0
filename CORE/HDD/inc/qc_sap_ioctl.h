@@ -302,6 +302,8 @@ enum {
     QCSAP_SET_AID,
     QCSAP_TX_OFF,
     QCSAP_SET_TXRX_PRINT_LEVEL,
+    QCSAP_SET_TARGET_CHANNEL,
+    QCSAP_SET_CAC_TIME,
 };
 
 int iw_get_channel_list(struct net_device *dev,

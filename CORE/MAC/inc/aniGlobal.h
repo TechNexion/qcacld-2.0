@@ -1301,6 +1301,8 @@ typedef struct sAniSirGlobal
     uint32_t sta_auth_retries_for_code17;
     bool aid_by_user;
     bool sap_tx_off;
+    uint8_t target_channel;
+    uint8_t cac_time;
 } tAniSirGlobal;
 
 typedef enum
