@@ -2268,6 +2268,8 @@ static int wma_vdev_stop_ind(tp_wma_handle wma, u_int8_t *buf)
 		goto free_req_msg;
 	}
 
+	wma_stop_radar_delay_timer();
+
 	vos_timer_stop(&req_msg->event_timeout);
 	if (req_msg->msg_type == WDA_DELETE_BSS_REQ) {
 		tpDeleteBssParams params =
