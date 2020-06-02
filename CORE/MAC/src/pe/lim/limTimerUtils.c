@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2016, 2019-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -599,6 +599,8 @@ limCreateTimers(tpAniSirGlobal pMac)
             limLog(pMac, LOGP, FL("AllocateMemory failed!"));
             goto err_timer;
         }
+	vos_mem_zero(pMac->lim.gLimPreAuthTimerTable.pTable[i],
+		     sizeof(tLimPreAuthNode));
     }
 
     limInitPreAuthTimerTable(pMac, &pMac->lim.gLimPreAuthTimerTable);
