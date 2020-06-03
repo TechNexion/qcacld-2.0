@@ -3550,6 +3550,13 @@ eHalStatus sme_ProcessMsg(tHalHandle hHal, vos_msg_t* pMsg)
                if (pMsg->bodyptr)
                    vos_mem_free(pMsg->bodyptr);
 		break;
+          case eWNI_SME_AU_TX_SCHED_IND:
+               if (pMac->sme.pau_tx_sched_ind_cb)
+                   pMac->sme.pau_tx_sched_ind_cb(pMsg->bodyptr,
+                                        pMac->sme.pau_get_tx_sched_cb_context);
+               if (pMsg->bodyptr)
+                   vos_mem_free(pMsg->bodyptr);
+		break;
 #endif
 
           default:
@@ -21375,7 +21382,6 @@ eHalStatus sme_spectral_scan_config(tHalHandle hal,
 /**
  * sme_au_get_txrx_stat() - get audio multicast txrx stats
  * @sessionid: Session ID
- * @req: get peer info request information
  * @context: event handle context
  * @pcallbackfn: callback function pointer
  *
@@ -21427,6 +21433,72 @@ eHalStatus sme_au_get_txrx_stat(tHalHandle hal,
 		if (!VOS_IS_STATUS_SUCCESS(vosstatus)) {
 			VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
 				"%s: Post get peer info msg fail", __func__);
+			vos_mem_free(vosmessage.bodyptr);
+			status = eHAL_STATUS_FAILURE;
+		}
+		sme_ReleaseGlobalLock(&mac->sme);
+	} else {
+		VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+			  FL("sme_AcquireGlobalLock failed"));
+		vos_mem_free(iwcmd);
+	}
+	return status;
+}
+
+/**
+ * sme_au_get_tx_sched() - get audio multicast tx sched method
+ * @sessionid: Session ID
+ * @context: event handle context
+ * @pcallbackfn: callback function pointer
+ *
+ * This function will send GEN_PARAM_MULTICAST_GET_TX_SCHED to WMA
+ *
+ * Return: 0 on success, otherwise error value
+ */
+eHalStatus sme_au_get_tx_sched(tHalHandle hal,
+			uint8_t sessionid,
+			void *context,
+			void (*callbackfn)(struct sir_au_get_tx_sched_resp *param,
+						void *pcontext))
+{
+
+	eHalStatus          status    = eHAL_STATUS_SUCCESS;
+	VOS_STATUS          vosstatus = VOS_STATUS_SUCCESS;
+	tpAniSirGlobal      mac       = PMAC_STRUCT(hal);
+	vos_msg_t           vosmessage;
+	wda_cli_set_cmd_t   *iwcmd;
+
+	/* serialize the req through MC thread */
+	iwcmd = (wda_cli_set_cmd_t *)vos_mem_malloc(sizeof(wda_cli_set_cmd_t));
+	if (NULL == iwcmd) {
+		VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+			"%s: Memory allocation failed.", __func__);
+		return eHAL_STATUS_E_MALLOC_FAILED;
+	}
+	iwcmd->param_value = sessionid;
+	iwcmd->param_vdev_id = sessionid;
+	iwcmd->param_id = GEN_PARAM_MULTICAST_GET_TX_SCHED;
+	iwcmd->param_vp_dev = GEN_CMD;
+
+	status = sme_AcquireGlobalLock(&mac->sme);
+	if (eHAL_STATUS_SUCCESS == status) {
+		if (NULL == callbackfn) {
+			VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+				"%s: Indication Call back is NULL",
+				__func__);
+			sme_ReleaseGlobalLock(&mac->sme);
+			return eHAL_STATUS_FAILURE;
+		}
+
+		mac->sme.pau_tx_sched_ind_cb = callbackfn;
+		mac->sme.pau_get_tx_sched_cb_context = context;
+
+		vosmessage.bodyptr = (void*)iwcmd;
+		vosmessage.type    = WDA_CLI_SET_CMD;
+		vosstatus = vos_mq_post_message(VOS_MQ_ID_WDA, &vosmessage);
+		if (!VOS_IS_STATUS_SUCCESS(vosstatus)) {
+			VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+				"%s: Post get tx sched msg fail", __func__);
 			vos_mem_free(vosmessage.bodyptr);
 			status = eHAL_STATUS_FAILURE;
 		}

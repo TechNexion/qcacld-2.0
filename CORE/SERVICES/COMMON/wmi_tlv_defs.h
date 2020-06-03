@@ -1069,6 +1069,28 @@ typedef enum {
     WMITLV_TAG_STRUC_wmi_pdev_srg_partial_bssid_bitmap_cmd_fixed_param,
     WMITLV_TAG_STRUC_wmi_simulation_test_cmd_fixed_param,
     WMITLV_TAG_STRUC_wmi_audio_aggr_set_rtscts_config,
+    WMITLV_TAG_STRUC_wmi_pdev_sscan_fw_cmd_fixed_param,
+    WMITLV_TAG_STRUC_wmi_pdev_sscan_fft_bin_index,
+    WMITLV_TAG_STRUC_wmi_pdev_srg_obss_color_enable_bitmap_cmd_fixed_param,
+    WMITLV_TAG_STRUC_wmi_pdev_srg_obss_bssid_enable_bitmap_cmd_fixed_param,
+    WMITLV_TAG_STRUC_wmi_pdev_non_srg_obss_color_enable_bitmap_cmd_fixed_param,
+    WMITLV_TAG_STRUC_wmi_pdev_non_srg_obss_bssid_enable_bitmap_cmd_fixed_param,
+    WMITLV_TAG_STRUC_wmi_roam_capability_report_event_fixed_param,
+    WMITLV_TAG_STRUC_wmi_pmf_bcn_protect_stats,
+    WMITLV_TAG_STRUC_wmi_nan_capabilities,
+    WMITLV_TAG_STRUC_wmi_request_ctrl_path_stats_cmd_fixed_param,
+    WMITLV_TAG_STRUC_wmi_ctrl_path_stats_event_fixed_param,
+    WMITLV_TAG_STRUC_wmi_ctrl_path_pdev_stats_struct,
+    WMITLV_TAG_STRUC_wmi_pdev_get_tpc_stats_cmd_fixed_param,
+    WMITLV_TAG_STRUC_wmi_pdev_get_tpc_stats_event_fixed_param,
+    WMITLV_TAG_STRUC_wmi_tpc_configs,
+    WMITLV_TAG_STRUC_wmi_max_reg_power_allowed,
+    WMITLV_TAG_STRUC_wmi_tpc_rates_array,
+    WMITLV_TAG_STRUC_wmi_tpc_ctl_pwr_table,
+    WMITLV_TAG_STRUC_wmi_vdev_bcn_latency_fixed_param,
+    WMITLV_TAG_STRUC_wmi_audio_aggr_set_sched_method,
+    WMITLV_TAG_STRUC_wmi_audio_aggr_get_sched_method,
+    WMITLV_TAG_STRUC_wmi_audio_aggr_sched_method_event_fixed_param,
 } WMITLV_TAG_ID;
 
 /*
@@ -1487,6 +1509,8 @@ typedef enum {
     OP(WMI_AUDIO_AGGR_GET_STATISTICS_CMDID) \
     OP(WMI_AUDIO_AGGR_RESET_STATISTICS_CMDID) \
     OP(WMI_AUDIO_AGGR_SET_RTSCTS_CONFIG_CMDID) \
+    OP(WMI_AUDIO_AGGR_SET_SCHED_METHOD_CMDID) \
+    OP(WMI_AUDIO_AGGR_GET_SCHED_METHOD_CMDID) \
     /* add new CMD_LIST elements above this line */
 
 
@@ -1724,6 +1748,7 @@ typedef enum {
     OP(WMI_GET_ELNA_BYPASS_EVENTID) \
     OP(WMI_ROAM_PMKID_REQUEST_EVENTID) \
     OP(WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID) \
+    OP(WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID) \
     /* add new EVT_LIST elements above this line */
 
 
@@ -4204,6 +4229,13 @@ WMITLV_CREATE_PARAM_STRUC(WMI_AUDIO_AGGR_RESET_STATISTICS_CMDID);
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_audio_aggr_set_rtscts_config, wmi_audio_aggr_set_rtscts_config_cmd_fixed_param, fixed_param, WMITLV_SIZE_FIX)
 WMITLV_CREATE_PARAM_STRUC(WMI_AUDIO_AGGR_SET_RTSCTS_CONFIG_CMDID);
 
+#define WMITLV_TABLE_WMI_AUDIO_AGGR_SET_SCHED_METHOD_CMDID(id,op,buf,len) \
+    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_audio_aggr_set_sched_method,wmi_audio_aggr_set_sched_method_cmd_fixed_param, fixed_param, WMITLV_SIZE_FIX)
+WMITLV_CREATE_PARAM_STRUC(WMI_AUDIO_AGGR_SET_SCHED_METHOD_CMDID);
+
+#define WMITLV_TABLE_WMI_AUDIO_AGGR_GET_SCHED_METHOD_CMDID(id,op,buf,len) \
+    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_audio_aggr_get_sched_method,wmi_audio_aggr_get_sched_method_cmd_fixed_param, fixed_param, WMITLV_SIZE_FIX)
+WMITLV_CREATE_PARAM_STRUC(WMI_AUDIO_AGGR_GET_SCHED_METHOD_CMDID);
 /************************** TLV definitions of WMI events *******************************/
 
 /* Service Ready event */
@@ -5648,6 +5680,10 @@ WMITLV_CREATE_PARAM_STRUC(WMI_GET_ELNA_BYPASS_EVENTID);
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_audio_aggr_group_stats, group_stats, WMITLV_SIZE_VAR) \
     WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_ARRAY_STRUC, wmi_audio_aggr_peer_stats, peer_stats, WMITLV_SIZE_VAR)
 WMITLV_CREATE_PARAM_STRUC(WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID);
+
+#define WMITLV_TABLE_WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID(id,op,buf,len) \
+    WMITLV_ELEM(id,op,buf,len, WMITLV_TAG_STRUC_wmi_audio_aggr_sched_method_event_fixed_param, wmi_audio_aggr_sched_method_event_fixed_param, fixed_param, WMITLV_SIZE_FIX)
+WMITLV_CREATE_PARAM_STRUC(WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID);
 
 #ifdef __cplusplus
 }

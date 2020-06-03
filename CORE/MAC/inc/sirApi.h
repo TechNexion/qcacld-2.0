@@ -8825,6 +8825,16 @@ struct sir_au_get_txrx_stat_resp {
 	uint32_t num_peers;
 	struct sir_au_peer_stat au_peer_stat[MAX_CLIENT_NUM * MAX_GROUP_NUM];
 };
+
+/**
+ * struct sir_au_get_tx_sched_resp - audio multicast aggr tx sched
+ * This struct restore tx sched method from firmware event
+ */
+struct sir_au_get_tx_sched_resp {
+	uint32_t vdev_id;
+	uint32_t tx_sched;
+	uint32_t rtscts_config;
+};
 #endif
 
 /**

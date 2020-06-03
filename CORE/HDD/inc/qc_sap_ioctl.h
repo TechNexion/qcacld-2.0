@@ -304,6 +304,8 @@ enum {
     QCSAP_SET_TXRX_PRINT_LEVEL,
     QCSAP_SET_TARGET_CHANNEL,
     QCSAP_SET_CAC_TIME,
+    QCSAP_AUDIO_AGGR_SET_TX_SCHED,
+    QCSAP_AUDIO_AGGR_GET_TX_SCHED,
 };
 
 int iw_get_channel_list(struct net_device *dev,

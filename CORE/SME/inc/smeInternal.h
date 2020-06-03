@@ -279,6 +279,10 @@ typedef struct tagSmeStruct
     void (*pau_txrx_stat_ind_cb) (struct sir_au_get_txrx_stat_resp *param,
 		    void *pcontext);
     void *pau_get_txrx_stat_cb_context;
+    /* get audio multicast tx sched callback */
+    void (*pau_tx_sched_ind_cb) (struct sir_au_get_tx_sched_resp *param,
+		    void *pcontext);
+    void *pau_get_tx_sched_cb_context;
 #endif
     void (*aid_req_cb)(void *ctx, sir_aid_req_t *);
 } tSmeStruct, *tpSmeStruct;

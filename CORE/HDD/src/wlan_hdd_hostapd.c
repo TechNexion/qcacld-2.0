@@ -4251,6 +4251,121 @@ wlan_hdd_au_reset_txrx_stat(hdd_adapter_t * pAdapter,
 	}
 	return ret;
 }
+
+struct au_tx_sched_priv {
+	eHalStatus status;
+	int tx_sched;
+};
+
+static int
+wlan_hdd_au_set_tx_sched(hdd_adapter_t * adapter, int tx_sched)
+{
+	int ret;
+
+	if ((tx_sched < 1 || tx_sched > 2)) {
+		hddLog(LOGW, FL("Invalid audio tx sched %d"), tx_sched);
+		return -EINVAL;
+	}
+
+	ret = process_wma_set_command((int)adapter->sessionId,
+		(int)GEN_PARAM_MULTICAST_SET_TX_SCHED,
+		tx_sched, GEN_CMD);
+
+	if (!ret) {
+		hddLog(LOGW, FL("Set TX sched fail, mode %d"), tx_sched);
+	}
+	return ret;
+}
+
+void hdd_au_tx_sched_ind_cb(struct sir_au_get_tx_sched_resp *au_tx_sched, void *context)
+{
+	struct hdd_request *request;
+	struct au_tx_sched_priv *priv;
+
+	request = hdd_request_get(context);
+	if (!request) {
+		hddLog(VOS_TRACE_LEVEL_ERROR,
+		       "Obsolete request %pK", context);
+		return;
+	}
+	priv = hdd_request_priv(request);
+
+	if (!au_tx_sched) {
+		hddLog(VOS_TRACE_LEVEL_ERROR,
+		       "%s: Bad param,  au_tx_sched [%pK] context [%pK]",
+		       __func__, au_tx_sched, context);
+		priv->status = eHAL_STATUS_INVALID_PARAMETER;
+		hdd_request_complete(request);
+		hdd_request_put(request);
+
+		return;
+	}
+
+	priv->status = eHAL_STATUS_SUCCESS;
+	priv->tx_sched = au_tx_sched->tx_sched;
+	hdd_request_complete(request);
+	hdd_request_put(request);
+
+	return;
+}
+
+static int
+wlan_hdd_au_get_tx_sched(hdd_adapter_t * pAdapter, int *value)
+{
+	int ret = 0;
+	void *cookie;
+	struct hdd_request *request = NULL;
+	struct au_tx_sched_priv *priv;
+	static const struct hdd_request_params params = {
+		.priv_size = sizeof(*priv),
+		.timeout_ms = WLAN_WAIT_TIME_STATS,
+	};
+
+	if (NULL == pAdapter) {
+		hddLog(VOS_TRACE_LEVEL_ERROR, "%s: pAdapter is NULL", __func__);
+		return VOS_STATUS_E_FAULT;
+	}
+
+	request = hdd_request_alloc(&params);
+	if (!request) {
+		hddLog(VOS_TRACE_LEVEL_ERROR,
+			"%s: Request allocation failure", __func__);
+		return VOS_STATUS_E_NOMEM;
+	}
+	cookie = hdd_request_cookie(request);
+	priv = hdd_request_priv(request);
+	priv->status = eHAL_STATUS_FAILURE;
+
+	ret = sme_au_get_tx_sched(WLAN_HDD_GET_HAL_CTX(pAdapter),
+				    pAdapter->sessionId,
+				    cookie,
+				    hdd_au_tx_sched_ind_cb);
+
+	if (ret) {
+		hddLog(LOGW, FL("Get group tx sched method fail"));
+	} else {
+		/* request was sent -- wait for the response */
+		ret = hdd_request_wait_for_response(request);
+		if (ret) {
+			hddLog(VOS_TRACE_LEVEL_ERROR,
+				FL("timed out while retrieving au tx sched method"));
+			/* we'll returned a cached value below */
+		} else {
+			/* update the adapter with the fresh results */
+			priv = hdd_request_priv(request);
+
+			if (priv->status != eHAL_STATUS_SUCCESS)
+				ret = -EINVAL;
+			else
+				*value = priv->tx_sched;
+		}
+	}
+
+	hdd_request_put(request);
+
+	return ret;
+}
+
 #endif
 
 int
@@ -4993,6 +5108,11 @@ static __iw_softap_setparam(struct net_device *dev,
                 hddLog(LOG1, "QCSAP_MULTICAST_DEL_GROUP val %d", set_value);
                 ret = wlan_hdd_multicast_del_group(pHostapdAdapter,set_value);
                 break;
+
+        case QCSAP_AUDIO_AGGR_SET_TX_SCHED:
+                hddLog(LOG1, "QCSAP_AUDIO_AGGR_SET_TX_SCHED val %d", set_value);
+                ret = wlan_hdd_au_set_tx_sched(pHostapdAdapter,set_value);
+                break;
 #endif
 
 	case QCSAP_SET_AID:
@@ -5433,6 +5553,11 @@ static __iw_softap_getparam(struct net_device *dev,
     case QCSAP_PARAM_CHAN_WIDTH:
         ret = hdd_sap_get_chan_width(pHostapdAdapter, value);
         break;
+#ifdef AUDIO_MULTICAST_AGGR_SUPPORT
+    case QCSAP_AUDIO_AGGR_GET_TX_SCHED:
+        ret = wlan_hdd_au_get_tx_sched(pHostapdAdapter, value);
+        break;
+#endif
     default:
         hddLog(LOGE, FL("Invalid getparam command %d"), sub_cmd);
         ret = -EINVAL;
@@ -8429,6 +8554,15 @@ static const struct iw_priv_args hostapd_private_args[] = {
     {   QCSAP_AUDIO_AGGR_SET_CTS,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2,
         0, "au_set_cts"},
+
+    {   QCSAP_AUDIO_AGGR_SET_TX_SCHED,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        0, "au_set_txsched" },
+
+    {   QCSAP_AUDIO_AGGR_GET_TX_SCHED,
+         0,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+        "au_get_txsched" },
 #endif
     {   QCSAP_SET_AID,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,

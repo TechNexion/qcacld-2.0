@@ -18748,7 +18748,7 @@ wma_multicast_aggr_reset_txrx_stat(tp_wma_handle wma_handle, ol_txrx_vdev_handle
 }
 
 /**
- * wma_multicast_aggr_set_cts() - set audio aggregation cts mde
+ * wma_multicast_aggr_set_cts() - set audio aggregation cts mode
  * @wma_handle: pointer to wma handle
  * @vdev: pointer to vdev
  * @mode: 0:disabled, 1:CTS-to-self per PPDU, 2:CTS-to-self pr cycle
@@ -18802,6 +18802,112 @@ wma_multicast_aggr_set_cts(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
 
 	return VOS_STATUS_SUCCESS;
 }
+
+/**
+ * wma_multicast_aggr_set_tx_sched() - set audio aggregation tx sched method
+ * @wma_handle: pointer to wma handle
+ * @vdev: pointer to vdev
+ * @tx_sched: tx sched method
+ *
+ * This is called to set audio aggregation cts mode to fw via WMI cmd
+ *
+ * Return: VOS_STATUS Success/Failure
+ */
+static VOS_STATUS
+wma_multicast_aggr_set_tx_sched(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev,
+				int tx_sched)
+{
+	wmi_audio_aggr_set_sched_method_cmd_fixed_param *cmd;
+	int status = 0;
+	wmi_buf_t buf;
+	u_int8_t *buf_ptr;
+	int32_t len = sizeof(wmi_audio_aggr_set_sched_method_cmd_fixed_param);
+
+	if (!wma_handle || !wma_handle->wmi_handle) {
+		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
+		return VOS_STATUS_E_INVAL;
+	}
+
+	buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
+	if (!buf) {
+		WMA_LOGP(FL("wmi_buf_alloc failed"));
+		return -ENOMEM;
+	}
+
+	buf_ptr = (u_int8_t *) wmi_buf_data(buf);
+	cmd = (wmi_audio_aggr_set_sched_method_cmd_fixed_param *) buf_ptr;
+	WMITLV_SET_HDR(&cmd->tlv_header,
+			WMITLV_TAG_STRUC_wmi_audio_aggr_set_sched_method,
+			WMITLV_GET_STRUCT_TLVLEN(
+				wmi_audio_aggr_set_sched_method_cmd_fixed_param));
+
+	cmd->vdev_id = vdev->vdev_id;
+	cmd->sched_method = tx_sched;
+
+	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
+					WMI_AUDIO_AGGR_SET_SCHED_METHOD_CMDID);
+
+	if (status != EOK) {
+		WMA_LOGE("%s: wmi_unified_cmd_send WMI_AUDIO_AGGR_SET_SCHED_METHOD_CMDID"
+			" returned Error %d", __func__, status);
+		wmi_buf_free(buf);
+		return VOS_STATUS_E_FAILURE;
+	}
+
+	return VOS_STATUS_SUCCESS;
+}
+
+/**
+ * wma_multicast_aggr_get_tx_sched() - request audio aggregation tx sched from fw
+ * @wma_handle: pointer to wma handle
+ * @vdev: pointer to vdev
+ *
+ * This is called to send get multicast group tx sched method request to fw via WMI cmd
+ *
+ * Return: VOS_STATUS Success/Failure
+ */
+static VOS_STATUS
+wma_multicast_aggr_get_tx_sched(tp_wma_handle wma_handle, ol_txrx_vdev_handle vdev)
+{
+	wmi_audio_aggr_get_sched_method_cmd_fixed_param *cmd;
+	int status = 0;
+	wmi_buf_t buf;
+	u_int8_t *buf_ptr;
+	int32_t len = sizeof(wmi_audio_aggr_get_sched_method_cmd_fixed_param);
+
+	if (!wma_handle || !wma_handle->wmi_handle) {
+		WMA_LOGE(FL("WMA is closed, can not issue cmd"));
+		return VOS_STATUS_E_INVAL;
+	}
+
+	buf = wmi_buf_alloc(wma_handle->wmi_handle, len);
+	if (!buf) {
+		WMA_LOGP(FL("wmi_buf_alloc failed"));
+		return -ENOMEM;
+	}
+
+	buf_ptr = (u_int8_t *) wmi_buf_data(buf);
+	cmd = (wmi_audio_aggr_get_sched_method_cmd_fixed_param *) buf_ptr;
+	WMITLV_SET_HDR(&cmd->tlv_header,
+			WMITLV_TAG_STRUC_wmi_audio_aggr_get_sched_method,
+			WMITLV_GET_STRUCT_TLVLEN(
+				wmi_audio_aggr_get_sched_method_cmd_fixed_param));
+
+	cmd->vdev_id = vdev->vdev_id;
+
+	status = wmi_unified_cmd_send(wma_handle->wmi_handle, buf, len,
+					WMI_AUDIO_AGGR_GET_SCHED_METHOD_CMDID);
+
+	if (status != EOK) {
+		WMA_LOGE("%s: wmi_unified_cmd_send WMI_AUDIO_AGGR_GET_SCHED_METHOD_CMDID"
+			" returned Error %d", __func__, status);
+		wmi_buf_free(buf);
+		return VOS_STATUS_E_FAILURE;
+	}
+
+	return VOS_STATUS_SUCCESS;
+}
+
 #endif
 
 static void wma_process_cli_set_cmd(tp_wma_handle wma,
@@ -18963,6 +19069,13 @@ static void wma_process_cli_set_cmd(tp_wma_handle wma,
 		case GEN_PARAM_MULTICAST_SET_CTS:
 			wma_multicast_aggr_set_cts(wma, vdev,
 				privcmd->param_value, privcmd->param_sec_value);
+			break;
+		case GEN_PARAM_MULTICAST_SET_TX_SCHED:
+			wma_multicast_aggr_set_tx_sched(wma, vdev,
+				privcmd->param_value);
+			break;
+		case GEN_PARAM_MULTICAST_GET_TX_SCHED:
+			wma_multicast_aggr_get_tx_sched(wma, vdev);
 			break;
 #endif
 #if !defined(WDI_API_AS_FUNCS)
@@ -25260,6 +25373,60 @@ fail_len:
 	WMA_LOGE("Invalid AU_TXRX_STAT event len. len = %d, buf_len = %d", len , buf_len);
 	vos_mem_free(au_txrx_stat);
 	return -EINVAL;
+}
+
+/**
+ * wma_audio_aggr_sched_method_evt_handler() - handle audio aggregation tx sched method event
+ * @handle: WMA handle
+ * @event:  Event received from FW
+ * @len:    Length of the event
+ *
+ */
+static int wma_audio_aggr_sched_method_evt_handler(void *handle,
+			u_int8_t *event,
+			u_int32_t len)
+{
+	uint32_t ret = 0;
+
+	WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID_param_tlvs *param_buf;
+	wmi_audio_aggr_sched_method_event_fixed_param *wmi_event;
+
+	struct sir_au_get_tx_sched_resp *au_tx_sched;
+	vos_msg_t sme_msg = {0};
+
+	param_buf = (WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID_param_tlvs *) event;
+	if (!param_buf) {
+		WMA_LOGE("Invalid event buffer");
+		return -EINVAL;
+	}
+
+	au_tx_sched = vos_mem_malloc(sizeof(struct sir_au_get_tx_sched_resp));
+	if (!au_tx_sched) {
+		WMA_LOGE("Unable to alloc memory for au_tx_sched");
+		return VOS_STATUS_E_NOMEM;
+	}
+	vos_mem_zero(au_tx_sched , sizeof(struct sir_au_get_tx_sched_resp));
+
+	wmi_event = param_buf->fixed_param;
+	au_tx_sched->vdev_id = wmi_event->vdev_id;
+	au_tx_sched->tx_sched = wmi_event->sched_method;
+	au_tx_sched->rtscts_config = wmi_event->rtscts_config;
+
+	WMA_LOGI("Received WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID, vdev=%d, tx_sched=%d, rtscts_conf=%d",
+		 au_tx_sched->vdev_id, au_tx_sched->tx_sched, au_tx_sched->rtscts_config);
+
+	sme_msg.type = eWNI_SME_AU_TX_SCHED_IND;
+	sme_msg.bodyptr = au_tx_sched;
+	sme_msg.bodyval = 0;
+
+	ret = vos_mq_post_message(VOS_MODULE_ID_SME, &sme_msg);
+	if (!VOS_IS_STATUS_SUCCESS(ret) ) {
+		WMA_LOGE("%s: Fail to post eWNI_SME_AU_TX_SCHED_IND msg", __func__);
+		vos_mem_free(au_tx_sched);
+	}
+
+	return ret;
+
 }
 #endif
 
@@ -40310,6 +40477,15 @@ v_VOID_t wma_rx_service_ready_event(WMA_HANDLE handle, void *cmd_param_info)
 
 	if (status != VOS_STATUS_SUCCESS) {
 		WMA_LOGE("Failed to register WMI_AUDIO_AGGR_REPORT_STATISTICS_EVENTID cb");
+		return;
+	}
+
+	status = wmi_unified_register_event_handler(wma_handle->wmi_handle,
+			WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID,
+			wma_audio_aggr_sched_method_evt_handler);
+
+	if (status != VOS_STATUS_SUCCESS) {
+		WMA_LOGE("Failed to register WMI_AUDIO_AGGR_SCHED_METHOD_EVENTID cb");
 		return;
 	}
 #endif

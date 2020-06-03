@@ -5060,6 +5060,11 @@ eHalStatus sme_au_get_txrx_stat(tHalHandle hal,
 			void *context,
 			void (*callbackfn)(struct sir_au_get_txrx_stat_resp *param,
 						void *pcontext));
+eHalStatus sme_au_get_tx_sched(tHalHandle hal,
+			uint8_t sessionid,
+			void *context,
+			void (*callbackfn)(struct sir_au_get_tx_sched_resp *param,
+						void *pcontext));
 #endif
 
 void sme_enable_aid_by_user(tHalHandle hal, bool aid_by_user);
