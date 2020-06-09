@@ -5046,13 +5046,13 @@ static __iw_softap_setparam(struct net_device *dev,
                              set_value);
                     return -EINVAL;
                 }
-		PMAC_STRUCT(hHal)->target_channel = set_value;
+                PMAC_STRUCT(hHal)->target_channel = set_value;
                 break;
         }
 
         case QCSAP_SET_CAC_TIME:
         {
-                if ((set_value < 10) || (set_value > 0xff)) {
+                if ((set_value < 0) || (set_value > 0xff)) {
                      hddLog(LOGE, FL("Invalid value %d in set_cac_time"),
                              set_value);
                     return -EINVAL;

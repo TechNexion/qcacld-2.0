@@ -7223,7 +7223,7 @@ static int __iw_setint_getnone(struct net_device *dev,
 
         case WE_SAP_SET_CAC_TIME:
         {
-                if ( (set_value < 10) || (set_value > 0xff)) {
+                if ( (set_value < 0) || (set_value > 0xff)) {
                      hddLog(LOGE, FL("Invalid value %d in set_cac_time"),
                              set_value);
                     return -EINVAL;
