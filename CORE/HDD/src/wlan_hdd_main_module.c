@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020 The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -72,6 +72,7 @@ void __exit hdd_module_exit(void)
 module_init(hdd_module_init);
 module_exit(hdd_module_exit);
 
+MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("WLAN HOST DEVICE DRIVER");
 
 #if  defined(QCA_WIFI_FTM)

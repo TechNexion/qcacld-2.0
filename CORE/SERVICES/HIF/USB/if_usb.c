@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, 2018-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2016, 2018-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -871,5 +871,3 @@ void hif_bus_resume_nonos()
 	pr_err("Exit:%s,Line:%d \n\r", __func__,__LINE__);
 }
 #endif
-
-MODULE_LICENSE("Dual BSD/GPL");

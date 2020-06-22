@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020 The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -305,4 +305,5 @@ static void __exit wlan_prealloc_exit(void)
 module_init(wlan_prealloc_init)
 module_exit(wlan_prealloc_exit);
 
-MODULE_DESCRIPTION("WLAN PREALLOC DRIVER");
+MODULE_LICENSE("Dual BSD/GPL");
+MODULE_DESCRIPTION("WLAN HOST DEVICE DRIVER");
