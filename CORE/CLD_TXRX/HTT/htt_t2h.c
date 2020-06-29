@@ -470,7 +470,7 @@ htt_t2h_lp_msg_handler(void *context, adf_nbuf_t htt_t2h_msg )
                     credit_delta = htt_tx_credit_update(pdev);
                     HTT_TX_MUTEX_RELEASE(&pdev->credit_mutex);
                 }
-                if (credit_delta) {
+                if (credit_delta > 0) {
                     ol_tx_target_credit_update(pdev->txrx_pdev, credit_delta);
                 }
             }
