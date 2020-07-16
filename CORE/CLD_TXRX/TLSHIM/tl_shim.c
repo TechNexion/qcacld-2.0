@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -2090,7 +2090,7 @@ VOS_STATUS WLANTL_Close(void *vos_ctx)
 #endif
 
 	adf_os_mem_free(tl_shim->vdev_active);
-#ifdef FEATURE_WLAN_ESE
+#if defined(FEATURE_WLAN_ESE) && !defined(FEATURE_WLAN_ESE_UPLOAD)
 	vos_flush_work(&tl_shim->iapp_work.deferred_work);
 #endif
 	vos_flush_work(&tl_shim->cache_flush_work);
