@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -3678,6 +3678,11 @@ sapSignalHDDevent
                                      ASSOC_REQ_IE_OFFSET);
             sta_event_ptr->ies = (pCsrRoamInfo->assocReqPtr +
                                      ASSOC_REQ_IE_OFFSET);
+            if (pCsrRoamInfo->fReassocReq) {
+                sta_event_ptr->iesLen -= VOS_MAC_ADDR_SIZE;
+                sta_event_ptr->ies += VOS_MAC_ADDR_SIZE;
+            }
+
             /* also fill up the channel info from the csrRoamInfo */
             pChanInfo =
             &sta_event_ptr->chan_info;
