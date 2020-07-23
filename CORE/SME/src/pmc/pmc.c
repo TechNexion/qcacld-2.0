@@ -3127,6 +3127,7 @@ eHalStatus pmcOffloadEnableStaPsHandler(tpAniSirGlobal pMac,
              */
              smsLog(pMac, LOGE, FL("Fail to issue eSmeCommandEnterBmps"));
          }
+         /* fallthrough */
        case eHAL_STATUS_PMC_NOT_NOW:
          /*
           * Some module voted against Power Save.

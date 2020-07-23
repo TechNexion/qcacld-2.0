@@ -3590,18 +3590,21 @@ WLANSAP_ResetSapConfigAddIE(tsap_Config_t *pConfig,
         pConfig->probeRespIEsBufferLen = 0;
         pConfig->pProbeRespIEsBuffer = NULL;
         if(eUPDATE_IE_ALL != updateType)  break;
+        /* fallthrough */
 
     case eUPDATE_IE_ASSOC_RESP:
         vos_mem_free( pConfig->pAssocRespIEsBuffer);
         pConfig->assocRespIEsLen = 0;
         pConfig->pAssocRespIEsBuffer = NULL;
         if(eUPDATE_IE_ALL != updateType)  break;
+        /* fallthrough */
 
     case eUPDATE_IE_PROBE_BCN:
         vos_mem_free(pConfig->pProbeRespBcnIEsBuffer );
         pConfig->probeRespBcnIEsLen = 0;
         pConfig->pProbeRespBcnIEsBuffer = NULL;
         if(eUPDATE_IE_ALL != updateType)  break;
+        /* fallthrough */
 
     default:
         if(eUPDATE_IE_ALL != updateType)

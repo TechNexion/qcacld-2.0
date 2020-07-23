@@ -13304,6 +13304,7 @@ static void csrRoamGetBssStartParms(tpAniSirGlobal pMac,
 	default:
 		smsLog(pMac, LOGE, FL("sees an unknown pSirNwType (%d)"),
 				nwType);
+		/* fallthrough */
 	case eSIR_11A_NW_TYPE:
 		csr_populate_default_rates(opr_rates, true, true);
 		if (eCSR_OPERATING_CHANNEL_ANY != operation_channel) {
@@ -19444,6 +19445,7 @@ eHalStatus csrPsOffloadIsFullPowerNeeded(tpAniSirGlobal pMac,
                     case eCsrForcedDisassoc:
                     case eCsrForcedDisassocMICFailure:
                         reason = eSME_LINK_DISCONNECTED_BY_HDD;
+                        /* fallthrough */
                     case eCsrSmeIssuedDisassocForHandoff:
                     case eCsrForcedDeauth:
                     case eCsrHddIssuedReassocToSameAP:

@@ -564,11 +564,13 @@ htt_rx_mpdu_desc_pn_hl(
                 *(word_ptr + 3) = rx_desc->pn_127_96;
                 /* bits 63:0 */
                 *(word_ptr + 2) = rx_desc->pn_95_64;
+                /* fallthrough */
             case 48:
                 /* bits 48:0
                  * copy 64 bits
                  */
                 *(word_ptr + 1) = rx_desc->u0.pn_63_32;
+                /* fallthrough */
             case 24:
                 /* bits 23:0
                  * copy 32 bits

@@ -490,6 +490,7 @@ limHandleCFGparamUpdate(tpAniSirGlobal pMac, tANI_U32 cfgId)
                 }
             }
         }
+        /* fallthrough */
     case WNI_CFG_MAX_PS_POLL:
     case WNI_CFG_NUM_BEACON_PER_RSSI_AVERAGE:
     case WNI_CFG_MIN_RSSI_THRESHOLD:

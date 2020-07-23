@@ -6197,6 +6197,7 @@ limProcessSmeReqMessages(tpAniSirGlobal pMac, tpSirMsgQ pMsg)
              * Do not add BREAK here
              */
 #ifdef FEATURE_OEM_DATA_SUPPORT
+            /* fallthrough */
         case eWNI_SME_OEM_DATA_REQ:
 #endif
         case eWNI_SME_JOIN_REQ:
