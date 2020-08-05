@@ -74,13 +74,8 @@ __adf_os_dmamem_alloc(adf_os_device_t     osdev,
        vaddr = dma_alloc_coherent(osdev->dev, size, &lmap->seg[0].daddr,
                                   GFP_ATOMIC);
    else
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,14,0)
        vaddr = dma_alloc_noncoherent(osdev->dev, size, &lmap->seg[0].daddr,
                                      GFP_ATOMIC);
-#else
-       vaddr = dma_alloc_attrs(osdev->dev, size, &lmap->seg[0].daddr,
-                                     GFP_ATOMIC, DMA_ATTR_NON_CONSISTENT);
-#endif
 
    adf_os_assert(vaddr);
 
@@ -105,12 +100,7 @@ __adf_os_dmamem_free(adf_os_device_t    osdev, __adf_os_size_t size,
     if(coherent)
         dma_free_coherent(osdev->dev, size, vaddr, dmap->seg[0].daddr);
     else
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,14,0)
         dma_free_noncoherent(osdev->dev, size, vaddr, dmap->seg[0].daddr);
-#else
-        dma_free_attrs(osdev->dev, size, vaddr, dmap->seg[0].daddr,
-               DMA_ATTR_NON_CONSISTENT);
-#endif
 
     kfree(dmap);
 }

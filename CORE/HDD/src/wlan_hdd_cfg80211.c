@@ -1913,11 +1913,7 @@ __wlan_hdd_cfg80211_set_scanning_mac_oui(struct wiphy *wiphy,
 
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_SET_SCANNING_MAC_OUI_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     NULL)) {
-#else
-                    NULL, NULL)) {
-#endif
         hddLog(LOGE, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -2034,11 +2030,7 @@ __wlan_hdd_cfg80211_get_concurrency_matrix(struct wiphy *wiphy,
         return ret;
 
     if (nla_parse(tb, MAX_CONCURRENT_MATRIX,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                   data, data_len, wlan_hdd_get_concurrency_matrix_policy)) {
-#else
-                  data, data_len, wlan_hdd_get_concurrency_matrix_policy, NULL)) {
-#endif
         hddLog(LOGE, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -2191,11 +2183,7 @@ __wlan_hdd_cfg80211_set_ext_roam_params(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_ROAMING_PARAM_MAX,
 		data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		wlan_hdd_set_roam_param_policy)) {
-#else
-		wlan_hdd_set_roam_param_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -2234,11 +2222,7 @@ __wlan_hdd_cfg80211_set_ext_roam_params(struct wiphy *wiphy,
 				if (nla_parse(tb2,
 					QCA_WLAN_VENDOR_ATTR_ROAM_SUBCMD_MAX,
 					nla_data(curr_attr), nla_len(curr_attr),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 					wlan_hdd_set_roam_param_policy)) {
-#else
-					wlan_hdd_set_roam_param_policy, NULL)) {
-#endif
 					hddLog(LOGE, FL("nla_parse failed"));
 					goto fail;
 				}
@@ -2402,11 +2386,7 @@ __wlan_hdd_cfg80211_set_ext_roam_params(struct wiphy *wiphy,
 			if (nla_parse(tb2,
 				QCA_WLAN_VENDOR_ATTR_ROAMING_PARAM_MAX,
 				nla_data(curr_attr), nla_len(curr_attr),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 				wlan_hdd_set_roam_param_policy)) {
-#else
-				wlan_hdd_set_roam_param_policy, NULL)) {
-#endif
 				hddLog(LOGE, FL("nla_parse failed"));
 				goto fail;
 			}
@@ -2468,11 +2448,7 @@ __wlan_hdd_cfg80211_set_ext_roam_params(struct wiphy *wiphy,
 				if (nla_parse(tb2,
 					QCA_WLAN_VENDOR_ATTR_ROAMING_PARAM_MAX,
 					nla_data(curr_attr), nla_len(curr_attr),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 					wlan_hdd_set_roam_param_policy)) {
-#else
-					wlan_hdd_set_roam_param_policy, NULL)) {
-#endif
 					hddLog(LOGE, FL("nla_parse failed"));
 					goto fail;
 				}
@@ -2930,11 +2906,7 @@ static int __wlan_hdd_cfg80211_extscan_get_capabilities(struct wiphy *wiphy,
     }
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_extscan_config_policy)) {
-#else
-                    wlan_hdd_extscan_config_policy, NULL)) {
-#endif
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -3076,11 +3048,7 @@ static int __wlan_hdd_cfg80211_extscan_get_cached_results(struct wiphy *wiphy,
 		return -ENOTSUPP;
 	}
 	if (nla_parse(tb, PARAM_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			wlan_hdd_extscan_config_policy)) {
-#else
-			wlan_hdd_extscan_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -3216,11 +3184,7 @@ static int __wlan_hdd_cfg80211_extscan_set_bssid_hotlist(struct wiphy *wiphy,
 
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_extscan_config_policy)) {
-#else
-                    wlan_hdd_extscan_config_policy, NULL)) {
-#endif
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -3282,11 +3246,7 @@ static int __wlan_hdd_cfg80211_extscan_set_bssid_hotlist(struct wiphy *wiphy,
 
         if (nla_parse(tb2, QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                 nla_data(apTh), nla_len(apTh),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                 wlan_hdd_extscan_config_policy)) {
-#else
-                wlan_hdd_extscan_config_policy, NULL)) {
-#endif
             hddLog(LOGE, FL("nla_parse failed"));
             goto fail;
         }
@@ -3421,11 +3381,7 @@ static int __wlan_hdd_cfg80211_extscan_set_significant_change(
 
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_extscan_config_policy)) {
-#else
-                    wlan_hdd_extscan_config_policy, NULL)) {
-#endif
         hddLog(LOGE, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -3508,11 +3464,7 @@ static int __wlan_hdd_cfg80211_extscan_set_significant_change(
         if (nla_parse(tb2,
                 QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                 nla_data(apTh), nla_len(apTh),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                 wlan_hdd_extscan_config_policy)) {
-#else
-                wlan_hdd_extscan_config_policy, NULL)) {
-#endif
             hddLog(LOGE, FL("nla_parse failed"));
             goto fail;
         }
@@ -3642,11 +3594,7 @@ static int __wlan_hdd_cfg80211_extscan_get_valid_channels(struct wiphy *wiphy,
 
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                   data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                   wlan_hdd_extscan_config_policy)) {
-#else
-                  wlan_hdd_extscan_config_policy, NULL)) {
-#endif
         hddLog(LOGE, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -3897,11 +3845,7 @@ static int hdd_extscan_start_fill_bucket_channel_spec(
 		if (nla_parse(bucket,
 			      QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
 			      nla_data(buckets), nla_len(buckets),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			      wlan_hdd_extscan_config_policy)) {
-#else
-			      wlan_hdd_extscan_config_policy, NULL)) {
-#endif
 			hddLog(LOGE, FL("nla_parse failed"));
 			return -EINVAL;
 		}
@@ -4124,11 +4068,7 @@ static int hdd_extscan_start_fill_bucket_channel_spec(
 			if (nla_parse(channel,
 				QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
 				nla_data(channels), nla_len(channels),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 				wlan_hdd_extscan_config_policy)) {
-#else
-				wlan_hdd_extscan_config_policy, NULL)) {
-#endif
 				hddLog(LOGE, FL("nla_parse failed"));
 				return -EINVAL;
 			}
@@ -4344,11 +4284,7 @@ static int __wlan_hdd_cfg80211_extscan_start(struct wiphy *wiphy,
 	}
 
 	if (nla_parse(tb, PARAM_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		wlan_hdd_extscan_config_policy)) {
-#else
-		wlan_hdd_extscan_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -4562,11 +4498,7 @@ static int __wlan_hdd_cfg80211_extscan_stop(struct wiphy *wiphy,
 		return -ENOTSUPP;
 	}
 	if (nla_parse(tb, PARAM_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			wlan_hdd_extscan_config_policy)) {
-#else
-			wlan_hdd_extscan_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -4686,11 +4618,7 @@ static int __wlan_hdd_cfg80211_extscan_reset_bssid_hotlist(struct wiphy *wiphy,
     }
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_extscan_config_policy)) {
-#else
-                    wlan_hdd_extscan_config_policy, NULL)) {
-#endif
         hddLog(LOGE, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -4805,11 +4733,7 @@ static int __wlan_hdd_cfg80211_extscan_reset_significant_change(
     }
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_extscan_config_policy)) {
-#else
-                    wlan_hdd_extscan_config_policy, NULL)) {
-#endif
         hddLog(LOGE, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -4933,11 +4857,7 @@ static int hdd_extscan_epno_fill_network_list(
 
 		if (nla_parse(network, QCA_WLAN_VENDOR_ATTR_PNO_MAX,
 			      nla_data(networks), nla_len(networks),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			      wlan_hdd_pno_config_policy)) {
-#else
-			      wlan_hdd_pno_config_policy, NULL)) {
-#endif
 			hddLog(LOGE, FL("nla_parse failed"));
 			return -EINVAL;
 		}
@@ -5032,11 +4952,7 @@ static int __wlan_hdd_cfg80211_set_epno_list(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_PNO_MAX,
 		      data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      wlan_hdd_pno_config_policy)) {
-#else
-		      wlan_hdd_pno_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -5251,11 +5167,7 @@ static int hdd_extscan_passpoint_fill_network_list(
 		if (nla_parse(network,
 			QCA_WLAN_VENDOR_ATTR_PNO_MAX,
 			nla_data(networks), nla_len(networks),
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			wlan_hdd_pno_config_policy)) {
-#else
-			wlan_hdd_pno_config_policy, NULL)) {
-#endif
 			hddLog(LOGE, FL("nla_parse failed"));
 			return -EINVAL;
 		}
@@ -5355,11 +5267,7 @@ static int __wlan_hdd_cfg80211_set_passpoint_list(struct wiphy *wiphy,
 	}
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_PNO_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		wlan_hdd_pno_config_policy)) {
-#else
-		wlan_hdd_pno_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -5480,11 +5388,7 @@ static int __wlan_hdd_cfg80211_reset_passpoint_list(struct wiphy *wiphy,
 	}
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_PNO_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		wlan_hdd_extscan_config_policy)) {
-#else
-		wlan_hdd_extscan_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -6707,11 +6611,7 @@ static int __wlan_hdd_cfg80211_ll_stats_ext_set_param(struct wiphy *wiphy,
 	       data_len);
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_MAX,
 		      (struct nlattr *)data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_ll_ext_policy)) {
-#else
-		      qca_wlan_vendor_ll_ext_policy, NULL)) {
-#endif
 		hddLog(VOS_TRACE_LEVEL_ERROR,
 		       FL("maximum attribute not present"));
 		return -EINVAL;
@@ -7701,11 +7601,7 @@ static int __wlan_hdd_cfg80211_ll_stats_set(struct wiphy *wiphy,
 
     if (nla_parse(tb_vendor, QCA_WLAN_VENDOR_ATTR_LL_STATS_SET_MAX,
                   (struct nlattr *)data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                   data_len, qca_wlan_vendor_ll_set_policy))
-#else
-                  data_len, qca_wlan_vendor_ll_set_policy, NULL))
-#endif
     {
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("maximum attribute not present"));
         return -EINVAL;
@@ -7842,11 +7738,7 @@ static int __wlan_hdd_cfg80211_ll_stats_get(struct wiphy *wiphy,
 
     if (nla_parse(tb_vendor, QCA_WLAN_VENDOR_ATTR_LL_STATS_GET_MAX,
                   (struct nlattr *)data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                   data_len, qca_wlan_vendor_ll_get_policy))
-#else
-                  data_len, qca_wlan_vendor_ll_get_policy, NULL))
-#endif
     {
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("max attribute not present"));
         return -EINVAL;
@@ -7971,11 +7863,7 @@ static int __wlan_hdd_cfg80211_ll_stats_clear(struct wiphy *wiphy,
 
     if (nla_parse(tb_vendor, QCA_WLAN_VENDOR_ATTR_LL_STATS_CLR_MAX,
                   (struct nlattr *)data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                   data_len, qca_wlan_vendor_ll_clr_policy))
-#else
-                  data_len, qca_wlan_vendor_ll_clr_policy, NULL))
-#endif
     {
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("STATS_CLR_MAX is not present"));
         return -EINVAL;
@@ -8321,11 +8209,7 @@ __wlan_hdd_cfg80211_get_wifi_info(struct wiphy *wiphy,
 		return -EINVAL;
 
 	if (nla_parse(tb_vendor, QCA_WLAN_VENDOR_ATTR_WIFI_INFO_GET_MAX, data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      data_len, qca_wlan_vendor_get_wifi_info_policy)) {
-#else
-		      data_len, qca_wlan_vendor_get_wifi_info_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("WIFI_INFO_GET NL CMD parsing failed"));
 		return -EINVAL;
 	}
@@ -8764,11 +8648,7 @@ __wlan_hdd_cfg80211_thermal_cmd(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_THERMAL_CMD_VALUE,
 			   data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			   qca_wlan_vendor_thermal_cmd_policy)) {
-#else
-			   qca_wlan_vendor_thermal_cmd_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -9088,11 +8968,7 @@ static int __wlan_hdd_cfg80211_exttdls_get_status(struct wiphy *wiphy,
     }
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_TDLS_GET_STATUS_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_tdls_config_get_status_policy)) {
-#else
-                    wlan_hdd_tdls_config_get_status_policy, NULL)) {
-#endif
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid attribute"));
         return -EINVAL;
     }
@@ -9279,11 +9155,7 @@ static int __wlan_hdd_cfg80211_exttdls_enable(struct wiphy *wiphy,
     }
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_TDLS_ENABLE_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_tdls_config_enable_policy)) {
-#else
-                    wlan_hdd_tdls_config_enable_policy, NULL)) {
-#endif
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -9399,11 +9271,7 @@ static int __wlan_hdd_cfg80211_exttdls_disable(struct wiphy *wiphy,
     }
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_TDLS_DISABLE_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_tdls_config_disable_policy)) {
-#else
-                    wlan_hdd_tdls_config_disable_policy, NULL)) {
-#endif
         hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid ATTR"));
         return -EINVAL;
     }
@@ -9589,11 +9457,7 @@ static int __wlan_hdd_cfg80211_disable_dfs_chan_scan(struct wiphy *wiphy,
 
     if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_SET_NO_DFS_FLAG_MAX,
                     data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                     wlan_hdd_set_no_dfs_flag_config_policy)) {
-#else
-                    wlan_hdd_set_no_dfs_flag_config_policy, NULL)) {
-#endif
         hddLog(LOGE, FL("invalid attr"));
         return -EINVAL;
     }
@@ -10213,11 +10077,7 @@ static int __wlan_hdd_cfg80211_do_acs(struct wiphy *wiphy,
 	vos_mem_zero(&sap_config->acs_cfg, sizeof(struct sap_acs_cfg));
 
 	status = nla_parse(tb, QCA_WLAN_VENDOR_ATTR_ACS_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 						wlan_hdd_cfg80211_do_acs_policy);
-#else
-						wlan_hdd_cfg80211_do_acs_policy, NULL);
-#endif
 	if (status) {
 		hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid ATTR"));
 		goto out;
@@ -10911,11 +10771,7 @@ static int __wlan_hdd_cfg80211_wifi_configuration_set(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_CONFIG_MAX,
 		      data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      wlan_hdd_wifi_config_policy)) {
-#else
-		      wlan_hdd_wifi_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("invalid attr"));
 		return -EINVAL;
 	}
@@ -11526,11 +11382,7 @@ __wlan_hdd_cfg80211_wifi_configuration_get(struct wiphy *wiphy,
 		return -EINVAL;
 
 	if (nla_parse(tb_vendor, QCA_WLAN_VENDOR_ATTR_CONFIG_MAX, data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      data_len, wlan_hdd_wifi_config_policy)) {
-#else
-		      data_len, wlan_hdd_wifi_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("WIFI_CFG_GET NL CMD parsing failed"));
 		return -EINVAL;
 	}
@@ -11762,11 +11614,7 @@ static int __wlan_hdd_cfg80211_wifi_logger_start(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_WIFI_LOGGER_START_MAX,
 		      data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_wifi_logger_start_policy)) {
-#else
-		      qca_wlan_vendor_wifi_logger_start_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid attribute"));
 		return -EINVAL;
 	}
@@ -11866,11 +11714,7 @@ static int __wlan_hdd_cfg80211_get_link_properties(struct wiphy *wiphy,
 		return -EINVAL;
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_attr_policy)) {
-#else
-		      qca_wlan_vendor_attr_policy, NULL)) {
-#endif
 		hddLog(VOS_TRACE_LEVEL_ERROR, FL("Invalid attribute"));
 		return -EINVAL;
 	}
@@ -12096,11 +11940,7 @@ static int __wlan_hdd_cfg80211_wifi_logger_get_ring_data(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_WIFI_LOGGER_GET_RING_DATA_MAX,
 			data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			qca_wlan_vendor_wifi_logger_get_ring_data_policy)) {
-#else
-			qca_wlan_vendor_wifi_logger_get_ring_data_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid attribute"));
 		return -EINVAL;
 	}
@@ -12505,11 +12345,7 @@ __wlan_hdd_cfg80211_offloaded_packets(struct wiphy *wiphy,
 		return -ENOTSUPP;
 	}
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 	if (nla_parse(tb, PARAM_MAX, data, data_len, policy)) {
-#else
-	if (nla_parse(tb, PARAM_MAX, data, data_len, policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -12619,11 +12455,7 @@ __wlan_hdd_cfg80211_monitor_rssi(struct wiphy *wiphy,
 		return -ENOTSUPP;
 	}
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 	if (nla_parse(tb, PARAM_MAX, data, data_len, policy)) {
-#else
-	if (nla_parse(tb, PARAM_MAX, data, data_len, policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -12882,11 +12714,7 @@ __wlan_hdd_cfg80211_set_ns_offload(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_ND_OFFLOAD_MAX,
 			(struct nlattr *)data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			data_len, ns_offload_set_policy)) {
-#else
-			data_len, ns_offload_set_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("nla_parse failed"));
 		return -EINVAL;
 	}
@@ -12962,11 +12790,7 @@ __wlan_hdd_cfg80211_setband(struct wiphy *wiphy,
 	if (ret)
 		return ret;
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_MAX, data, data_len, policy)) {
-#else
-	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_MAX, data, data_len, policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -13319,11 +13143,7 @@ __wlan_hdd_cfg80211_bpf_offload(struct wiphy *wiphy,
 	}
 
 	if (nla_parse(tb, BPF_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 				wlan_hdd_bpf_offload_policy)) {
-#else
-				wlan_hdd_bpf_offload_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -13773,11 +13593,7 @@ __wlan_hdd_cfg80211_acs_dfs_mode(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_ACS_DFS_MAX,
 				data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 				wlan_hdd_set_acs_dfs_config_policy)) {
-#else
-				wlan_hdd_set_acs_dfs_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("invalid attr"));
 		return -EINVAL;
 	}
@@ -13950,11 +13766,7 @@ __wlan_hdd_cfg80211_sta_roam_policy(struct wiphy *wiphy,
 		return -EINVAL;
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_STA_CONNECT_ROAM_POLICY_MAX,
 				data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 				wlan_hdd_set_sta_roam_config_policy)) {
-#else
-				wlan_hdd_set_sta_roam_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("invalid attr"));
 		return -EINVAL;
         }
@@ -14207,11 +14019,7 @@ __wlan_hdd_cfg80211_sap_configuration_set(struct wiphy *wiphy,
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_SAP_CONFIG_MAX,
 				data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 				wlan_hdd_sap_config_policy)) {
-#else
-				wlan_hdd_sap_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("invalid attr"));
 		return -EINVAL;
 	}
@@ -15140,11 +14948,7 @@ __hdd_cfg80211_get_station_cmd(struct wiphy *wiphy,
 		goto out;
 
 	status = nla_parse(tb, STATION_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			   hdd_get_station_policy);
-#else
-			   hdd_get_station_policy, NULL);
-#endif
 	if (status) {
 		hddLog(LOGE, FL("Invalid ATTR"));
 		goto out;
@@ -15290,11 +15094,7 @@ static int __wlan_hdd_cfg80211_fast_roaming(struct wiphy *wiphy,
 	}
 
 	ret = nla_parse(tb, QCA_WLAN_VENDOR_ATTR_MAX, data, data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			qca_wlan_vendor_attr);
-#else
-			qca_wlan_vendor_attr, NULL);
-#endif
 	if (ret) {
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
@@ -15404,11 +15204,7 @@ static int __wlan_hdd_cfg80211_txpower_scale(struct wiphy *wiphy,
 	adapter = WLAN_HDD_GET_PRIV_PTR(dev);
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_TXPOWER_SCALE_MAX,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      data, data_len, txpower_scale_policy)) {
-#else
-		      data, data_len, txpower_scale_policy, NULL)) {
-#endif
 		hddLog(LOGE, "Invalid ATTR");
 		return -EINVAL;
 	}
@@ -15494,11 +15290,7 @@ static int __wlan_hdd_cfg80211_txpower_scale_decr_db(struct wiphy *wiphy,
 	adapter = WLAN_HDD_GET_PRIV_PTR(dev);
 
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_TXPOWER_SCALE_DECR_DB_MAX,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      data, data_len, txpower_scale_decr_db_policy)) {
-#else
-		      data, data_len, txpower_scale_decr_db_policy, NULL)) {
-#endif
 		hddLog(LOGE, "Invalid ATTR");
 		return -EINVAL;
 	}
@@ -15621,11 +15413,7 @@ static int __wlan_hdd_cfg80211_get_chain_rssi(struct wiphy *wiphy,
 		return retval;
 
 	/* nla validation doesn't do exact lengths, do the validation later */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 	retval = nla_parse(tb, QCA_WLAN_VENDOR_ATTR_MAX, data, data_len, NULL);
-#else
-	retval = nla_parse(tb, QCA_WLAN_VENDOR_ATTR_MAX, data, data_len, NULL, NULL);
-#endif
 	if (retval) {
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return retval;
@@ -15744,11 +15532,7 @@ __wlan_hdd_cfg80211_peer_flush_pending(struct wiphy *wiphy,
 		return -EINVAL;
 	}
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_FLUSH_PENDING_MAX, data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      data_len, qca_wlan_vendor_peer_flush_pending_policy)) {
-#else
-		      data_len, qca_wlan_vendor_peer_flush_pending_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid attribute"));
 		return -EINVAL;
 	}
@@ -16568,11 +16352,7 @@ int wlan_hdd_cfg80211_init(struct device *dev,
 #ifdef FEATURE_WLAN_SCAN_PNO
     if (pCfg->configPNOScanSupport)
     {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
-		wiphy->flags |= WIPHY_FLAG_SUPPORTS_SCHED_SCAN;
-#else
-		wiphy->max_sched_scan_reqs = 1;
-#endif
+        wiphy->flags |= WIPHY_FLAG_SUPPORTS_SCHED_SCAN;
         wiphy->max_sched_scan_ssids = SIR_PNO_MAX_SUPP_NETWORKS;
         wiphy->max_match_sets       = SIR_PNO_MAX_SUPP_NETWORKS;
         wiphy->max_sched_scan_ie_len = SIR_MAC_MAX_IE_LENGTH;
@@ -16898,7 +16678,6 @@ void wlan_hdd_cfg80211_update_wiphy_caps(struct wiphy *wiphy)
     * control comes here. Here just we need to clear it if firmware doesn't
     * have PNO support. */
    if (!pCfg->PnoOffload) {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
        wiphy->flags &= ~WIPHY_FLAG_SUPPORTS_SCHED_SCAN;
 #else
        wiphy->max_sched_scan_reqs = 0;
@@ -28690,11 +28469,7 @@ void hdd_cfg80211_sched_scan_done_callback(void *callbackContext,
          */
         hdd_prevent_suspend_timeout(1000, WIFI_POWER_EVENT_WAKELOCK_SCAN);
     }
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
     cfg80211_sched_scan_results(pHddCtx->wiphy);
-#else
-    cfg80211_sched_scan_results(pHddCtx->wiphy, 0);
-#endif
     VOS_TRACE(VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_INFO,
             "%s: cfg80211 scan result database updated", __func__);
 }
@@ -30611,11 +30386,7 @@ static int __wlan_hdd_cfg80211_testmode(struct wiphy *wiphy,
 
     ENTER();
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
     err = nla_parse(tb, WLAN_HDD_TM_ATTR_MAX, data, len, wlan_hdd_tm_policy);
-#else
-    err = nla_parse(tb, WLAN_HDD_TM_ATTR_MAX, data, len, wlan_hdd_tm_policy, NULL);
-#endif
     if (err) {
         hddLog(LOGE, FL("Testmode INV ATTR"));
         return err;
@@ -31279,11 +31050,7 @@ int __wlan_hdd_cfg80211_resume_wlan(struct wiphy *wiphy, bool thermal)
                  */
                 hdd_prevent_suspend_timeout(1000,
                                          WIFI_POWER_EVENT_WAKELOCK_RESUME_WLAN);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
                 cfg80211_sched_scan_results(pHddCtx->wiphy);
-#else
-                cfg80211_sched_scan_results(pHddCtx->wiphy, 0);
-#endif
             }
 
             hddLog(LOG1, FL("cfg80211 scan result database updated"));

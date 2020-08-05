@@ -990,11 +990,7 @@ static int __wlan_hdd_cfg80211_ocb_set_config(struct wiphy *wiphy,
 	/* Parse the netlink message */
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_OCB_SET_CONFIG_MAX,
 			data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 			data_len, qca_wlan_vendor_ocb_set_config_policy)) {
-#else
-			data_len, qca_wlan_vendor_ocb_set_config_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -1232,11 +1228,7 @@ static int __wlan_hdd_cfg80211_ocb_set_utc_time(struct wiphy *wiphy,
 	/* Parse the netlink message */
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_OCB_SET_UTC_TIME_MAX,
 		      data,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      data_len, qca_wlan_vendor_ocb_set_utc_time_policy)) {
-#else
-		      data_len, qca_wlan_vendor_ocb_set_utc_time_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -1361,11 +1353,7 @@ __wlan_hdd_cfg80211_ocb_start_timing_advert(struct wiphy *wiphy,
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_OCB_START_TIMING_ADVERT_MAX,
 		      data,
 		      data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_ocb_start_timing_advert_policy)) {
-#else
-		      qca_wlan_vendor_ocb_start_timing_advert_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		goto fail;
 	}
@@ -1487,11 +1475,7 @@ __wlan_hdd_cfg80211_ocb_stop_timing_advert(struct wiphy *wiphy,
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_OCB_STOP_TIMING_ADVERT_MAX,
 		      data,
 		      data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_ocb_stop_timing_advert_policy)) {
-#else
-		      qca_wlan_vendor_ocb_stop_timing_advert_policy, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		goto fail;
 	}
@@ -1854,11 +1838,7 @@ static int __wlan_hdd_cfg80211_dcc_get_stats(struct wiphy *wiphy,
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_DCC_GET_STATS_MAX,
 		      data,
 		      data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_dcc_get_stats)) {
-#else
-		      qca_wlan_vendor_dcc_get_stats, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -2024,11 +2004,7 @@ static int __wlan_hdd_cfg80211_dcc_clear_stats(struct wiphy *wiphy,
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_DCC_CLEAR_STATS_MAX,
 		      data,
 		      data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_dcc_clear_stats)) {
-#else
-		      qca_wlan_vendor_dcc_clear_stats, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
@@ -2161,11 +2137,7 @@ static int __wlan_hdd_cfg80211_dcc_update_ndl(struct wiphy *wiphy,
 	if (nla_parse(tb, QCA_WLAN_VENDOR_ATTR_DCC_UPDATE_NDL_MAX,
 		      data,
 		      data_len,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
 		      qca_wlan_vendor_dcc_update_ndl)) {
-#else
-		      qca_wlan_vendor_dcc_update_ndl, NULL)) {
-#endif
 		hddLog(LOGE, FL("Invalid ATTR"));
 		return -EINVAL;
 	}
