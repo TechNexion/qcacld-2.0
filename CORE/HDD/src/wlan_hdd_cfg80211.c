@@ -16293,7 +16293,7 @@ const struct wiphy_vendor_command hdd_wiphy_vendor_commands[] =
 		.flags = WIPHY_VENDOR_CMD_NEED_WDEV |
 			WIPHY_VENDOR_CMD_NEED_NETDEV,
 		.doit = wlan_hdd_cfg80211_thermal_cmd,
-		vendor_command_policy(wlan_hdd_thermal_mitigation_policy,
+		vendor_command_policy(qca_wlan_vendor_thermal_cmd_policy,
 				      QCA_WLAN_VENDOR_ATTR_THERMAL_CMD_MAX)
 	},
 #endif /* FEATURE_WLAN_THERMAL_SHUTDOWN */
