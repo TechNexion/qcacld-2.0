@@ -4255,6 +4255,7 @@ wlan_hdd_au_reset_txrx_stat(hdd_adapter_t * pAdapter,
 struct au_tx_sched_priv {
 	eHalStatus status;
 	int tx_sched;
+	int rtscts_config;
 };
 
 static int
@@ -4303,6 +4304,7 @@ void hdd_au_tx_sched_ind_cb(struct sir_au_get_tx_sched_resp *au_tx_sched, void *
 
 	priv->status = eHAL_STATUS_SUCCESS;
 	priv->tx_sched = au_tx_sched->tx_sched;
+	priv->rtscts_config = au_tx_sched->rtscts_config;
 	hdd_request_complete(request);
 	hdd_request_put(request);
 
@@ -4366,6 +4368,72 @@ wlan_hdd_au_get_tx_sched(hdd_adapter_t * pAdapter, int *value)
 	return ret;
 }
 
+static int
+wlan_hdd_au_get_cts(hdd_adapter_t * pAdapter,
+		union iwreq_data *wrqu, char *extra)
+{
+	int ret = 0, length = 0;
+	void *cookie;
+	struct hdd_request *request = NULL;
+	struct au_tx_sched_priv *priv;
+	static const struct hdd_request_params params = {
+		.priv_size = sizeof(*priv),
+		.timeout_ms = WLAN_WAIT_TIME_STATS,
+	};
+
+	if (NULL == pAdapter) {
+		hddLog(VOS_TRACE_LEVEL_ERROR, "%s: pAdapter is NULL", __func__);
+		return VOS_STATUS_E_FAULT;
+	}
+
+	request = hdd_request_alloc(&params);
+	if (!request) {
+		hddLog(VOS_TRACE_LEVEL_ERROR,
+			"%s: Request allocation failure", __func__);
+		return VOS_STATUS_E_NOMEM;
+	}
+	cookie = hdd_request_cookie(request);
+	priv = hdd_request_priv(request);
+	priv->status = eHAL_STATUS_FAILURE;
+
+	ret = sme_au_get_tx_sched(WLAN_HDD_GET_HAL_CTX(pAdapter),
+				    pAdapter->sessionId,
+				    cookie,
+				    hdd_au_tx_sched_ind_cb);
+
+	if (ret) {
+		hddLog(LOGW, FL("Get group cts config fail"));
+	} else {
+		/* request was sent -- wait for the response */
+		ret = hdd_request_wait_for_response(request);
+		if (ret) {
+			hddLog(VOS_TRACE_LEVEL_ERROR,
+				FL("timed out while retrieving group cts config "));
+			/* we'll returned a cached value below */
+		} else {
+			/* update the adapter with the fresh results */
+			priv = hdd_request_priv(request);
+
+			if (priv->status != eHAL_STATUS_SUCCESS)
+				ret = -EINVAL;
+		}
+	}
+
+	if (ret == eHAL_STATUS_SUCCESS) {
+		length += scnprintf(extra+length, WE_MAX_STR_LEN - length,
+			"\ncts_mode:%d\n", (priv->rtscts_config >> 16));
+		length += scnprintf(extra+length, WE_MAX_STR_LEN - length,
+			"profile:0x%02x\n", (priv->rtscts_config & 0xFF));
+	}
+	else
+		scnprintf(extra, WE_MAX_STR_LEN, "\nFail, ret:%d\n", ret);
+
+
+        wrqu->data.length = strlen(extra)+1;
+	hdd_request_put(request);
+
+	return ret;
+}
 #endif
 
 int
@@ -6297,6 +6365,10 @@ static __iw_get_char_setnone(struct net_device *dev,
         {
             return wlan_hdd_au_reset_txrx_stat(pAdapter, wrqu,
                                extra);
+        }
+        case QCSAP_AUDIO_AGGR_GET_CTS:
+        {
+            return wlan_hdd_au_get_cts(pAdapter, wrqu, extra);
         }
 #endif
     }
@@ -8554,6 +8626,11 @@ static const struct iw_priv_args hostapd_private_args[] = {
     {   QCSAP_AUDIO_AGGR_SET_CTS,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2,
         0, "au_set_cts"},
+
+    {   QCSAP_AUDIO_AGGR_GET_CTS,
+         0,
+        IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN,
+        "au_get_cts" },
 
     {   QCSAP_AUDIO_AGGR_SET_TX_SCHED,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,

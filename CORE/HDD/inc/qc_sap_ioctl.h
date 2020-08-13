@@ -166,6 +166,7 @@ typedef struct
 #define QCSAP_GET_PS_TDCC                       3
 #define QCSAP_AUDIO_AGGR_GET_TXRX_STAT          4
 #define QCSAP_AUDIO_AGGR_RESET_TXRX_STAT        5
+#define QCSAP_AUDIO_AGGR_GET_CTS                6
 
 #define QCSAP_IOCTL_CLR_STATS                   (SIOCIWFIRSTPRIV+14)
 #define QCSAP_IOCTL_PRIV_SET_THREE_INT_GET_NONE (SIOCIWFIRSTPRIV+15)
