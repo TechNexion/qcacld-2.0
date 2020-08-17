@@ -15343,6 +15343,16 @@ eHalStatus sme_ProcessChannelChangeResp(tpAniSirGlobal pMac,
 
         return status;
     }
+    if (CSR_IS_ROAM_SUBSTATE_STOP_BSS_REQ( pMac, SessionId))
+    {
+        VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_INFO_MED,
+                "sapdfs: Abort channel change in STOP_BSS_REQ state on sessionId[%d]",
+                SessionId);
+        status = eHAL_STATUS_FAILURE;
+        vos_mem_free(roam_info);
+
+        return status;
+    }
     if (msg_type == eWNI_SME_CHANNEL_CHANGE_RSP)
     {
         roam_info->channelChangeRespEvent->sessionId = SessionId;

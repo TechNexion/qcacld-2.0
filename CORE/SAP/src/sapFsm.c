@@ -4896,6 +4896,13 @@ sapFsm
                     vosStatus = sapGotoDisconnecting(sapContext);
                 }
             }
+            else if (msg == eSAP_HDD_STOP_INFRA_BSS)
+            {
+                VOS_TRACE( VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_INFO_MED,
+                          "In %s, in state %s, event msg %d",
+                          __func__, "eSAP_DISCONNECTING ", msg);
+                vosStatus = sapGotoDisconnecting(sapContext);
+            }
             else
             {
                 VOS_TRACE( VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_ERROR,
