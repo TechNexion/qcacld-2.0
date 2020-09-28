@@ -17658,6 +17658,15 @@ int hdd_wlan_startup(struct device *dev, v_VOID_t *hif_sc)
                                   rtnl_lock_enable);
 #endif
 
+      if (pAdapter != NULL &&
+          strlen(pHddCtx->cfg_ini->enable_concurrent_sta)) {
+         pAdapter = hdd_open_adapter(pHddCtx, WLAN_HDD_INFRA_STATION,
+                                     pHddCtx->cfg_ini->enable_concurrent_sta,
+                                     wlan_hdd_get_intf_addr(pHddCtx),
+                                     NET_NAME_UNKNOWN,
+                                     rtnl_lock_enable);
+      }
+
 #ifdef WLAN_OPEN_P2P_INTERFACE
     if(VOS_MONITOR_MODE != vos_get_conparam()){
       /* Open P2P device interface */

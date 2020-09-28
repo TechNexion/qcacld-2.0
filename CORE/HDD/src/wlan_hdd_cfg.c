@@ -5481,6 +5481,10 @@ REG_TABLE_ENTRY g_registry_table[] =
 		CFG_AID_BY_USER_MIN,
 		CFG_AID_BY_USER_MAX),
 
+	REG_VARIABLE_STRING(CFG_ENABLE_CONCURRENT_STA_NAME, WLAN_PARAM_String,
+			    hdd_config_t, enable_concurrent_sta,
+			    VAR_FLAGS_OPTIONAL,
+			    (void *)CFG_ENABLE_CONCURRENT_STA_DEFAULT),
 };
 
 

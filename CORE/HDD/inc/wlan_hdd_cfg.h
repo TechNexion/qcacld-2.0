@@ -5640,6 +5640,10 @@ FG_BTC_BT_INTERVAL_PAGE_P2P_STA_DEFAULT
 #define CFG_AID_BY_USER_DEFAULT (0)
 #define CFG_AID_BY_USER_MIN     (0)
 #define CFG_AID_BY_USER_MAX     (1)
+
+#define CFG_CONCURRENT_IFACE_MAX_LEN      16
+#define CFG_ENABLE_CONCURRENT_STA_NAME    "gEnableConcurrentSTA"
+#define CFG_ENABLE_CONCURRENT_STA_DEFAULT ""
 /*---------------------------------------------------------------------------
   Type declarations
   -------------------------------------------------------------------------*/
@@ -6581,6 +6585,7 @@ struct hdd_config {
    uint32_t  mask_tx_legacy_rate;
    uint32_t  mask_tx_ht_rate;
    bool aid_by_user;
+   uint8_t enable_concurrent_sta[CFG_CONCURRENT_IFACE_MAX_LEN];
 };
 
 typedef struct hdd_config hdd_config_t;
