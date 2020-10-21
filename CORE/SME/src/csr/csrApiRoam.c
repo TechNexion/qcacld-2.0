@@ -17123,6 +17123,7 @@ static void csrInitSession( tpAniSirGlobal pMac, tANI_U32 sessionId )
     pSession->sessionId = CSR_SESSION_ID_INVALID;
     pSession->callback = NULL;
     pSession->pContext = NULL;
+    pSession->bssParams.bssPersona = 0;
     pSession->connectState = eCSR_ASSOC_STATE_TYPE_NOT_CONNECTED;
     csrFreeRoamProfile( pMac, sessionId );
     csrRoamFreeConnectProfile(pMac, &pSession->connectedProfile);
