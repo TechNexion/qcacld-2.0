@@ -110,9 +110,8 @@ static INLINE void RestoreTxPacket(HTC_TARGET *target, HTC_PACKET *pPacket)
     if (pPacket->PktInfo.AsTx.Flags & HTC_TX_PACKET_FLAG_FIXUP_NETBUF) {
         adf_nbuf_unmap(target->osdev, netbuf, ADF_OS_DMA_TO_DEVICE);
         pPacket->PktInfo.AsTx.Flags &= ~HTC_TX_PACKET_FLAG_FIXUP_NETBUF;
+        adf_nbuf_pull_head(netbuf, sizeof(HTC_FRAME_HDR));
     }
-    adf_nbuf_pull_head(netbuf, sizeof(HTC_FRAME_HDR));
-
 }
 
 static void DoSendCompletion(HTC_ENDPOINT       *pEndpoint,
