@@ -1644,11 +1644,12 @@ static v_U8_t sapRandomChannelSel(ptSapContext sapContext)
 #ifdef WLAN_ENABLE_CHNL_MATRIX_RESTRICTION
         VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_ERROR,
                   FL("sapdfs: Processing temp channel list against NOL."));
-        if (VOS_STATUS_SUCCESS != sapMarkChannelsLeakingIntoNOL(sapContext,
+        if ((sapContext->channel < RF_CHAN_149)
+            && (VOS_STATUS_SUCCESS != sapMarkChannelsLeakingIntoNOL(sapContext,
                                                                cbModeCurrent,
                                                                pNol,
                                                                valid_chnl_count,
-                                                               tempChannels)) {
+                                                               tempChannels))) {
             vos_mem_free(tempChannels);
             return target_channel;
         }
