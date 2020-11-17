@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, 2017-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012, 2014, 2017-2018, 2020 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -255,14 +255,14 @@ ol_tx_pdev_reset_driver_del_ack(void *pdev)
 #ifdef QCA_SUPPORT_TXRX_HL_BUNDLE
 void
 ol_tx_vdev_set_bundle_require(uint8_t vdev_id, unsigned long tx_packets,
-			uint32_t time_in_ms, uint32_t high_th, uint32_t low_th);
+			uint32_t time_in_ms, uint64_t high_th, uint64_t low_th);
 void
 ol_tx_pdev_reset_bundle_require(void* pdev);
 
 #else
 static inline void
 ol_tx_vdev_set_bundle_require(uint8_t vdev_id, unsigned long tx_packets,
-			uint32_t time_in_ms, uint32_t high_th, uint32_t low_th)
+			uint32_t time_in_ms, uint64_t high_th, uint64_t low_th)
 {
 	return;
 }

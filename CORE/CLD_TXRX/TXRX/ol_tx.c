@@ -1987,7 +1987,7 @@ ol_tx_pdev_reset_bundle_require(void* pdev_handle)
  */
 void
 ol_tx_vdev_set_bundle_require(uint8_t vdev_id, unsigned long tx_bytes,
-			uint32_t time_in_ms, uint32_t high_th, uint32_t low_th)
+			uint32_t time_in_ms, uint64_t high_th, uint64_t low_th)
 {
 	struct ol_txrx_vdev_t* vdev = ol_txrx_get_vdev_from_vdev_id(vdev_id);
 	bool old_bundle_required;
