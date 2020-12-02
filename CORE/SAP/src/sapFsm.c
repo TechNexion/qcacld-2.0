@@ -1193,7 +1193,7 @@ static void sapSetBitmap(chan_bonding_bitmap *pBitmap, v_U8_t channel)
             return;
         }
     }
-    VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_ERROR,
+    VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_INFO_HIGH,
               FL("Channel=%d is not in the bitmap"), channel);
 }
 
@@ -1633,7 +1633,7 @@ static v_U8_t sapRandomChannelSel(ptSapContext sapContext)
         /* prepare temp list of just the valid channels */
         for (i = 0; i < sapContext->SapAllChnlList.numChannel; i++) {
             if (sapContext->SapAllChnlList.channelList[i].valid) {
-                VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_ERROR,
+                VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_INFO_HIGH,
                           FL("sapdfs: Adding Channel = %d to temp List"),
                           sapContext->SapAllChnlList.channelList[i].channel);
                 tempChannels[j++] =
@@ -1642,7 +1642,7 @@ static v_U8_t sapRandomChannelSel(ptSapContext sapContext)
         }
 
 #ifdef WLAN_ENABLE_CHNL_MATRIX_RESTRICTION
-        VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_ERROR,
+        VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_INFO_HIGH,
                   FL("sapdfs: Processing temp channel list against NOL."));
         if ((sapContext->channel < RF_CHAN_149)
             && (VOS_STATUS_SUCCESS != sapMarkChannelsLeakingIntoNOL(sapContext,
@@ -1663,7 +1663,7 @@ static v_U8_t sapRandomChannelSel(ptSapContext sapContext)
         channelBitmap.chanBondingSet[4].startChannel = 132;
         channelBitmap.chanBondingSet[5].startChannel = 149;
         /* now loop through whatever is left of channel list */
-        VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_ERROR,
+        VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_INFO_HIGH,
                   FL("sapdfs: Moving temp channel list to final."));
         for (i = 0; i < valid_chnl_count; i++ ){
             /*

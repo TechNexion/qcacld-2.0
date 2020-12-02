@@ -1087,7 +1087,7 @@ dfsfound:
       /* Collect stats */
       dfs->ath_dfs_stats.num_radar_detects++;
       thischan = &rs->rs_chan;
-   VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_ERROR, "%s[%d]: ### RADAR FOUND ON CHANNEL %d (%d MHz) ###",__func__,__LINE__,thischan->ic_ieee,
+   VOS_TRACE(VOS_MODULE_ID_SAP, VOS_TRACE_LEVEL_INFO_HIGH, "%s[%d]: ### RADAR FOUND ON CHANNEL %d (%d MHz) ###",__func__,__LINE__,thischan->ic_ieee,
 thischan->ic_freq);
       DFS_PRINTK("Radar found on channel %d (%d MHz)",
           thischan->ic_ieee,
