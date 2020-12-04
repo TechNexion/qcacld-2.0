@@ -1087,6 +1087,7 @@ CDEFINES :=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DHTC_CRP_DEBUG \
 		-DWLAN_VOWIFI_DEBUG \
 		-DATH_SUPPORT_DFS \
+		-DBUILD_STRING="\"+${BUILD_STRING}\"" \
 		-Wno-misleading-indentation
 #-Werror is omitted
 
