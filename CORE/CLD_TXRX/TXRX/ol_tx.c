@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2014, 2016-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2014, 2016-2018, 2021 The Linux Foundation. 
+ * All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -2003,7 +2003,7 @@ ol_tx_vdev_set_bundle_require(uint8_t vdev_id, unsigned long tx_bytes,
 
 	if (old_bundle_required != vdev->bundling_reqired)
 		TXRX_PRINT(TXRX_PRINT_LEVEL_INFO1,
-			"vdev_id %d bundle_require %d tx_bytes %ld time_in_ms %d high_th %d low_th %d\n",
+			"vdev_id %d bundle_require %d tx_bytes %ld time_in_ms %d high_th %lld low_th %lld\n",
 			vdev->vdev_id, vdev->bundling_reqired, tx_bytes,
 			time_in_ms, high_th, low_th);
 }
