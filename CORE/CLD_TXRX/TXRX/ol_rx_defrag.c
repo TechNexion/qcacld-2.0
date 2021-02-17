@@ -283,6 +283,8 @@ ol_rx_reorder_store_frag(
     struct ol_rx_reorder_array_elem_t *rx_reorder_array_elem;
     u_int16_t frxseq, rxseq, seq;
     htt_pdev_handle htt_pdev = pdev->htt_pdev;
+    void *rx_desc;
+    int index;              /* unicast vs. multicast */
 
     seq = seq_num & peer->tids_rx_reorder[tid].win_sz_mask;
     adf_os_assert(seq == 0);
@@ -294,6 +296,37 @@ ol_rx_reorder_store_frag(
     fragno = adf_os_le16_to_cpu(*(u_int16_t *) mac_hdr->i_seq) &
         IEEE80211_SEQ_FRAG_MASK;
     more_frag = mac_hdr->i_fc[1] & IEEE80211_FC1_MORE_FRAG;
+
+    /*
+     * CR 2868034
+     * A broadcast or multicast frame should never be fragmented
+     * driver should drop all fragmented broadcast / multicast frames.
+     */
+    rx_desc = htt_rx_msdu_desc_retrieve(htt_pdev, frag);
+    if (htt_rx_msdu_is_wlan_mcast(htt_pdev, rx_desc)) {
+        /* Discard Mcast/Bcast single frag frames */
+        ol_rx_frames_free(htt_pdev, frag);
+
+        VOS_TRACE(VOS_MODULE_ID_TXRX, VOS_TRACE_LEVEL_ERROR,
+            "%s: QSV2020004 discard MCAST/BCAST frag frame\n\n",
+            __FUNCTION__);
+        return;
+    }
+
+    index = htt_rx_msdu_is_wlan_mcast(htt_pdev, rx_desc) ?
+                txrx_sec_mcast : txrx_sec_ucast;
+
+    if (peer->security[index].sec_type != htt_sec_type_none &&
+        !htt_rx_mpdu_is_encrypted(htt_pdev, rx_desc)) {
+        ol_rx_frames_free(htt_pdev, frag);
+
+        VOS_TRACE(VOS_MODULE_ID_TXRX, VOS_TRACE_LEVEL_ERROR,
+            "%s: QSV2020004, Unencrypted fragment received in security mode %d\n",
+            __FUNCTION__,
+            peer->security[index].sec_type);
+
+        return;
+    }
 
     if ((!more_frag) && (!fragno) && (!rx_reorder_array_elem->head)) {
         ol_rx_fraglist_insert(htt_pdev, peer,
