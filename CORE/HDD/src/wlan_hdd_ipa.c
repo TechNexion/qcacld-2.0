@@ -3009,6 +3009,7 @@ static void hdd_ipa_send_skb_to_network(adf_nbuf_t skb, hdd_adapter_t *adapter)
 #endif
 	struct hdd_ipa_priv *hdd_ipa = ghdd_ipa;
 	unsigned int cpu_index;
+	hdd_context_t *pHddCtx = NULL;
 
 	if (!adapter || adapter->magic != WLAN_HDD_ADAPTER_MAGIC) {
 		HDD_IPA_LOG(VOS_TRACE_LEVEL_INFO_LOW, "Invalid adapter: 0x%pK",
@@ -3022,6 +3023,36 @@ static void hdd_ipa_send_skb_to_network(adf_nbuf_t skb, hdd_adapter_t *adapter)
 		HDD_IPA_INCREASE_INTERNAL_DROP_COUNT(hdd_ipa);
 		adf_nbuf_free(skb);
 		return;
+	}
+
+	pHddCtx = (hdd_context_t *)adapter->pHddCtx;
+	if (pHddCtx->cfg_ini->gEnableSapEapolChecking &&
+		(adapter->device_mode == WLAN_HDD_SOFTAP ||
+		adapter->device_mode == WLAN_HDD_P2P_GO) &&
+		adf_nbuf_is_eapol_pkt(skb)) {
+
+		/* CR 2868053 */
+		HDD_IPA_LOG(VOS_TRACE_LEVEL_INFO,
+				"QSV2020005, dev, mode=%d, session=%u, %s, addr (%pM)",
+				adapter->device_mode,
+				adapter->sessionId,
+				adapter->dev->name,
+				adapter->dev->dev_addr);
+		HDD_IPA_LOG(VOS_TRACE_LEVEL_INFO,
+				"QSV2020005 pkt addr (%pM)",
+				skb->data);
+		if (adf_os_mem_cmp(adapter->dev->dev_addr,
+			skb->data, VOS_MAC_ADDR_SIZE)) {
+			/* CR 2868053, discard this EAPOL */
+			HDD_IPA_LOG(VOS_TRACE_LEVEL_ERROR,
+					"QSV2020005 discard invalid EAPOL frame, dev=%pM, "
+					"pkt_da=%pM",
+					adapter->dev->dev_addr,
+					skb->data);
+
+			adf_nbuf_free(skb);
+			return;
+		}
 	}
 
 	skb->destructor = hdd_ipa_uc_rt_debug_destructor;
@@ -3256,6 +3287,20 @@ static enum hdd_ipa_forward_type hdd_ipa_intrabss_forward(
 				"Forward packet to Tx (fw_desc=%d)", desc);
 		hdd_ipa->ipa_tx_forward++;
 
+		/*
+		* CR 2868053
+		* discard EAPOL frame for intrabss forwarding
+		*/
+		if (adf_nbuf_is_eapol_pkt(skb)) {
+			HDD_IPA_DP_LOG(VOS_TRACE_LEVEL_ERROR,
+					"QSV2020005 EAPOL forwarding discard \n");
+			/* Drop the packet*/
+			hdd_ipa->ipa_rx_internel_drop_count++;
+			hdd_ipa->ipa_rx_discard++;
+			ret = HDD_IPA_FORWARD_PKT_DISCARD;
+			goto out;
+		}
+
 		if ((desc & FW_RX_DESC_DISCARD_M)) {
 			xmit_status = hdd_softap_hard_start_xmit(
 							skb, adapter->dev);
@@ -3274,6 +3319,7 @@ static enum hdd_ipa_forward_type hdd_ipa_intrabss_forward(
 			ret = HDD_IPA_FORWARD_PKT_LOCAL_STACK;
 		}
 
+out:
 		if (NETDEV_TX_OK == xmit_status) {
 			hdd_ipa->stats.num_tx_fwd_ok++;
 		} else {
