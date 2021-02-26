@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, 2016-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2014, 2016-2018,2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -296,12 +296,17 @@ ol_rx_reorder_store_frag(
     more_frag = mac_hdr->i_fc[1] & IEEE80211_FC1_MORE_FRAG;
 
     if ((!more_frag) && (!fragno) && (!rx_reorder_array_elem->head)) {
-        ol_rx_fraglist_insert(htt_pdev, &rx_reorder_array_elem->head,
+        ol_rx_fraglist_insert(htt_pdev, peer,
+            &rx_reorder_array_elem->head,
             &rx_reorder_array_elem->tail, frag, &all_frag_present);
         adf_nbuf_set_next(frag, NULL);
         ol_rx_defrag(pdev, peer, tid, rx_reorder_array_elem->head);
         rx_reorder_array_elem->head = NULL;
         rx_reorder_array_elem->tail = NULL;
+
+        VOS_TRACE(VOS_MODULE_ID_TXRX, VOS_TRACE_LEVEL_ERROR,
+            "%s: QSV2020008 not expected behavior, but also handled\n",
+            __FUNCTION__);
         return;
     }
     if (rx_reorder_array_elem->head) {
@@ -322,7 +327,8 @@ ol_rx_reorder_store_frag(
         }
     }
 
-    ol_rx_fraglist_insert(htt_pdev, &rx_reorder_array_elem->head,
+    ol_rx_fraglist_insert(htt_pdev, peer,
+        &rx_reorder_array_elem->head,
         &rx_reorder_array_elem->tail, frag, &all_frag_present);
 
     if (pdev->rx.flags.defrag_timeout_check) {
@@ -349,6 +355,7 @@ ol_rx_reorder_store_frag(
 void
 ol_rx_fraglist_insert(
     htt_pdev_handle htt_pdev,
+    struct ol_txrx_peer_t *peer,
     adf_nbuf_t *head_addr,
     adf_nbuf_t *tail_addr,
     adf_nbuf_t frag,
@@ -358,6 +365,10 @@ ol_rx_fraglist_insert(
     struct ieee80211_frame *mac_hdr, *cmac_hdr, *next_hdr, *lmac_hdr;
     u_int8_t fragno, cur_fragno, lfragno, next_fragno;
     u_int8_t last_morefrag = 1, count = 0;
+    int pn_len = 0;
+    void *rx_desc;
+    int index;              /* unicast vs. multicast */
+    union htt_rx_pn_t curr_pn, next_pn;
 
     adf_os_assert(frag);
 
@@ -393,6 +404,10 @@ ol_rx_fraglist_insert(
         if (fragno == cur_fragno) {
             htt_rx_desc_frame_free(htt_pdev, frag);
             *all_frag_present = 0;
+            VOS_TRACE(VOS_MODULE_ID_TXRX, VOS_TRACE_LEVEL_ERROR,
+                   "\n%s:Duplicated frag No, fragno = %u, discard it\n",
+                   __FUNCTION__,
+                   fragno);
             return;
         } else {
             adf_nbuf_set_next(prev, frag);
@@ -404,15 +419,63 @@ ol_rx_fraglist_insert(
                                                                 *tail_addr);
     last_morefrag = lmac_hdr->i_fc[1] & IEEE80211_FC1_MORE_FRAG;
     if (!last_morefrag) {
+        rx_desc = htt_rx_msdu_desc_retrieve(htt_pdev, *head_addr);
+        index = htt_rx_msdu_is_wlan_mcast(htt_pdev, rx_desc) ?
+                txrx_sec_mcast : txrx_sec_ucast;
+        pn_len = htt_pdev->txrx_pdev->rx_pn[peer->security[index].sec_type].len;
+        if (pn_len) {
+            htt_rx_mpdu_desc_pn(htt_pdev, rx_desc, &curr_pn, pn_len);
+        }
+
         do {
             next_hdr = (struct ieee80211_frame *) OL_RX_FRAG_GET_MAC_HDR(
                                                                 htt_pdev, next);
             next_fragno = adf_os_le16_to_cpu(*(u_int16_t *) next_hdr->i_seq) &
                 IEEE80211_SEQ_FRAG_MASK;
+
+			/*
+			 * CR 2868016
+			 * Perform strict PN check if non-consecutive
+			 * discard all frags
+			 */
+			if (pn_len) {
+				/* retrieve PN from rx descriptor */
+			    rx_desc = htt_rx_msdu_desc_retrieve(htt_pdev, next);
+			    htt_rx_mpdu_desc_pn(htt_pdev, rx_desc, &next_pn, pn_len);
+			}
+
             count++;
+			/*
+			 * Fragment number consecutive is gauranteed
+			 * by count++, all_frage_present only set to
+			 * 1 when checking complete, otherwise, frags
+			 * will be discard due to timeout
+			 */
+
             if (next_fragno != count) {
                 break;
             }
+
+			if (pn_len) {
+				if(!ol_rx_pn_strict_chk(&next_pn,
+				    &curr_pn,
+				    index == txrx_sec_ucast,
+				    pn_len,
+				    peer->vdev->opmode)) {
+					VOS_TRACE(VOS_MODULE_ID_TXRX, VOS_TRACE_LEVEL_ERROR,
+                               "\n%s:QSV2020003 expected discard non-strict PN behavior, curr_pn=%llu, next_pn=%llu\n",
+                               __FUNCTION__,
+                               curr_pn.pn48,
+                               next_pn.pn48
+                               );
+					break;
+				}
+
+				vos_mem_copy((uint8_t *) &curr_pn,
+					         (uint8_t *) &next_pn,
+					         sizeof(union htt_rx_pn_t));
+			}
+
             next = adf_nbuf_next(next);
         } while (next);
 

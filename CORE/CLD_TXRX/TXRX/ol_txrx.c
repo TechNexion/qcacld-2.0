@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2019, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -565,8 +565,13 @@ ol_txrx_pdev_attach(
 
     /* configure where defrag timeout and duplicate detection is handled */
     pdev->rx.flags.defrag_timeout_check =
-        pdev->rx.flags.dup_check =
-            ol_cfg_rx_host_defrag_timeout_duplicate_check(ctrl_pdev);
+            ol_cfg_rx_host_defrag_timeout_check(ctrl_pdev);
+    pdev->rx.flags.dup_check =
+            ol_cfg_rx_host_duplicate_check(ctrl_pdev);
+
+    if (pdev->rx.flags.defrag_timeout_check) {
+        pdev->rx.defrag.timeout_ms = DEFRAG_MIN_TIMEOUT_MS;
+    }
 
 #ifdef QCA_SUPPORT_SW_TXRX_ENCAP
     /* Need to revisit this part. Currently,hardcode to riva's caps */

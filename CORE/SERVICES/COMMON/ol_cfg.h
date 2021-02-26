@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, 2016-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2014, 2016-2017, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -51,6 +51,12 @@ enum wlan_frm_fmt {
     wlan_frm_fmt_802_3,
 };
 
+#if CFG_TGT_DEFAULT_RX_SKIP_DEFRAG_TIMEOUT_DUP_DETECTION_CHECK
+#define DEFRAG_MIN_TIMEOUT_MS 100
+#else
+#define DEFRAG_MIN_TIMEOUT_MS 0
+#endif
+
 /* Throttle period Different level Duty Cycle values*/
 #define THROTTLE_DUTY_CYCLE_LEVEL0 (0)
 #define THROTTLE_DUTY_CYCLE_LEVEL1 (50)
@@ -71,6 +77,7 @@ struct wlan_ipa_uc_rsc_t {
 struct txrx_pdev_cfg_t {
 	u8 is_high_latency;
 	u8 defrag_timeout_check;
+    u8 dup_check;
 	u8 rx_pn_check;
 	u8 pn_rx_fwd_check;
 	u8 host_addba;
@@ -341,7 +348,7 @@ u_int16_t ol_cfg_target_tx_credit(ol_pdev_handle pdev);
 int ol_cfg_tx_download_size(ol_pdev_handle pdev);
 
 /**
- * brief Specify where defrag timeout and duplicate detection is handled
+ * brief Specify where defrag timeout is handled
  * @details
  *   non-aggregate duplicate detection and timing out stale fragments
  *   requires additional target memory. To reach max client
@@ -356,7 +363,25 @@ int ol_cfg_tx_download_size(ol_pdev_handle pdev);
  *  1 -> host is responsible non-aggregate duplicate detection and
  *          timing out stale fragments.
  */
-int ol_cfg_rx_host_defrag_timeout_duplicate_check(ol_pdev_handle pdev);
+int ol_cfg_rx_host_defrag_timeout_check(ol_pdev_handle pdev);
+
+/**
+ * brief Specify where duplicate detection is handled
+ * @details
+ *   non-aggregate duplicate detection and timing out stale fragments
+ *   requires additional target memory. To reach max client
+ *   configurations (128+), non-aggregate duplicate detection and the
+ *   logic to time out stale fragments is moved to the host.
+ *
+ * @param pdev - handle to the physical device
+ * @return
+ *  0 -> target is responsible non-aggregate duplicate detection and
+ *          timing out stale fragments.
+ *
+ *  1 -> host is responsible non-aggregate duplicate detection and
+ *          timing out stale fragments.
+ */
+int ol_cfg_rx_host_duplicate_check(ol_pdev_handle pdev);
 
 /**
  * brief Query for the period in ms used for throttling for

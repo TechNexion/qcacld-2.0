@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, 2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2014, 2017, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -63,6 +63,7 @@ enum {
 void
 ol_rx_fraglist_insert(
     htt_pdev_handle htt_pdev,
+    struct ol_txrx_peer_t *peer,
     adf_nbuf_t *head_addr,
     adf_nbuf_t *tail_addr,
     adf_nbuf_t frag,

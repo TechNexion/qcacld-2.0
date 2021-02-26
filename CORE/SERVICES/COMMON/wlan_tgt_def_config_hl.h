@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2016, 2019, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -209,7 +209,7 @@
 #define CFG_TGT_DEFAULT_TX_DBG_LOG_SIZE 1024 /* bytes */
 
 /* target based fragment timeout and MPDU duplicate detection */
-#define CFG_TGT_DEFAULT_RX_SKIP_DEFRAG_TIMEOUT_DUP_DETECTION_CHECK 0
+#define CFG_TGT_DEFAULT_RX_SKIP_DEFRAG_TIMEOUT_DUP_DETECTION_CHECK 1
 /*  Default VoW configuration
  */
 #define CFG_TGT_DEFAULT_VOW_CONFIG   0

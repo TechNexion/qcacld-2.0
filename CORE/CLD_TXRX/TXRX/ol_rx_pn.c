@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2015-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011, 2015-2017, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -89,6 +89,34 @@ int ol_rx_pn_wapi_cmp(
         }
     }
     return pn_is_replay;
+}
+
+int ol_rx_pn_strict_chk(union htt_rx_pn_t *new_pn,
+		      union htt_rx_pn_t *old_pn,
+		      int is_unicast, int pn_len,
+		      int opmode)
+{
+    int rc = 0;
+
+    if (pn_len == 24) {
+	    rc = ((new_pn->pn24 & 0xffffff) == ((old_pn->pn24 & 0xffffff) + 1));
+	    return rc;
+    }
+
+    /* TKIP: 48-bit TSC, CCMP: 48-bit PN */
+    if (pn_len == 48) {
+	    rc = ((new_pn->pn48 & 0xffffffffffffULL) ==
+		  ((old_pn->pn48 & 0xffffffffffffULL) + 1));
+	    return rc;
+    }
+
+    /* WAPI: 128-bit PN */
+    if (pn_len == 128) {
+        /* TODO WAPI is not implemented, bypass this checking*/
+        rc = 1;
+    }
+
+    return rc;
 }
 
 adf_nbuf_t

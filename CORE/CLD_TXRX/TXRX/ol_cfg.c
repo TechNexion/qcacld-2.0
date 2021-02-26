@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014,2016-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2014,2016-2017,2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -111,6 +111,7 @@ ol_pdev_handle ol_pdev_cfg_attach(adf_os_device_t osdev,
 #else
 	cfg_ctx->defrag_timeout_check = 0;
 #endif
+	cfg_ctx->dup_check = 0;
 	cfg_ctx->max_peer_id = 511;
 	cfg_ctx->max_vdev = CFG_TGT_NUM_VDEV;
 	cfg_ctx->pn_rx_fwd_check = 1;
@@ -386,10 +387,16 @@ int ol_cfg_tx_download_size(ol_pdev_handle pdev)
 	return cfg->tx_download_size;
 }
 
-int ol_cfg_rx_host_defrag_timeout_duplicate_check(ol_pdev_handle pdev)
+int ol_cfg_rx_host_defrag_timeout_check(ol_pdev_handle pdev)
 {
 	struct txrx_pdev_cfg_t *cfg = (struct txrx_pdev_cfg_t *)pdev;
 	return cfg->defrag_timeout_check;
+}
+
+int ol_cfg_rx_host_duplicate_check(ol_pdev_handle pdev)
+{
+	struct txrx_pdev_cfg_t *cfg = (struct txrx_pdev_cfg_t *)pdev;
+	return cfg->dup_check;
 }
 
 int ol_cfg_throttle_period_ms(ol_pdev_handle pdev)

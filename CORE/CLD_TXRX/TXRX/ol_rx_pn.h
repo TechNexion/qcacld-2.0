@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -118,5 +118,19 @@ ol_rx_pn_check_base(
     unsigned tid,
     adf_nbuf_t msdu_list);
 
+/**
+ * @brief If applicable, check the Packet Number to strict mathcing old +1 = new.
+ *
+ * @param new_pn - which includes new pn data
+ * @param old_pn - which includes old pn data
+ * @param is_unicast - unicsat frame or mcast frame for WAPI
+ * @param pn_len - pn length
+ * @param op_mode - op mode used for WAPI
+ * @return list of netbufs that didn't fail the PN check
+ */
+int ol_rx_pn_strict_chk(union htt_rx_pn_t *new_pn,
+		      union htt_rx_pn_t *old_pn,
+		      int is_unicast, int pn_len,
+		      int opmode);
 
 #endif /* _OL_RX_PN_H_ */
