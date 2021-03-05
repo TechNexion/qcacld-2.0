@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2014, 2016 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011, 2014, 2016, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -229,6 +229,33 @@ ol_rx_fwd_check(
              * in which case we need to make a copy (or clone?).
              */
             if (!do_not_fwd) {
+                u_int16_t off = 0;
+                // for HL, point to payload right now
+                if (pdev->cfg.is_high_latency) {
+                    off = htt_rx_msdu_rx_desc_size_hl(pdev->htt_pdev,
+                                                      rx_desc);
+                }
+
+                /*
+                 * CR 2868053
+                 * discard EAPOL frame for intrabss forwarding
+                 */
+                if ((vdev->opmode == wlan_op_mode_ap) &&
+                    __adf_nbuf_data_is_eapol_pkt(adf_nbuf_data(msdu) + off)) {
+                    VOS_TRACE(VOS_MODULE_ID_TXRX, VOS_TRACE_LEVEL_ERROR,
+                        "\n%s:QSV2020005 EAPOL forwarding discard \n",
+                        __FUNCTION__);
+                    /* Drop the packet*/
+                    htt_rx_msdu_desc_free(pdev->htt_pdev, msdu);
+                    TXRX_STATS_MSDU_LIST_INCR(
+                        pdev, tx.dropped.host_reject, msdu);
+                    /* add NULL terminator */
+                    adf_nbuf_set_next(msdu, NULL);
+                    adf_nbuf_tx_free(msdu, ADF_NBUF_PKT_ERROR);
+                    msdu = msdu_list;
+                    continue;
+                }
+
                 if (htt_rx_msdu_discard(pdev->htt_pdev, rx_desc)) {
                         htt_rx_msdu_desc_free(pdev->htt_pdev, msdu);
                         adf_net_buf_debug_release_skb(msdu);
