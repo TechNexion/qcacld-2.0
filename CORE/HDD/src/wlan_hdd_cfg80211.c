@@ -18444,11 +18444,6 @@ static int wlan_hdd_cfg80211_start_bss(hdd_adapter_t *pHostapdAdapter,
         ret = wlan_hdd_sap_cfg_dfs_override(pHostapdAdapter);
         if (ret < 0) {
             goto error;
-        } else {
-            if (ret == 0) {
-                if (VOS_IS_DFS_CH(pConfig->channel))
-                    pHddCtx->dev_dfs_cac_status = DFS_CAC_NEVER_DONE;
-            }
         }
 
         /*
@@ -18948,6 +18943,13 @@ static int wlan_hdd_cfg80211_start_bss(hdd_adapter_t *pHostapdAdapter,
     pSapEventCallback = hdd_hostapd_SAPEventCB;
 
     (WLAN_HDD_GET_AP_CTX_PTR(pHostapdAdapter))->dfs_cac_block_tx = VOS_TRUE;
+
+    if (pHostapdAdapter->device_mode == WLAN_HDD_SOFTAP)
+    {
+        if (VOS_IS_DFS_CH(pConfig->channel))
+            pHddCtx->dev_dfs_cac_status = DFS_CAC_NEVER_DONE;
+    }
+
 
     /* Set ANTENNA_MODE_2X2 before starting SAP/GO */
     if (pHddCtx->cfg_ini->enable_dynamic_sta_chainmask)
