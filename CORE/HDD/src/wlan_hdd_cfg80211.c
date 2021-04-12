@@ -26797,7 +26797,7 @@ static void hdd_get_max_rate_vht(hdd_station_info_t *stainfo,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
 /**
  * hdd_fill_bw_mcs() - fill ch width and mcs flags
- * @stainfo: stainfo pointer
+ * @rinfo: rateinfo pointer
  * @rate_flags: HDD rate flags
  * @mcsidx: mcs index
  * @nss: number of streams
@@ -26807,34 +26807,34 @@ static void hdd_get_max_rate_vht(hdd_station_info_t *stainfo,
  *
  * Return: None
  */
-static void hdd_fill_bw_mcs(struct station_info *sinfo,
+static void hdd_fill_bw_mcs(struct rate_info *rinfo,
 		uint8_t rate_flags,
 		uint8_t mcsidx,
 		uint8_t nss,
 		bool vht)
 {
 	if (vht) {
-		sinfo->txrate.nss = nss;
-		sinfo->txrate.mcs = mcsidx;
-		sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
+		rinfo->nss = nss;
+		rinfo->mcs = mcsidx;
+		rinfo->flags |= RATE_INFO_FLAGS_VHT_MCS;
 		if (rate_flags & eHAL_TX_RATE_VHT80)
-			sinfo->txrate.bw = RATE_INFO_BW_80;
+			rinfo->bw = RATE_INFO_BW_80;
 		else if (rate_flags & eHAL_TX_RATE_VHT40)
-			sinfo->txrate.bw = RATE_INFO_BW_40;
+			rinfo->bw = RATE_INFO_BW_40;
 		else if (rate_flags & eHAL_TX_RATE_VHT20)
-			sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
+			rinfo->flags |= RATE_INFO_FLAGS_VHT_MCS;
 	} else {
-		sinfo->txrate.mcs = (nss-1) << 3;
-		sinfo->txrate.mcs |= mcsidx;
-		sinfo->txrate.flags |= RATE_INFO_FLAGS_MCS;
+		rinfo->mcs = (nss-1) << 3;
+		rinfo->mcs |= mcsidx;
+		rinfo->flags |= RATE_INFO_FLAGS_MCS;
 		if (rate_flags & eHAL_TX_RATE_HT40)
-			sinfo->txrate.bw = RATE_INFO_BW_40;
+			rinfo->bw = RATE_INFO_BW_40;
 	}
 }
 #else
 /**
  * hdd_fill_bw_mcs() - fill ch width and mcs flags
- * @stainfo: stainfo pointer
+ * @rinfo: rateinfo pointer
  * @rate_flags: HDD rate flags
  * @mcsidx: mcs index
  * @nss: number of streams
@@ -26844,28 +26844,28 @@ static void hdd_fill_bw_mcs(struct station_info *sinfo,
  *
  * Return: None
  */
-static void hdd_fill_bw_mcs(struct station_info *sinfo,
+static void hdd_fill_bw_mcs(struct rate_info *sinfo,
 		uint8_t rate_flags,
 		uint8_t mcsidx,
 		uint8_t nss,
 		bool vht)
 {
 	if (vht) {
-		sinfo->txrate.nss = nss;
-		sinfo->txrate.mcs = mcsidx;
-		sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
+		rinfo->nss = nss;
+		rinfo->mcs = mcsidx;
+		rinfo->flags |= RATE_INFO_FLAGS_VHT_MCS;
 		if (rate_flags & eHAL_TX_RATE_VHT80)
-			sinfo->txrate.flags |= RATE_INFO_FLAGS_80_MHZ_WIDTH;
+			rinfo->flags |= RATE_INFO_FLAGS_80_MHZ_WIDTH;
 		else if (rate_flags & eHAL_TX_RATE_VHT40)
-			sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
+			rinfo->flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
 		else if (rate_flags & eHAL_TX_RATE_VHT20)
-			sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
+			rinfo->flags |= RATE_INFO_FLAGS_VHT_MCS;
 	} else {
-		sinfo->txrate.mcs = (nss-1) << 3;
-		sinfo->txrate.mcs |= mcsidx;
-		sinfo->txrate.flags |= RATE_INFO_FLAGS_MCS;
+		rinfo->mcs = (nss-1) << 3;
+		rinfo->mcs |= mcsidx;
+		rinfo->flags |= RATE_INFO_FLAGS_MCS;
 		if (rate_flags & eHAL_TX_RATE_HT40)
-			sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
+			rinfo->flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
 	}
 }
 #endif
@@ -26873,7 +26873,7 @@ static void hdd_fill_bw_mcs(struct station_info *sinfo,
 #ifdef WLAN_FEATURE_11AC
 /**
  * hdd_fill_bw_mcs_vht() - fill ch width and mcs flags for VHT mode
- * @stainfo: stainfo pointer
+ * @rinfo: rateinfo pointer
  * @rate_flags: HDD rate flags
  * @mcsidx: mcs index
  * @nss: number of streams
@@ -26882,15 +26882,15 @@ static void hdd_fill_bw_mcs(struct station_info *sinfo,
  *
  * Return: None
  */
-static void hdd_fill_bw_mcs_vht(struct station_info *sinfo,
+static void hdd_fill_bw_mcs_vht(struct rate_info *rinfo,
 		uint8_t rate_flags,
 		uint8_t mcsidx,
 		uint8_t nss)
 {
-	hdd_fill_bw_mcs(sinfo, rate_flags, mcsidx, nss, TRUE);
+	hdd_fill_bw_mcs(rinfo, rate_flags, mcsidx, nss, TRUE);
 }
 #else
-static void hdd_fill_bw_mcs_vht(struct station_info *sinfo,
+static void hdd_fill_bw_mcs_vht(struct rate_info *rinfo,
 		uint8_t rate_flags,
 		uint8_t mcsidx,
 		uint8_t nss) { }
@@ -26898,7 +26898,7 @@ static void hdd_fill_bw_mcs_vht(struct station_info *sinfo,
 
 /**
  * hdd_fill_sinfo_rate_info() - fill rate info of sinfo struct
- * @sinfo: station_info struct pointer
+ * @rinfo: rate_info struct pointer
  * @rate_flags: HDD rate flags
  * @mcsidx: mcs index
  * @nss: number of streams
@@ -26908,7 +26908,7 @@ static void hdd_fill_bw_mcs_vht(struct station_info *sinfo,
  *
  * Return: None
  */
-static void hdd_fill_sinfo_rate_info(struct station_info *sinfo,
+static void hdd_fill_sinfo_rate_info(struct rate_info *rinfo,
 		uint32_t rate_flags,
 		uint8_t mcsidx,
 		uint8_t nss,
@@ -26916,30 +26916,30 @@ static void hdd_fill_sinfo_rate_info(struct station_info *sinfo,
 {
 	if (rate_flags & eHAL_TX_RATE_LEGACY) {
 		/* provide to the UI in units of 100kbps */
-		sinfo->txrate.legacy = maxrate;
+		rinfo->legacy = maxrate;
 	} else {
 		/* must be MCS */
 		if (rate_flags &
 				(eHAL_TX_RATE_VHT80 |
 				 eHAL_TX_RATE_VHT40 |
 				 eHAL_TX_RATE_VHT20))
-			hdd_fill_bw_mcs_vht(sinfo, rate_flags, mcsidx, nss);
+			hdd_fill_bw_mcs_vht(rinfo, rate_flags, mcsidx, nss);
 
 		if (rate_flags & (eHAL_TX_RATE_HT20 | eHAL_TX_RATE_HT40))
-			hdd_fill_bw_mcs(sinfo, rate_flags, mcsidx, nss, FALSE);
+			hdd_fill_bw_mcs(rinfo, rate_flags, mcsidx, nss, FALSE);
 
 		if (rate_flags & eHAL_TX_RATE_SGI) {
-			if (!(sinfo->txrate.flags & RATE_INFO_FLAGS_VHT_MCS))
-				sinfo->txrate.flags |= RATE_INFO_FLAGS_MCS;
-			sinfo->txrate.flags |= RATE_INFO_FLAGS_SHORT_GI;
+			if (!(rinfo->flags & RATE_INFO_FLAGS_VHT_MCS))
+				rinfo->flags |= RATE_INFO_FLAGS_MCS;
+			rinfo->flags |= RATE_INFO_FLAGS_SHORT_GI;
 		}
 	}
 
 	hddLog(VOS_TRACE_LEVEL_INFO, FL("flag %x mcs %d legacy %d nss %d"),
-			sinfo->txrate.flags,
-			sinfo->txrate.mcs,
-			sinfo->txrate.legacy,
-			sinfo->txrate.nss);
+			rinfo->flags,
+			rinfo->mcs,
+			rinfo->legacy,
+			rinfo->nss);
 }
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 0, 0))
@@ -27131,7 +27131,7 @@ static void hdd_fill_rate_info(struct station_info *sinfo,
 			mcsidx = stats->tx_rate.mcs;
 	}
 
-	hdd_fill_sinfo_rate_info(sinfo,
+	hdd_fill_sinfo_rate_info(&sinfo->txrate,
 			rate_flags,
 			mcsidx,
 			nss,
@@ -27249,6 +27249,314 @@ static int wlan_hdd_get_station_remote(struct wiphy *wiphy,
 	return status;
 }
 
+/**
+ * hdd_report_max_rate() - Fill the max rate stats in the station info structure
+ * to be sent to the userspace.
+ * @adapter: pointer to adapter
+ * @signal: signal from station_info
+ * @rate_info: The station_info tx/rx rate to be filled
+ * @rate_flags: TX/RX rate flags computed from tx/rx rate
+ * @mcs_index; The TX/RX mcs index computed from tx/rx rate
+ * @nss: The TX/RX NSS from fw stats
+ * @rate: The tx/rx rate from fw stats
+ *
+ * Return: 0 if fill is successful
+ */
+static int hdd_report_max_rate(hdd_adapter_t *adapter,
+			       int8_t signal,
+			       struct rate_info *rate_info,
+			       uint8_t rate_flags,
+			       uint8_t mcs_index,
+			       uint8_t nss,
+			       uint16_t rate)
+{
+	hdd_context_t *hdd_ctx = WLAN_HDD_GET_CTX(adapter);
+	hdd_config_t  *cfg = hdd_ctx->cfg_ini;
+
+	uint8_t operational_rates[CSR_DOT11_SUPPORTED_RATES_MAX];
+	uint32_t or_leng = CSR_DOT11_SUPPORTED_RATES_MAX;
+	uint8_t extended_rates[CSR_DOT11_EXTENDED_SUPPORTED_RATES_MAX];
+	uint32_t er_leng = CSR_DOT11_EXTENDED_SUPPORTED_RATES_MAX;
+	uint8_t mcs_rates[SIZE_OF_BASIC_MCS_SET];
+	uint32_t mcs_leng = SIZE_OF_BASIC_MCS_SET;
+	uint16_t max_rate = 0;
+	uint16_t current_rate = 0;
+	uint8_t  max_speed_mcs = 0;
+	uint8_t  max_mcs_idx = 0;
+	uint8_t  rate_flag = 1;
+	uint8_t i, j, rssidx = 0;
+	uint8_t mode = 0, max_ht_idx;
+	struct index_vht_data_rate_type *supported_vht_mcs_rate;
+	struct index_data_rate_type *supported_mcs_rate;
+	uint32_t vht_mcs_map;
+	eDataRate11ACMaxMcs vht_max_mcs;
+
+	// we do not want to necessarily report the current speed
+	if (eHDD_LINK_SPEED_REPORT_MAX == cfg->reportMaxLinkSpeed) {
+		// report the max possible speed
+		rssidx = 0;
+        } else if (eHDD_LINK_SPEED_REPORT_MAX_SCALED ==
+			cfg->reportMaxLinkSpeed) {
+		// report the max possible speed with RSSI scaling
+		if (signal >= cfg->linkSpeedRssiHigh) {
+			// report the max possible speed
+			rssidx = 0;
+		} else if (signal >= cfg->linkSpeedRssiMid) {
+			// report middle speed
+			rssidx = 1;
+		} else if (signal >= cfg->linkSpeedRssiLow) {
+			// report middle speed
+			rssidx = 2;
+		} else {
+			// report actual speed
+			rssidx = 3;
+		}
+	} else {
+		// unknown, treat as eHDD_LINK_SPEED_REPORT_MAX
+		hddLog(LOGE, FL("Invalid value for reportMaxLinkSpeed: %u"),
+		       cfg->reportMaxLinkSpeed);
+		rssidx = 0;
+	}
+
+	/* Get Basic Rate Set */
+	if (0 != ccmCfgGetStr(WLAN_HDD_GET_HAL_CTX(adapter),
+			      WNI_CFG_OPERATIONAL_RATE_SET,
+			      operational_rates, &or_leng)) {
+		hddLog(LOGE, FL("ccm api returned failure"));
+		/*To keep GUI happy*/
+		return 0;
+	}
+
+	for (i = 0; i < or_leng; i++) {
+		for (j = 0; j < ARRAY_SIZE(supported_data_rate); j++) {
+			/* Validate Rate Set */
+			if (supported_data_rate[j].beacon_rate_index ==
+				(operational_rates[i] & 0x7F)) {
+			    current_rate =
+				supported_data_rate[j].supported_rate[rssidx];
+			    break;
+			}
+		}
+		/* Update MAX rate */
+		max_rate = (current_rate > max_rate) ? current_rate : max_rate;
+	}
+
+	/* Get Extended Rate Set */
+	if (0 != ccmCfgGetStr(WLAN_HDD_GET_HAL_CTX(adapter),
+			      WNI_CFG_EXTENDED_OPERATIONAL_RATE_SET,
+			      extended_rates, &er_leng)) {
+		hddLog(LOGE, FL("ccm api returned failure"));
+		/*To keep GUI happy*/
+		return 0;
+	}
+
+	for (i = 0; i < er_leng; i++) {
+		for (j = 0; j < ARRAY_SIZE(supported_data_rate); j++) {
+			if (supported_data_rate[j].beacon_rate_index ==
+				(extended_rates[i] & 0x7F)) {
+			    current_rate =
+				supported_data_rate[j].supported_rate[rssidx];
+			    break;
+			}
+		}
+		/* Update MAX rate */
+		max_rate = (current_rate > max_rate) ? current_rate : max_rate;
+	}
+	/* Get MCS Rate Set --
+	   Only if we are connected in non legacy mode and not reporting
+	   actual speed */
+	if ((3 != rssidx) && !(rate_flags & eHAL_TX_RATE_LEGACY)) {
+		if (0 != ccmCfgGetStr(WLAN_HDD_GET_HAL_CTX(adapter),
+				      WNI_CFG_CURRENT_MCS_SET,
+				      mcs_rates, &mcs_leng)) {
+			hddLog(LOGE, FL("ccm api returned failure"));
+			/*To keep GUI happy*/
+			return 0;
+		}
+		rate_flag = 0;
+		supported_vht_mcs_rate = (struct index_vht_data_rate_type *)
+			((nss == 1) ? &supported_vht_mcs_rate_nss1 :
+						&supported_vht_mcs_rate_nss2);
+
+		if (rate_flags & eHAL_TX_RATE_VHT80)
+			mode = 2;
+		else if ((rate_flags & eHAL_TX_RATE_VHT40) ||
+			 (rate_flags & eHAL_TX_RATE_HT40))
+			mode = 1;
+		else
+			mode = 0;
+
+		/* VHT80 rate has separate rate table */
+		if (rate_flags &
+			(eHAL_TX_RATE_VHT20 |
+			eHAL_TX_RATE_VHT40 |
+			eHAL_TX_RATE_VHT80)) {
+			ccmCfgGetInt(WLAN_HDD_GET_HAL_CTX(adapter),
+				     WNI_CFG_VHT_TX_MCS_MAP, &vht_mcs_map);
+			vht_max_mcs = (eDataRate11ACMaxMcs)
+				(vht_mcs_map & DATA_RATE_11AC_MCS_MASK);
+			if (rate_flags & eHAL_TX_RATE_SGI) {
+			    rate_flag |= 1;
+			}
+
+			if (DATA_RATE_11AC_MAX_MCS_7 == vht_max_mcs) {
+			    max_mcs_idx = 7;
+			} else if (DATA_RATE_11AC_MAX_MCS_8 == vht_max_mcs) {
+			    max_mcs_idx = 8;
+			} else if (DATA_RATE_11AC_MAX_MCS_9 == vht_max_mcs) {
+		        /*
+		         * 'IEEE_P802.11ac_2013.pdf' page 325, 326
+		         * - MCS9 is valid for VHT20 when Nss = 3 or Nss = 6
+		         * - MCS9 is not valid for VHT20 when Nss = 1,2,4,5,7,8
+		         */
+				if ((rate_flags & eHAL_TX_RATE_VHT20) &&
+				    (nss != 3 && nss != 6)) {
+					max_mcs_idx = 8;
+				} else {
+					max_mcs_idx = 9;
+				}
+			}
+
+			if (rssidx != 0) {
+				for (i = 0; i <= max_mcs_idx ; i++) {
+					if (signal <= rssiMcsTbl[mode][i]) {
+						max_mcs_idx = i;
+						break;
+					}
+				}
+			}
+
+			if (rate_flags & eHAL_TX_RATE_VHT80) {
+				current_rate =
+					supported_vht_mcs_rate[mcs_index].
+						supported_VHT80_rate[rate_flag];
+				max_rate =
+					supported_vht_mcs_rate[max_mcs_idx].
+						supported_VHT80_rate[rate_flag];
+			} else if (rate_flags & eHAL_TX_RATE_VHT40) {
+				current_rate =
+					supported_vht_mcs_rate[mcs_index].
+						supported_VHT40_rate[rate_flag];
+				max_rate =
+					supported_vht_mcs_rate[max_mcs_idx].
+						supported_VHT40_rate[rate_flag];
+			} else if (rate_flags & eHAL_TX_RATE_VHT20) {
+				current_rate =
+					supported_vht_mcs_rate[mcs_index].
+						supported_VHT20_rate[rate_flag];
+				 max_rate =
+					supported_vht_mcs_rate[max_mcs_idx].
+						supported_VHT20_rate[rate_flag];
+			}
+
+			max_speed_mcs = 1;
+			if (current_rate > max_rate)
+				max_rate = current_rate;
+		} else {
+			if (rate_flags & eHAL_TX_RATE_HT40)
+			    rate_flag |= 1;
+
+			if (rate_flags & eHAL_TX_RATE_SGI)
+			    rate_flag |= 2;
+
+			supported_mcs_rate = (struct index_data_rate_type *)
+				((nss == 1) ? &supported_mcs_rate_nss1 :
+					&supported_mcs_rate_nss2);
+
+			max_ht_idx = MAX_HT_MCS_IDX;
+			if (rssidx != 0) {
+				for (i=0; i < MAX_HT_MCS_IDX; i++) {
+					if (signal <= rssiMcsTbl[mode][i]) {
+						max_ht_idx = i + 1;
+						break;
+					}
+				}
+			}
+
+			for (i = 0; i < mcs_leng; i++) {
+				for (j = 0; j < max_ht_idx; j++) {
+					if (supported_mcs_rate[j].
+						beacon_rate_index ==
+							mcs_rates[i]) {
+						current_rate =
+							supported_mcs_rate[j].
+								supported_rate[rate_flag];
+						max_mcs_idx =
+							supported_mcs_rate[j].
+								beacon_rate_index;
+						break;
+					}
+				}
+
+				if ((j < MAX_HT_MCS_IDX) &&
+						(current_rate > max_rate))
+					max_rate = current_rate;
+
+				max_speed_mcs = 1;
+			}
+		}
+	} else if (!(rate_flags & eHAL_TX_RATE_LEGACY)) {
+		max_rate = rate;
+		max_speed_mcs = 1;
+		max_mcs_idx = mcs_index;
+	}
+
+	// make sure we report a value at least as big as our current rate
+	if ((max_rate < rate) || (0 == max_rate)) {
+		max_rate = rate;
+		if (rate_flags & eHAL_TX_RATE_LEGACY) {
+			max_speed_mcs = 0;
+		} else {
+			max_speed_mcs = 1;
+			max_mcs_idx = mcs_index;
+			/*
+			 * 'IEEE_P802.11ac_2013.pdf' page 325, 326
+			 * - MCS9 is valid for VHT20 when Nss = 3 or Nss = 6
+			 * - MCS9 is not valid for VHT20 when Nss = 1,2,4,5,7,8
+			 */
+			if ((rate_flags & eHAL_TX_RATE_VHT20) &&
+			    (max_mcs_idx > 8) &&
+			    (nss != 3 && nss != 6)) {
+				max_mcs_idx = 8;
+			}
+		}
+	}
+
+	hdd_fill_sinfo_rate_info(rate_info,
+				 rate_flags,
+				 max_mcs_idx,
+				 nss,
+				 max_rate);
+
+	return 0;
+}
+
+/**
+ * hdd_report_actual_rate() - Fill the actual rate stats in the station info
+ * structure to be sent to the userspace.
+ * @rate_info: The station_info tx/rx rate to be filled
+ * @rate_flags: TX/RX rate flags computed from tx/rx rate
+ * @mcs_index; The TX/RX mcs index computed from tx/rx rate
+ * @nss: The TX/RX NSS from fw stats
+ * @rate: The tx/rx rate from fw stats
+ *
+ * Return: 0 if fill is successful
+ */
+static int hdd_report_actual_rate(struct rate_info *rate_info,
+				  uint8_t rate_flags,
+				  uint8_t mcs_index,
+				  uint8_t nss,
+				  uint16_t rate)
+{
+	hdd_fill_sinfo_rate_info(rate_info,
+				 rate_flags,
+				 mcs_index,
+				 nss,
+				 rate);
+
+	return 0;
+}
+
 static int __wlan_hdd_cfg80211_get_station(struct wiphy *wiphy,
                                            struct net_device *dev,
                                            const u8* mac,
@@ -27261,32 +27569,17 @@ static int __wlan_hdd_cfg80211_get_station(struct wiphy *wiphy,
     hdd_context_t *pHddCtx = (hdd_context_t*) wiphy_priv(wiphy);
     hdd_config_t  *pCfg    = pHddCtx->cfg_ini;
 
-    tANI_U8  OperationalRates[CSR_DOT11_SUPPORTED_RATES_MAX];
-    tANI_U32 ORLeng = CSR_DOT11_SUPPORTED_RATES_MAX;
-    tANI_U8  ExtendedRates[CSR_DOT11_EXTENDED_SUPPORTED_RATES_MAX];
-    tANI_U32 ERLeng = CSR_DOT11_EXTENDED_SUPPORTED_RATES_MAX;
-    tANI_U8  MCSRates[SIZE_OF_BASIC_MCS_SET];
-    tANI_U32 MCSLeng = SIZE_OF_BASIC_MCS_SET;
-    tANI_U16 maxRate = 0;
-    tANI_U16 myRate;
+    tANI_U16 tx_rate;
+    tANI_U16 rx_rate;
     int8_t   snr = 0;
-    tANI_U16 currentRate = 0;
-    tANI_U8  maxSpeedMCS = 0;
-    tANI_U8  maxMCSIdx = 0;
-    tANI_U8  rateFlag = 1;
-    tANI_U8  i, j, rssidx;
+    tANI_U8 i;
     tANI_U8  nss = 1;
-    int status, mode = 0, maxHtIdx;
-    struct index_vht_data_rate_type *supported_vht_mcs_rate;
-    struct index_data_rate_type *supported_mcs_rate;
+    int status;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
     bool rssi_stats_valid = FALSE;
 #endif
-
-#ifdef WLAN_FEATURE_11AC
-    tANI_U32 vht_mcs_map;
-    eDataRate11ACMaxMcs vhtMaxMcs;
-#endif /* WLAN_FEATURE_11AC */
+    tANI_U16 tx_mcs_index;
+    tANI_U16 rx_mcs_index;
 
     ENTER();
 
@@ -27342,10 +27635,14 @@ static int __wlan_hdd_cfg80211_get_station(struct wiphy *wiphy,
 #endif
 
     wlan_hdd_get_station_stats(pAdapter);
-    rate_flags = pAdapter->hdd_stats.ClassA_stat.tx_rate_flags;
+    rate_flags = pAdapter->hdd_stats.ClassA_stat.tx_rx_rate_flags;
 
     //convert to the UI units of 100kbps
-    myRate = pAdapter->hdd_stats.ClassA_stat.tx_rate * 5;
+    tx_rate = pAdapter->hdd_stats.ClassA_stat.tx_rate * 5;
+    rx_rate = pAdapter->hdd_stats.ClassA_stat.rx_rate * 5;
+
+    tx_mcs_index = pAdapter->hdd_stats.ClassA_stat.tx_mcs_index;
+    rx_mcs_index = pAdapter->hdd_stats.ClassA_stat.rx_mcs_index;
     if (!(rate_flags & eHAL_TX_RATE_LEGACY)) {
         nss = pAdapter->hdd_stats.ClassA_stat.rx_frag_cnt;
 
@@ -27354,424 +27651,36 @@ static int __wlan_hdd_cfg80211_get_station(struct wiphy *wiphy,
             rate_flags = pAdapter->hdd_stats.ClassA_stat.promiscuous_rx_frag_cnt;
         }
 
-        if (pAdapter->hdd_stats.ClassA_stat.mcs_index == INVALID_MCS_IDX) {
+        if (tx_mcs_index == INVALID_MCS_IDX) {
             rate_flags = eHAL_TX_RATE_LEGACY;
-            pAdapter->hdd_stats.ClassA_stat.mcs_index = 0;
+            tx_mcs_index = 0;
+        }
+        if (rx_mcs_index == INVALID_MCS_IDX) {
+            rate_flags = eHAL_TX_RATE_LEGACY;
+            rx_mcs_index = 0;
         }
     }
 
     hddLog(LOG1,
-           FL("RSSI %d, RLMS %u, rate %d, rssi high %d, rssi mid %d, rssi low %d, rate_flags 0x%x, MCS %d"),
+           FL("RSSI %d, RLMS %u, tx_rate %d, rssi high %d, rssi mid %d, rssi low %d, rate_flags 0x%x, MCS %d"),
             sinfo->signal,
             pCfg->reportMaxLinkSpeed,
-            myRate,
+            tx_rate,
             (int) pCfg->linkSpeedRssiHigh,
             (int) pCfg->linkSpeedRssiMid,
             (int) pCfg->linkSpeedRssiLow,
             (int) rate_flags,
-            (int) pAdapter->hdd_stats.ClassA_stat.mcs_index);
+            (int) tx_mcs_index);
 
     if (eHDD_LINK_SPEED_REPORT_ACTUAL != pCfg->reportMaxLinkSpeed)
     {
-        // we do not want to necessarily report the current speed
-        if (eHDD_LINK_SPEED_REPORT_MAX == pCfg->reportMaxLinkSpeed)
-        {
-            // report the max possible speed
-            rssidx = 0;
-        }
-        else if (eHDD_LINK_SPEED_REPORT_MAX_SCALED == pCfg->reportMaxLinkSpeed)
-        {
-            // report the max possible speed with RSSI scaling
-            if (sinfo->signal >= pCfg->linkSpeedRssiHigh)
-            {
-                // report the max possible speed
-                rssidx = 0;
-            }
-            else if (sinfo->signal >= pCfg->linkSpeedRssiMid)
-            {
-                // report middle speed
-                rssidx = 1;
-            }
-            else if (sinfo->signal >= pCfg->linkSpeedRssiLow)
-            {
-                // report middle speed
-                rssidx = 2;
-            }
-            else
-            {
-                // report actual speed
-                rssidx = 3;
-            }
-        }
-        else
-        {
-            // unknown, treat as eHDD_LINK_SPEED_REPORT_MAX
-            hddLog(VOS_TRACE_LEVEL_ERROR,
-                   "%s: Invalid value for reportMaxLinkSpeed: %u",
-                    __func__, pCfg->reportMaxLinkSpeed);
-            rssidx = 0;
-        }
-
-        maxRate = 0;
-
-        /* Get Basic Rate Set */
-        if (0 != ccmCfgGetStr(WLAN_HDD_GET_HAL_CTX(pAdapter), WNI_CFG_OPERATIONAL_RATE_SET,
-                             OperationalRates, &ORLeng))
-        {
-            hddLog(VOS_TRACE_LEVEL_ERROR, "%s: ccm api returned failure", __func__);
-            /*To keep GUI happy*/
-            return 0;
-        }
-
-        for (i = 0; i < ORLeng; i++)
-        {
-            for (j = 0; j < (sizeof(supported_data_rate) / sizeof(supported_data_rate[0])); j ++)
-            {
-                /* Validate Rate Set */
-                if (supported_data_rate[j].beacon_rate_index == (OperationalRates[i] & 0x7F))
-                {
-                    currentRate = supported_data_rate[j].supported_rate[rssidx];
-                    break;
-                }
-            }
-            /* Update MAX rate */
-            maxRate = (currentRate > maxRate)?currentRate:maxRate;
-        }
-
-        /* Get Extended Rate Set */
-        if (0 != ccmCfgGetStr(WLAN_HDD_GET_HAL_CTX(pAdapter), WNI_CFG_EXTENDED_OPERATIONAL_RATE_SET,
-                             ExtendedRates, &ERLeng))
-        {
-            hddLog(VOS_TRACE_LEVEL_ERROR, "%s: ccm api returned failure", __func__);
-            /*To keep GUI happy*/
-            return 0;
-        }
-
-        for (i = 0; i < ERLeng; i++)
-        {
-            for (j = 0; j < (sizeof(supported_data_rate) / sizeof(supported_data_rate[0])); j ++)
-            {
-                if (supported_data_rate[j].beacon_rate_index == (ExtendedRates[i] & 0x7F))
-                {
-                    currentRate = supported_data_rate[j].supported_rate[rssidx];
-                    break;
-                }
-            }
-            /* Update MAX rate */
-            maxRate = (currentRate > maxRate)?currentRate:maxRate;
-        }
-        /* Get MCS Rate Set --
-           Only if we are connected in non legacy mode and not reporting
-           actual speed */
-         if ((3 != rssidx) &&
-              !(rate_flags & eHAL_TX_RATE_LEGACY))
-        {
-            if (0 != ccmCfgGetStr(WLAN_HDD_GET_HAL_CTX(pAdapter), WNI_CFG_CURRENT_MCS_SET,
-                                 MCSRates, &MCSLeng))
-            {
-                hddLog(VOS_TRACE_LEVEL_ERROR, "%s: ccm api returned failure", __func__);
-                /*To keep GUI happy*/
-                return 0;
-            }
-            rateFlag = 0;
-#ifdef WLAN_FEATURE_11AC
-            supported_vht_mcs_rate = (struct index_vht_data_rate_type *)
-                                      ((nss == 1)?
-                                       &supported_vht_mcs_rate_nss1 :
-                                       &supported_vht_mcs_rate_nss2);
-
-            if (rate_flags & eHAL_TX_RATE_VHT80)
-                mode = 2;
-            else if ((rate_flags & eHAL_TX_RATE_VHT40) ||
-                     (rate_flags & eHAL_TX_RATE_HT40))
-                mode = 1;
-            else
-                mode = 0;
-
-            /* VHT80 rate has separate rate table */
-            if (rate_flags & (eHAL_TX_RATE_VHT20|eHAL_TX_RATE_VHT40|eHAL_TX_RATE_VHT80))
-            {
-                ccmCfgGetInt(WLAN_HDD_GET_HAL_CTX(pAdapter), WNI_CFG_VHT_TX_MCS_MAP, &vht_mcs_map);
-                vhtMaxMcs = (eDataRate11ACMaxMcs)(vht_mcs_map & DATA_RATE_11AC_MCS_MASK );
-                if (rate_flags & eHAL_TX_RATE_SGI)
-                {
-                    rateFlag |= 1;
-                }
-                if (DATA_RATE_11AC_MAX_MCS_7 == vhtMaxMcs)
-                {
-                    maxMCSIdx = 7;
-                }
-                else if (DATA_RATE_11AC_MAX_MCS_8 == vhtMaxMcs)
-                {
-                    maxMCSIdx = 8;
-                }
-                else if (DATA_RATE_11AC_MAX_MCS_9 == vhtMaxMcs)
-                {
-                    /*
-                     * 'IEEE_P802.11ac_2013.pdf' page 325, 326
-                     * - MCS9 is valid for VHT20 when Nss = 3 or Nss = 6
-                     * - MCS9 is not valid for VHT20 when Nss = 1,2,4,5,7,8
-                     */
-                    if ((rate_flags & eHAL_TX_RATE_VHT20) &&
-                        (nss != 3 && nss != 6)) {
-                        maxMCSIdx = 8;
-                    } else {
-                        maxMCSIdx = 9;
-                    }
-                }
-
-                if (rssidx != 0)
-                {
-                    for (i=0; i <= maxMCSIdx ; i++)
-                    {
-                         if (sinfo->signal <= rssiMcsTbl[mode][i])
-                         {
-                             maxMCSIdx = i;
-                             break;
-                         }
-                    }
-                }
-
-                if (rate_flags & eHAL_TX_RATE_VHT80)
-                {
-                    currentRate = supported_vht_mcs_rate[pAdapter->hdd_stats.ClassA_stat.mcs_index].supported_VHT80_rate[rateFlag];
-                    maxRate = supported_vht_mcs_rate[maxMCSIdx].supported_VHT80_rate[rateFlag];
-                }
-                else if (rate_flags & eHAL_TX_RATE_VHT40)
-                {
-                    currentRate = supported_vht_mcs_rate[pAdapter->hdd_stats.ClassA_stat.mcs_index].supported_VHT40_rate[rateFlag];
-                    maxRate = supported_vht_mcs_rate[maxMCSIdx].supported_VHT40_rate[rateFlag];
-                }
-                else if (rate_flags & eHAL_TX_RATE_VHT20)
-                {
-                    currentRate = supported_vht_mcs_rate[pAdapter->hdd_stats.ClassA_stat.mcs_index].supported_VHT20_rate[rateFlag];
-                    maxRate = supported_vht_mcs_rate[maxMCSIdx].supported_VHT20_rate[rateFlag];
-                }
-
-                maxSpeedMCS = 1;
-                if (currentRate > maxRate)
-                {
-                    maxRate = currentRate;
-                }
-
-            }
-            else
-#endif /* WLAN_FEATURE_11AC */
-            {
-                if (rate_flags & eHAL_TX_RATE_HT40)
-                {
-                    rateFlag |= 1;
-                }
-                if (rate_flags & eHAL_TX_RATE_SGI)
-                {
-                    rateFlag |= 2;
-                }
-
-                supported_mcs_rate = (struct index_data_rate_type *)
-                                      ((nss == 1)? &supported_mcs_rate_nss1 :
-                                                   &supported_mcs_rate_nss2);
-
-                maxHtIdx = MAX_HT_MCS_IDX;
-                if (rssidx != 0)
-                {
-                    for (i=0; i < MAX_HT_MCS_IDX; i++)
-                    {
-                         if (sinfo->signal <= rssiMcsTbl[mode][i])
-                         {
-                             maxHtIdx = i + 1;
-                             break;
-                         }
-                    }
-                }
-
-                for (i = 0; i < MCSLeng; i++)
-                {
-                    for (j = 0; j < maxHtIdx; j++)
-                    {
-                        if (supported_mcs_rate[j].beacon_rate_index == MCSRates[i])
-                        {
-                            currentRate = supported_mcs_rate[j].supported_rate[rateFlag];
-                            maxMCSIdx = supported_mcs_rate[j].beacon_rate_index;
-                            break;
-                        }
-                    }
-
-                    if ((j < MAX_HT_MCS_IDX) && (currentRate > maxRate))
-                    {
-                        maxRate     = currentRate;
-                    }
-                    maxSpeedMCS = 1;
-                }
-            }
-        }
-
-        else if (!(rate_flags & eHAL_TX_RATE_LEGACY))
-        {
-            maxRate = myRate;
-            maxSpeedMCS = 1;
-            maxMCSIdx = pAdapter->hdd_stats.ClassA_stat.mcs_index;
-        }
-
-        // make sure we report a value at least as big as our current rate
-        if ((maxRate < myRate) || (0 == maxRate))
-        {
-           maxRate = myRate;
-           if (rate_flags & eHAL_TX_RATE_LEGACY)
-           {
-              maxSpeedMCS = 0;
-           }
-           else
-           {
-              maxSpeedMCS = 1;
-              maxMCSIdx = pAdapter->hdd_stats.ClassA_stat.mcs_index;
-              /*
-               * 'IEEE_P802.11ac_2013.pdf' page 325, 326
-               * - MCS9 is valid for VHT20 when Nss = 3 or Nss = 6
-               * - MCS9 is not valid for VHT20 when Nss = 1,2,4,5,7,8
-               */
-              if ((rate_flags & eHAL_TX_RATE_VHT20) &&
-                  (maxMCSIdx > 8) &&
-                  (nss != 3 && nss != 6)) {
-#ifdef LINKSPEED_DEBUG_ENABLED
-                  pr_info("MCS%d is not valid for VHT20 when nss=%d, hence report MCS8.",
-                          maxMCSIdx, nss);
-#endif
-                  maxMCSIdx = 8;
-              }
-           }
-        }
-
-        if (rate_flags & eHAL_TX_RATE_LEGACY)
-        {
-            sinfo->txrate.legacy  = maxRate;
-#ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting legacy rate %d\n", sinfo->txrate.legacy);
-#endif //LINKSPEED_DEBUG_ENABLED
-        }
-        else
-        {
-            sinfo->txrate.mcs    = maxMCSIdx;
-#ifdef WLAN_FEATURE_11AC
-            sinfo->txrate.nss = nss;
-            if (rate_flags & eHAL_TX_RATE_VHT80)
-            {
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                sinfo->txrate.bw = RATE_INFO_BW_80;
-#else
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_80_MHZ_WIDTH;
-#endif
-            }
-            else if (rate_flags & eHAL_TX_RATE_VHT40)
-            {
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                sinfo->txrate.bw = RATE_INFO_BW_40;
-#else
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
-#endif
-            }
-            else if (rate_flags & eHAL_TX_RATE_VHT20)
-            {
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                sinfo->txrate.bw = RATE_INFO_BW_20;
-#endif
-            }
-            else
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
-#endif /* WLAN_FEATURE_11AC */
-            if (rate_flags & (eHAL_TX_RATE_HT20 | eHAL_TX_RATE_HT40))
-            {
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_MCS;
-                if (rate_flags & eHAL_TX_RATE_HT40)
-                {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                    sinfo->txrate.bw = RATE_INFO_BW_40;
-#else
-                    sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
-#endif
-                }
-                else if (rate_flags & eHAL_TX_RATE_HT20)
-                {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                    sinfo->txrate.bw = RATE_INFO_BW_20;
-#endif
-                }
-            }
-            if (rate_flags & eHAL_TX_RATE_SGI)
-            {
-                if (!(sinfo->txrate.flags & RATE_INFO_FLAGS_VHT_MCS))
-                    sinfo->txrate.flags |= RATE_INFO_FLAGS_MCS;
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_SHORT_GI;
-            }
-
-#ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting MCS rate %d flags %x\n",
-                    sinfo->txrate.mcs,
-                    sinfo->txrate.flags );
-#endif //LINKSPEED_DEBUG_ENABLED
-        }
+	hdd_report_max_rate(pAdapter, sinfo->signal, &sinfo->txrate, rate_flags, tx_mcs_index, nss, tx_rate);
+	hdd_report_max_rate(pAdapter, sinfo->signal, &sinfo->rxrate, rate_flags, rx_mcs_index, nss, rx_rate);
     }
     else
     {
-        // report current rate instead of max rate
-
-        if (rate_flags & eHAL_TX_RATE_LEGACY)
-        {
-            //provide to the UI in units of 100kbps
-            sinfo->txrate.legacy = myRate;
-#ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting actual legacy rate %d\n", sinfo->txrate.legacy);
-#endif //LINKSPEED_DEBUG_ENABLED
-        }
-        else
-        {
-            //must be MCS
-            sinfo->txrate.mcs = pAdapter->hdd_stats.ClassA_stat.mcs_index;
-#ifdef WLAN_FEATURE_11AC
-            sinfo->txrate.nss = nss;
-            sinfo->txrate.flags |= RATE_INFO_FLAGS_VHT_MCS;
-            if (rate_flags & eHAL_TX_RATE_VHT80)
-            {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                sinfo->txrate.bw = RATE_INFO_BW_80;
-#else
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_80_MHZ_WIDTH;
-#endif
-            }
-            else if (rate_flags & eHAL_TX_RATE_VHT40)
-            {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                sinfo->txrate.bw = RATE_INFO_BW_40;
-#else
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
-#endif
-            }
-#endif /* WLAN_FEATURE_11AC */
-            if (rate_flags & (eHAL_TX_RATE_HT20 | eHAL_TX_RATE_HT40))
-            {
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_MCS;
-                if (rate_flags & eHAL_TX_RATE_HT40)
-                {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-                    sinfo->txrate.bw = RATE_INFO_BW_40;
-#else
-                    sinfo->txrate.flags |= RATE_INFO_FLAGS_40_MHZ_WIDTH;
-#endif
-                }
-            }
-            if (rate_flags & eHAL_TX_RATE_SGI)
-            {
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_MCS;
-                sinfo->txrate.flags |= RATE_INFO_FLAGS_SHORT_GI;
-            }
-#ifdef LINKSPEED_DEBUG_ENABLED
-            pr_info("Reporting actual MCS rate %d flags %x\n",
-                    sinfo->txrate.mcs,
-                    sinfo->txrate.flags );
-#endif //LINKSPEED_DEBUG_ENABLED
-        }
+	hdd_report_actual_rate(&sinfo->txrate, rate_flags, tx_mcs_index, nss, tx_rate);
+	hdd_report_actual_rate(&sinfo->rxrate, rate_flags, rx_mcs_index, nss, rx_rate);
     }
 
 
@@ -27817,6 +27726,7 @@ static int __wlan_hdd_cfg80211_get_station(struct wiphy *wiphy,
                      STATION_INFO_TX_RETRIES |
                      STATION_INFO_TX_FAILED  |
                      STATION_INFO_RX_BYTES   |
+                     STATION_INFO_RX_BITRATE |
                      STATION_INFO_RX_PACKETS;
 #else
     sinfo->filled |= BIT(NL80211_STA_INFO_TX_BYTES)   |
@@ -27825,6 +27735,7 @@ static int __wlan_hdd_cfg80211_get_station(struct wiphy *wiphy,
                      BIT(NL80211_STA_INFO_TX_RETRIES) |
                      BIT(NL80211_STA_INFO_TX_FAILED)  |
                      BIT(NL80211_STA_INFO_RX_BYTES)   |
+                     BIT(NL80211_STA_INFO_RX_BITRATE) |
                      BIT(NL80211_STA_INFO_RX_PACKETS);
 #endif
 
@@ -27864,9 +27775,6 @@ static int __wlan_hdd_cfg80211_get_station(struct wiphy *wiphy,
     }
 #endif
 
-    MTRACE(vos_trace(VOS_MODULE_ID_HDD,
-                     TRACE_CODE_HDD_CFG80211_GET_STA,
-                     pAdapter->sessionId, maxRate));
        EXIT();
        return 0;
 }

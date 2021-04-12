@@ -2843,9 +2843,17 @@ static void wma_update_peer_stats(tp_wma_handle wma, wmi_peer_stats *peer_stats)
 					peer_stats->peer_tx_rate/500;
 			}
 
-			classa_stats->tx_rate_flags = node->rate_flags;
+			WMA_LOGD("peer rx rate:%d", peer_stats->peer_rx_rate);
+			/*The linkspeed returned by fw is in kbps so convert
+			 *it in to units of 500kbps which is expected by UMAC*/
+			if (peer_stats->peer_rx_rate) {
+				classa_stats->rx_rate =
+					peer_stats->peer_rx_rate/500;
+			}
+
+			classa_stats->tx_rx_rate_flags = node->rate_flags;
                         if (!(node->rate_flags & eHAL_TX_RATE_LEGACY)) {
-				classa_stats->mcs_index =
+				classa_stats->tx_mcs_index =
 					wma_get_mcs_idx((peer_stats->peer_tx_rate/100),
 							node->rate_flags,
 							node->nss,
@@ -2856,6 +2864,12 @@ static void wma_update_peer_stats(tp_wma_handle wma, wmi_peer_stats *peer_stats)
 				 * rate flags */
 				classa_stats->rx_frag_cnt = node->nss;
 				classa_stats->promiscuous_rx_frag_cnt = mcsRateFlags;
+
+				classa_stats->rx_mcs_index =
+					wma_get_mcs_idx((peer_stats->peer_rx_rate/100),
+							node->rate_flags,
+							node->nss,
+							&mcsRateFlags);
 			}
 			/* FW returns tx power in intervals of 0.5 dBm
 			   Convert it back to intervals of 1 dBm */

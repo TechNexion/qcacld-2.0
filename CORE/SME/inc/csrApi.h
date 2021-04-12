@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2019, 2021 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -1655,10 +1655,12 @@ typedef struct tagCsrGlobalClassAStatsInfo
    //tANI_U32 default_pwr;
    tANI_U32 sync_fail_cnt;
    tANI_U32 tx_rate;
+   tANI_U32 rx_rate;
    //mcs index for HT20 and HT40 rates
-   tANI_U32  mcs_index;
+   tANI_U32  tx_mcs_index;
+   tANI_U32  rx_mcs_index;
    //to defferentiate between HT20 and HT40 rates;short and long guard interval
-   tANI_U32  tx_rate_flags;
+   tANI_U32  tx_rx_rate_flags;
 
 }tCsrGlobalClassAStatsInfo;
 
