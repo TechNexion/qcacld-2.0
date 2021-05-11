@@ -32366,7 +32366,7 @@ wlan_hdd_cfg80211_extscan_full_scan_result_event(void *ctx,
 {
 	hdd_context_t *pHddCtx  = (hdd_context_t *)ctx;
 	struct sk_buff *skb;
-	struct timespec ts;
+	struct timespec64 ts;
 	int flags = vos_get_gfp_flags();
 	struct hdd_ext_scan_context *context;
 

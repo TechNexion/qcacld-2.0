@@ -896,7 +896,7 @@ unsigned long vos_get_time_of_the_day_ms(void)
 
 	local_time = (uint32_t)(tv.tv_sec -
 		(sys_tz.tz_minuteswest * 60));
-	rtc_time_to_tm(local_time, &tm);
+	rtc_time64_to_tm(local_time, &tm);
 	return ((tm.tm_hour * 60 * 60 * 1000) +
 		(tm.tm_min *60 * 1000) + (tm.tm_sec * 1000)+
 		(tv.tv_nsec/1000000));
@@ -912,7 +912,7 @@ void vos_get_time_of_the_day_in_hr_min_sec_usec(char *tbuf, int len)
        ktime_get_real_ts64(&tv);
        /* Convert rtc to local time */
        local_time = (u32)(tv.tv_sec - (sys_tz.tz_minuteswest * 60));
-       rtc_time_to_tm(local_time, &tm);
+       rtc_time64_to_tm(local_time, &tm);
        snprintf(tbuf, len,
                "[%02d:%02d:%02d.%06lu] ",
                tm.tm_hour, tm.tm_min, tm.tm_sec, tv.tv_nsec/1000);

@@ -38,6 +38,7 @@
 #include <linux/jiffies.h>
 #include <linux/workqueue.h>
 #include <linux/sched.h>
+#include <linux/version.h>
 
 enum cnss_bus_width_type {
 	CNSS_BUS_WIDTH_NONE,
@@ -125,14 +126,14 @@ static inline int vos_wlan_pm_control(bool vote)
 static inline void vos_lock_pm_sem(void) { return; }
 static inline void vos_release_pm_sem(void) { return; }
 
-static inline void vos_get_monotonic_bootime_ts(struct timespec *ts)
+static inline void vos_get_monotonic_bootime_ts(struct timespec64 *ts)
 {
-	*ts = ktime_to_timespec(ktime_get_boottime());
+	*ts = ktime_to_timespec64(ktime_get_boottime());
 }
 
-static inline void vos_get_boottime_ts(struct timespec *ts)
+static inline void vos_get_boottime_ts(struct timespec64 *ts)
 {
-	ktime_get_ts(ts);
+	ktime_get_ts64(ts);
 }
 
 static inline void *vos_get_virt_ramdump_mem(struct device *dev,
@@ -156,7 +157,11 @@ static inline int vos_set_cpus_allowed_ptr(struct task_struct *task, ulong cpu)
 #endif
 
 static inline void vos_device_self_recovery(struct device *dev) { return; }
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0))
+static inline void vos_request_pm_qos_type(u32 qos_val)
+#else
 static inline void vos_request_pm_qos_type(int latency_type, u32 qos_val)
+#endif
 {
 	return;
 }
@@ -203,9 +208,9 @@ static inline int vos_wlan_get_dfs_nol(void *info, u16 info_len)
 	return -EINVAL;
 }
 
-static inline void vos_get_monotonic_boottime_ts(struct timespec *ts)
+static inline void vos_get_monotonic_boottime_ts(struct timespec64 *ts)
 {
-	*ts = ktime_to_timespec(ktime_get_boottime());
+	*ts = ktime_to_timespec64(ktime_get_boottime());
 }
 
 static inline void vos_schedule_recovery_work(struct device *dev) { return; }

@@ -2915,7 +2915,11 @@ static int hif_sdio_device_reinit(struct sdio_func *func, const struct sdio_devi
 	}
 
 	if ((func != NULL) && (id != NULL)) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0))
+		vos_request_pm_qos_type(
+#else
 		vos_request_pm_qos_type(PM_QOS_CPU_DMA_LATENCY,
+#endif
 					DISABLE_KRAIT_IDLE_PS_VAL);
 		ret = hifDeviceInserted(func, id);
 		vos_remove_pm_qos();
