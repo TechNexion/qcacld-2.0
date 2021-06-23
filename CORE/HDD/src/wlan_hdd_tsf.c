@@ -1518,7 +1518,7 @@ int wlan_get_ts_info(struct net_device *dev, struct ethtool_ts_info *info)
  *
  * Return: Describe the execute result of this routine
  */
-static int wlan_ptp_gettime(struct ptp_clock_info *ptp, struct timespec *ts)
+static int wlan_ptp_gettime(struct ptp_clock_info *ptp, struct timespec64 *ts)
 {
 	uint64_t host_time, target_time = 0;
 	VosContextType *pVosContext = NULL;

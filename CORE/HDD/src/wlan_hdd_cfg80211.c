@@ -21875,7 +21875,7 @@ wlan_hdd_cfg80211_inform_bss_frame( hdd_adapter_t *pAdapter,
     hdd_context_t *pHddCtx;
     int status;
 #ifdef ANDROID
-    struct timespec ts;
+    struct timespec64 ts;
 #endif
     hdd_config_t *cfg_param = NULL;
 

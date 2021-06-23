@@ -157,9 +157,9 @@ static inline int vos_wlan_pm_control(bool vote)
 static inline void vos_lock_pm_sem(void) { return; }
 static inline void vos_release_pm_sem(void) { return; }
 
-static inline void vos_get_boottime_ts(struct timespec *ts)
+static inline void vos_get_boottime_ts(struct timespec64 *ts)
 {
-	ktime_get_ts(ts);
+	ktime_get_ts64(ts);
 }
 
 static inline void *vos_get_virt_ramdump_mem(struct device *dev,
@@ -231,7 +231,7 @@ static inline int vos_wlan_get_dfs_nol(void *info, u16 info_len)
 }
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
-static inline void vos_get_monotonic_boottime_ts(struct timespec *ts)
+static inline void vos_get_monotonic_boottime_ts(struct timespec64 *ts)
 {
 	get_monotonic_boottime(ts);
 }
@@ -337,7 +337,7 @@ static inline void vos_pm_wake_lock_destroy(vos_wake_lock_t *lock)
 	cnss_pm_wake_lock_destroy(&(lock->lock));
 }
 
-static inline void vos_get_monotonic_boottime_ts(struct timespec *ts)
+static inline void vos_get_monotonic_boottime_ts(struct timespec64 *ts)
 {
         cnss_get_monotonic_boottime(ts);
 }
@@ -373,7 +373,7 @@ static inline int vos_wlan_get_dfs_nol(void *info, u16 info_len)
 	return cnss_wlan_get_dfs_nol(info, info_len);
 }
 
-static inline void vos_get_boottime_ts(struct timespec *ts)
+static inline void vos_get_boottime_ts(struct timespec64 *ts)
 {
         cnss_get_boottime(ts);
 }

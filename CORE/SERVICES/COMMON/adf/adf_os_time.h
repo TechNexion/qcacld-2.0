@@ -149,7 +149,7 @@ adf_os_msleep(int msecs)
 static inline a_uint64_t adf_get_boottime(void)
 {
 #ifdef CONFIG_CNSS
-   struct timespec ts;
+   struct timespec64 ts;
 
    vos_get_boottime_ts(&ts);
 
