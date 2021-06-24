@@ -597,7 +597,11 @@ vos_sched_open
                                                  pSchedContext,
                                                  "VosTlshimRxThread");
 #ifdef CONFIG_PERF_NON_QC_PLATFORM
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+  sched_set_fifo(pSchedContext->TlshimRxThread);
+#else
   sched_setscheduler(pSchedContext->TlshimRxThread, SCHED_FIFO, &param);
+#endif
 #endif
   if (IS_ERR(pSchedContext->TlshimRxThread))
   {

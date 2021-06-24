@@ -15850,7 +15850,11 @@ static void hdd_set_ixc_prio(void *priv)
                 memset(comm, 0, sizeof(comm));
                 strcpy(comm, task->comm);
                 if(strstr(comm, "ixchariot") || strstr(comm, "iperf")) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+                    sched_set_fifo(task);
+#else
                     sched_setscheduler(task, SCHED_FIFO, &param);
+#endif
 #ifdef CONFIG_PERF_MODE
                     enable_wlan_perf_mode();
 #endif

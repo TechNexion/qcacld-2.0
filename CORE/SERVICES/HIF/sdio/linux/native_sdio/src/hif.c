@@ -893,7 +893,11 @@ static inline int hif_start_tx_completion_thread(HIF_DEVICE *device)
 		device->tx_completion_task = kthread_create(tx_completion_task,
 			(void *)device,	"AR6K TxCompletion");
 #ifdef CONFIG_PERF_NON_QC_PLATFORM
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+		sched_set_fifo(device->tx_completion_task);
+#else
 		sched_setscheduler(device->tx_completion_task, SCHED_FIFO, &param);
+#endif
 #endif
 		if (IS_ERR(device->tx_completion_task)) {
 			device->tx_completion_shutdown = 1;
@@ -2263,7 +2267,11 @@ static A_STATUS hifEnableFunc(HIF_DEVICE *device, struct sdio_func *func)
                                            (void *)device,
                                            "AR6K Async");
 #ifdef CONFIG_PERF_NON_QC_PLATFORM
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+           sched_set_fifo(device->async_task);
+#else
            sched_setscheduler(device->async_task, SCHED_FIFO, &param);
+#endif
 #endif
            if (IS_ERR(device->async_task)) {
                AR_DEBUG_PRINTF(ATH_DEBUG_ERROR, ("AR6000: %s(), to create async task\n", __FUNCTION__));
