@@ -167,10 +167,17 @@ static ssize_t ath_procfs_diag_write(struct file *file, const char __user *buf,
 	}
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0)
+static const struct proc_ops athdiag_fops = {
+	.proc_read = ath_procfs_diag_read,
+	.proc_write = ath_procfs_diag_write,
+};
+#else
 static const struct file_operations athdiag_fops = {
 	.read = ath_procfs_diag_read,
 	.write = ath_procfs_diag_write,
 };
+#endif
 
 /**
  *This function is called when the module is loaded

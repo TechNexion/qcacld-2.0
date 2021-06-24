@@ -460,9 +460,15 @@ static ssize_t crash_dump_read(struct file *file, char __user *buf,
  * This structure initialize the file operation handle for crash
  * dump feature
  */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0)
+static const struct proc_ops crash_dump_fops = {
+	proc_read: crash_dump_read
+};
+#else
 static const struct file_operations crash_dump_fops = {
 	read: crash_dump_read
 };
+#endif
 
 /**
  * crash_dump_procfs_remove() - Remove file/dir under procfs for crash dump
