@@ -447,4 +447,7 @@ int qca_request_firmware(const struct firmware **firmware_p,
                 const char *name,
                 struct device *device);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,7,0)
+#define PM_QOS_CPU_DMA_LATENCY 0
+#endif
 #endif // if !defined __VOS_API_H

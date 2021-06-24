@@ -42,6 +42,9 @@
 #include <adf_os_types.h>
 #include <adf_os_util.h>
 
+#ifndef DMA_ATTR_NON_CONSISTENT
+#define DMA_ATTR_NON_CONSISTENT 0
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
 #define __adf_os_dma_alloc_noncoherent(dev, size, daddr, flag, attr) dma_alloc_attrs(dev, size, daddr, flag, attr)
 #define __adf_os_dma_free_noncoherent(dev, size, vddr, daddr, attr) dma_free_attrs(dev, size, vddr, daddr, attr)
