@@ -49,7 +49,7 @@
 #include <ol_tx_classify.h>   /* ol_tx_classify, ol_tx_classify_mgmt */
 #include <ol_tx_queue.h>      /* ol_tx_enqueue */
 #include <ol_tx_sched.h>      /* ol_tx_sched */
-
+#include <asm/div64.h>
 /* internal header files relevant only for specific systems (Pronto) */
 #include <ol_txrx_encap.h>    /* OL_TX_ENCAP, etc */
 #include "vos_lock.h"
@@ -1992,14 +1992,18 @@ ol_tx_vdev_set_bundle_require(uint8_t vdev_id, unsigned long tx_bytes,
 {
 	struct ol_txrx_vdev_t* vdev = ol_txrx_get_vdev_from_vdev_id(vdev_id);
 	bool old_bundle_required;
+	uint64_t high_th_temp;
+	uint64_t low_th_temp;
 
 	if ((!vdev) || (low_th > high_th))
 		return;
 
 	old_bundle_required = vdev->bundling_reqired;
-	if (tx_bytes > ((high_th * time_in_ms * 1500)/1000))
+	high_th_temp = high_th * time_in_ms * 1500;
+	low_th_temp = low_th * time_in_ms * 1500;
+	if (tx_bytes > do_div(high_th_temp,1000))
 		vdev->bundling_reqired = true;
-	else if (tx_bytes < ((low_th * time_in_ms * 1500)/1000))
+	else if (tx_bytes < do_div(high_th_temp,1000))
 		vdev->bundling_reqired = false;
 
 	if (old_bundle_required != vdev->bundling_reqired)
