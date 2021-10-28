@@ -24617,6 +24617,28 @@ int wlan_hdd_cfg80211_set_ie(hdd_adapter_t *pAdapter,
                 }
                 break;
 
+            case WLAN_ELEMID_RSNXE:
+                hddLog (VOS_TRACE_LEVEL_INFO, "%s Set RSNXE(len %d)",
+                        __func__, eLen + 2);
+
+                if (SIR_MAC_MAX_ADD_IE_LENGTH <
+                        (pWextState->assocAddIE.length + eLen)) {
+                   hddLog(VOS_TRACE_LEVEL_FATAL, "Cannot accommodate assocAddIE"
+                                                  "Need bigger buffer space");
+                   VOS_ASSERT(0);
+                   return -ENOMEM;
+                }
+                memcpy(pWextState->assocAddIE.addIEdata +
+                       pWextState->assocAddIE.length,
+                       genie - 2, eLen + 2);
+                pWextState->assocAddIE.length += eLen + 2;
+
+                pWextState->roamProfile.pAddIEAssoc =
+                                pWextState->assocAddIE.addIEdata;
+                pWextState->roamProfile.nAddIEAssocLength =
+                                pWextState->assocAddIE.length;
+                break;
+
             default:
                 hddLog (VOS_TRACE_LEVEL_ERROR,
                         "%s Set UNKNOWN IE %X", __func__, elementId);

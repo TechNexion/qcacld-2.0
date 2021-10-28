@@ -3255,6 +3255,10 @@ tANI_U32 dot11fGetPackedIEExtCap(tpAniSirGlobal, tDot11fIEExtCap*, tANI_U32*);
 #ifdef __cplusplus
 }; /* End extern "C". */
 #endif /* C++ */
+
+#define WLAN_ELEMID_RSNXE ( 244 )
+#define WLAN_MAX_IE_LEN ( 255 )
+
 // EID 50 (0x32)
 typedef struct sDot11fIEExtSuppRates {
     tANI_U8      present;
