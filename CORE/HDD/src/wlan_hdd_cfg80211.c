@@ -17543,6 +17543,8 @@ int wlan_hdd_cfg80211_update_apies(hdd_adapter_t* pHostapdAdapter)
 
     wlan_hdd_add_extra_ie(pHostapdAdapter, genie, &total_ielen,
                           WLAN_EID_VHT_TX_POWER_ENVELOPE);
+    wlan_hdd_add_extra_ie(pHostapdAdapter, genie, &total_ielen,
+                          WLAN_ELEMID_RSNXE);
     if (0 != wlan_hdd_add_ie(pHostapdAdapter, genie,
                               &total_ielen, WPS_OUI_TYPE, WPS_OUI_TYPE_SIZE))
     {
@@ -17624,7 +17626,8 @@ int wlan_hdd_cfg80211_update_apies(hdd_adapter_t* pHostapdAdapter)
     hddLog(LOGE, FL("qcdbg, probe resp ie len:%d"), proberesp_ies_len);
     wlan_hdd_add_sap_obss_scan_ie(pHostapdAdapter, proberesp_ies,
                                   &proberesp_ies_len);
-
+    wlan_hdd_add_extra_ie(pHostapdAdapter, proberesp_ies, &proberesp_ies_len,
+                          WLAN_ELEMID_RSNXE);
     if (test_bit(SOFTAP_BSS_STARTED, &pHostapdAdapter->event_flags)) {
         updateIE.ieBufferlength = proberesp_ies_len;
         updateIE.pAdditionIEBuffer = proberesp_ies;
