@@ -806,6 +806,9 @@ ifeq ($(BUILD_DIAG_VERSION),1)
 VOSS_OBJS += $(VOSS_SRC_DIR)/vos_diag.o
 endif
 
+ifeq ($(CONFIG_CLD_REGDB),y)
+VOSS_OBJS += $(VOSS_SRC_DIR)/vos_regdb.o
+endif
 ########### BMI ###########
 BMI_DIR := CORE/SERVICES/BMI
 
@@ -1891,6 +1894,10 @@ endif
 
 ifeq ($(CONFIG_SPECTRAL_SCAN), y)
 CDEFINES += -DWLAN_SPECTRAL_SCAN
+endif
+
+ifeq ($(CONFIG_CLD_REGDB), y)
+CDEFINES += -DCLD_REGDB
 endif
 
 # Module information used by KBuild framework
