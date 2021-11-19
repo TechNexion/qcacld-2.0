@@ -1997,9 +1997,9 @@ ol_tx_vdev_set_bundle_require(uint8_t vdev_id, unsigned long tx_bytes,
 		return;
 
 	old_bundle_required = vdev->bundling_reqired;
-	if (tx_bytes > ((high_th * time_in_ms * 1500)/1000))
+	if (tx_bytes > ((high_th * time_in_ms * 3) >> 1))
 		vdev->bundling_reqired = true;
-	else if (tx_bytes < ((low_th * time_in_ms * 1500)/1000))
+	else if (tx_bytes < ((low_th * time_in_ms * 3) >> 1))
 		vdev->bundling_reqired = false;
 
 	if (old_bundle_required != vdev->bundling_reqired)
