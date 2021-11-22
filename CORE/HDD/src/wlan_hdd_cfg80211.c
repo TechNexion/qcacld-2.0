@@ -5223,7 +5223,11 @@ static int hdd_extscan_passpoint_fill_network_list(
 			hddLog(LOGE, FL("attr realm failed"));
 			return -EINVAL;
 		}
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0))
+		len = nla_strscpy(req_msg->networks[index].realm,
+#else
 		len = nla_strlcpy(req_msg->networks[index].realm,
+#endif
 				  network[PARAM_REALM],
 				  SIR_PASSPOINT_REALM_LEN);
 		/* Don't send partial realm to firmware */
