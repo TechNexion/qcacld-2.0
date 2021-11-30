@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006-2007, 2014-2016 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -3164,8 +3165,6 @@ FRAME Beacon                              // C.f. Sec. 7.2.3.1
     OPTIE  FHPattTable;
     OPTIE  PowerConstraints;
     OPTIE  ChanSwitchAnn;
-    OPTIE  ext_chan_switch_ann;
-    OPTIE  SuppOperatingClasses;
     OPTIE  Quiet;
     OPTIE  TPCReport;
     OPTIE  ERPInfo;
@@ -3177,36 +3176,38 @@ FRAME Beacon                              // C.f. Sec. 7.2.3.1
     OPTIE  APChannelReport;
     OPTIE  RRMEnabledCap;
     OPTIE  MobilityDomain;
-    OPTIE  WPA;
+    OPTIE  ext_chan_switch_ann;
+    OPTIE  SuppOperatingClasses;
     OPTIE  HTCaps;
     OPTIE  HTInfo;
+    OPTIE  OBSSScanParameters;
+    OPTIE  ExtCap;
+    OPTIE  VHTCaps;
+    OPTIE  VHTOperation;
+    OPTIE  ChannelSwitchWrapper;
+    OPTIE  VHTExtBssLoad;
+    OPTIE  OperatingMode;
+    //WLAN_FEATURE_FILS_SK
+    OPTIE  fils_indication;
     OPTIE  sec_chan_offset_ele;
+    OPTIE  WAPI;
+    OPTIE  ESETxmitPower;
+    OPTIE  WiderBWChanSwitchAnn;
+    OPTIE  WPA;
     OPTIE  WMMInfoAp;
     OPTIE  WMMParams;
     OPTIE  WMMCaps;
-    OPTIE  WAPI;
+    OPTIE  ESEVersion;
     OPTIE  ESERadMgmtCap;
     OPTIE  ESETrafStrmMet;
-    OPTIE  ESETxmitPower;
 
     OPTIE  WscBeacon;
     OPTIE  P2PBeacon;
-    OPTIE  VHTCaps;
-    OPTIE  VHTOperation;
-    OPTIE  VHTExtBssLoad;
-    OPTIE  ExtCap;
-    OPTIE  OperatingMode;
-    OPTIE  WiderBWChanSwitchAnn;
-    OPTIE  OBSSScanParameters;
-    //WLAN_FEATURE_FILS_SK
-    OPTIE  fils_indication;
     OPTIE  Vendor1IE;
     OPTIE  vendor2_ie;
     OPTIE  Vendor3IE;
     OPTIE  hs20vendor_ie;
-    OPTIE  ChannelSwitchWrapper;
     OPTIE  QComVendorIE;
-    OPTIE  ESEVersion;
 } // End frame Beacon.
 
 // Ok, here's  the story on  Beacon1 & Beacon2.   We presumably beacon  a lot
@@ -3257,8 +3258,6 @@ FRAME Beacon2
     OPTIE  Country;
     OPTIE  PowerConstraints;
     OPTIE  ChanSwitchAnn;
-    OPTIE  ext_chan_switch_ann;
-    OPTIE  SuppOperatingClasses;
     OPTIE  Quiet;
     OPTIE  TPCReport;
     OPTIE  ERPInfo;
@@ -3268,33 +3267,35 @@ FRAME Beacon2
     OPTIE  APChannelReport;
     OPTIE  RRMEnabledCap;
     OPTIE  MobilityDomain;
-    OPTIE  WPA;
+    OPTIE  ext_chan_switch_ann;
+    OPTIE  SuppOperatingClasses;
     OPTIE  HTCaps;
     OPTIE  HTInfo;
+    OPTIE  OBSSScanParameters;
+    OPTIE  ExtCap;
+    OPTIE  VHTCaps;
+    OPTIE  VHTOperation;
+    OPTIE  ChannelSwitchWrapper;
+    OPTIE  VHTExtBssLoad;
+    OPTIE  OperatingMode;
+    //WLAN_FEATURE_FILS_SK
+    OPTIE  fils_indication;
     OPTIE  sec_chan_offset_ele;
+    OPTIE  WAPI;
+    OPTIE  ESETxmitPower;
+    OPTIE  WiderBWChanSwitchAnn;
+    OPTIE  WPA;
     OPTIE  WMMInfoAp;
     OPTIE  WMMParams;
     OPTIE  WMMCaps;
-    OPTIE  WscBeacon;
-    OPTIE  WAPI;
     OPTIE  ESERadMgmtCap;
     OPTIE  ESETrafStrmMet;
-    OPTIE  ESETxmitPower;
+    OPTIE  WscBeacon;
     OPTIE  P2PBeacon;
-    OPTIE  VHTCaps;
-    OPTIE  VHTOperation;
-    OPTIE  VHTExtBssLoad;
-    OPTIE  ExtCap;
-    OPTIE  OperatingMode;
-    OPTIE  WiderBWChanSwitchAnn;
-    OPTIE  OBSSScanParameters;
-    //WLAN_FEATURE_FILS_SK
-    OPTIE  fils_indication;
     OPTIE  Vendor1IE;
     OPTIE  vendor2_ie;
     OPTIE  Vendor3IE;
     OPTIE  hs20vendor_ie;
-    OPTIE  ChannelSwitchWrapper;
     OPTIE  QComVendorIE;
     OPTIE  ESEVersion;
 }
@@ -3320,8 +3321,6 @@ FRAME BeaconIEs
     OPTIE  FHPattTable;
     OPTIE  PowerConstraints;
     OPTIE  ChanSwitchAnn;
-    OPTIE  ext_chan_switch_ann;
-    OPTIE  SuppOperatingClasses;
     OPTIE  Quiet;
     OPTIE  TPCReport;
     OPTIE  ERPInfo;
@@ -3333,37 +3332,38 @@ FRAME BeaconIEs
     OPTIE  APChannelReport;
     OPTIE  RRMEnabledCap;
     OPTIE  MobilityDomain;
-    OPTIE  WPA;
+    OPTIE  ext_chan_switch_ann;
+    OPTIE  SuppOperatingClasses;
     OPTIE  HTCaps;
     OPTIE  HTInfo;
+    OPTIE  OBSSScanParameters;
+    OPTIE  ExtCap;
+    OPTIE  VHTCaps;
+    OPTIE  VHTOperation;
+    OPTIE  ChannelSwitchWrapper;
+    OPTIE  VHTExtBssLoad;
+    OPTIE  OperatingMode;
+    //WLAN_FEATURE_FILS_SK
+    OPTIE  fils_indication;
     OPTIE  sec_chan_offset_ele;
+    OPTIE  WAPI;
+    OPTIE  ESETxmitPower;
+    OPTIE  WiderBWChanSwitchAnn;
+    OPTIE  WPA;
     OPTIE  WMMInfoAp;
     OPTIE  WMMParams;
     OPTIE  WMMCaps;
-    OPTIE  WAPI;
     OPTIE  ESEVersion;
     OPTIE  ESERadMgmtCap;
     OPTIE  ESETrafStrmMet;
-    OPTIE  ESETxmitPower;
 
     OPTIE  WscBeaconProbeRes;
     OPTIE  P2PBeaconProbeRes;
-    OPTIE  VHTCaps;
-    OPTIE  VHTOperation;
-    OPTIE  VHTExtBssLoad;
-    OPTIE  ExtCap;
-    OPTIE  OperatingMode;
-    OPTIE  WiderBWChanSwitchAnn;
-    OPTIE  OBSSScanParameters;
-    //WLAN_FEATURE_FILS_SK
-    OPTIE  fils_indication;
     OPTIE  Vendor1IE;
     OPTIE  vendor2_ie;
     OPTIE  Vendor3IE;
     OPTIE  hs20vendor_ie;
-    OPTIE  ChannelSwitchWrapper;
     OPTIE  QComVendorIE;
-
 } // End frame BeaconIEs.
 
 FRAME Disassociation                      // 7.3.3.3
@@ -3385,30 +3385,30 @@ FRAME AssocRequest                        // 7.2.3.4
     OPTIE  QOSCapsStation;
     OPTIE  RRMEnabledCap;
     OPTIE  MobilityDomain;
-    OPTIE  dh_parameter_element;
-    OPTIE  WPAOpaque;
     OPTIE  HTCaps;
-    OPTIE  WMMCaps;
-    OPTIE  WMMInfoStation;
-    OPTIE  WscIEOpaque;
-    OPTIE  WAPIOpaque;
-    OPTIE  WAPI;
-    OPTIE  ESERadMgmtCap;
-    OPTIE  ESEVersion;
-    OPTIE  P2PIEOpaque;
-    OPTIE  WFDIEOpaque;
+    OPTIE  ExtCap;
     OPTIE  VHTCaps;
+    OPTIE  OperatingMode;
     //WLAN_FEATURE_FILS_SK
     OPTIE  fils_session;
     OPTIE  fils_public_key;
     OPTIE  fils_key_confirmation;
     OPTIE  fils_hlp_container;
-    OPTIE  ExtCap;
-    OPTIE  OperatingMode;
+    OPTIE  WAPIOpaque;
+    OPTIE  WAPI;
     OPTIE  QosMapSet;
+    OPTIE  dh_parameter_element;
+    OPTIE  WPAOpaque;
+    OPTIE  WMMCaps;
+    OPTIE  WMMInfoStation;
+    OPTIE  WscIEOpaque;
+    OPTIE  ESERadMgmtCap;
+    OPTIE  ESEVersion;
+    OPTIE  P2PIEOpaque;
+    OPTIE  WFDIEOpaque;
     OPTIE  vendor2_ie;
-    OPTIE  QComVendorIE;
     OPTIE  hs20vendor_ie;
+    OPTIE  QComVendorIE;
 } // End frame AssocRequest.
 
 FRAME AssocResponse                       // 7.2.3.5
@@ -3424,30 +3424,30 @@ FRAME AssocResponse                       // 7.2.3.5
     OPTIE  RRMEnabledCap;
     OPTIE  MobilityDomain;
     OPTIE  FTInfo;
-    OPTIE  RICDataDesc[2];
-    OPTIE  WPA;
     OPTIE  TimeoutInterval;
     OPTIE  HTCaps;
     OPTIE  HTInfo;
-    OPTIE  WMMParams;
-    OPTIE  WMMCaps;
-    OPTIE  ESERadMgmtCap;
-    OPTIE  ESETrafStrmMet;
-    OPTIE  ESETxmitPower;
-    OPTIE  WMMTSPEC[0..4];
-    OPTIE  WscAssocRes;
-    OPTIE  P2PAssocRes;
+    OPTIE  OBSSScanParameters;
+    OPTIE  ExtCap;
+    OPTIE  QosMapSet;
     OPTIE  VHTCaps;
     OPTIE  VHTOperation;
-    OPTIE  ExtCap;
-    OPTIE  OBSSScanParameters;
-    OPTIE  QosMapSet;
     //WLAN_FEATURE_FILS_SK
     OPTIE  fils_session;
     OPTIE  fils_public_key;
     OPTIE  fils_key_confirmation;
     OPTIE  fils_hlp_container;
+    OPTIE  RICDataDesc[2];
+    OPTIE  ESETxmitPower;
     OPTIE  fils_kde;
+    OPTIE  WPA;
+    OPTIE  WMMParams;
+    OPTIE  WMMCaps;
+    OPTIE  ESERadMgmtCap;
+    OPTIE  ESETrafStrmMet;
+    OPTIE  WMMTSPEC[0..4];
+    OPTIE  WscAssocRes;
+    OPTIE  P2PAssocRes;
     OPTIE  vendor2_ie;
     OPTIE  QComVendorIE;
 } // End frame AssocResponse.
@@ -3468,24 +3468,24 @@ FRAME ReAssocRequest                      // 7.2.3.6
     OPTIE  MobilityDomain;
     OPTIE  FTInfo;
     OPTIE  RICDataDesc[2];
-    OPTIE  WPAOpaque;
     OPTIE  HTCaps;
+    OPTIE  ExtCap;
+    OPTIE  VHTCaps;
+    OPTIE  OperatingMode;
+    OPTIE  WAPIOpaque;
+    OPTIE  WAPI;
+    OPTIE  QosMapSet;
+    OPTIE  ESECckmOpaque;
+    OPTIE  WPAOpaque;
     OPTIE  WMMCaps;
     OPTIE  WMMInfoStation;
     OPTIE  WscIEOpaque;
-    OPTIE  WAPIOpaque;
-    OPTIE  WAPI;
     OPTIE  ESERadMgmtCap;
     OPTIE  ESEVersion;
-    OPTIE  ESECckmOpaque;
     OPTIE  WMMTSPEC[0..4];
     OPTIE  ESETrafStrmRateSet;
     OPTIE  P2PIEOpaque;
     OPTIE  WFDIEOpaque;
-    OPTIE  VHTCaps;
-    OPTIE  ExtCap;
-    OPTIE  OperatingMode;
-    OPTIE  QosMapSet;
     OPTIE  vendor2_ie;
     OPTIE  QComVendorIE;
     OPTIE  hs20vendor_ie;
@@ -3506,23 +3506,23 @@ FRAME ReAssocResponse                     // 7.2.3.7
     OPTIE  MobilityDomain;
     OPTIE  FTInfo;
     OPTIE  RICDataDesc[2];
-    OPTIE  WPA;
     OPTIE  TimeoutInterval;
     OPTIE  HTCaps;
     OPTIE  HTInfo;
+    OPTIE  OBSSScanParameters;
+    OPTIE  ExtCap;
+    OPTIE  VHTCaps;
+    OPTIE  VHTOperation;
+    OPTIE  QosMapSet;
+    OPTIE  ESETxmitPower;
+    OPTIE  WPA;
     OPTIE  WMMParams;
     OPTIE  ESERadMgmtCap;
     OPTIE  ESETrafStrmMet;
-    OPTIE  ESETxmitPower;
     OPTIE  WMMTSPEC[0..4];
     OPTIE  ESETrafStrmRateSet;
     OPTIE  WscReassocRes;
     OPTIE  P2PAssocRes;
-    OPTIE  VHTCaps;
-    OPTIE  VHTOperation;
-    OPTIE  ExtCap;
-    OPTIE  OBSSScanParameters;
-    OPTIE  QosMapSet;
     OPTIE  vendor2_ie;
     OPTIE  QComVendorIE;
 } // End frame ReAssocResponse.
@@ -3535,11 +3535,11 @@ FRAME ProbeRequest                        // 7.2.3.8
     OPTIE  ExtSuppRates;
     OPTIE  DSParams;
     OPTIE  HTCaps;
+    OPTIE  ExtCap;
+    OPTIE  VHTCaps;
     OPTIE  WscProbeReq;
     OPTIE  WFATPC;
     OPTIE  P2PProbeReq;
-    OPTIE  VHTCaps;
-    OPTIE  ExtCap;
 } // End frame ProbeRequest.
 
 FRAME ProbeResponse                       // 7.2.3.9
@@ -3558,8 +3558,6 @@ FRAME ProbeResponse                       // 7.2.3.9
     OPTIE  FHPattTable;
     OPTIE  PowerConstraints;
     OPTIE  ChanSwitchAnn;
-    OPTIE  ext_chan_switch_ann;
-    OPTIE  SuppOperatingClasses;
     OPTIE  Quiet;
     OPTIE  TPCReport;
     OPTIE  ERPInfo;
@@ -3570,35 +3568,37 @@ FRAME ProbeResponse                       // 7.2.3.9
     OPTIE  RRMEnabledCap;
     OPTIE  APChannelReport;
     OPTIE  MobilityDomain;
-    OPTIE  WPA;
+    OPTIE  ext_chan_switch_ann;
+    OPTIE  SuppOperatingClasses;
     OPTIE  HTCaps;
     OPTIE  HTInfo;
+    OPTIE  OBSSScanParameters;
+    OPTIE  ExtCap;
+    OPTIE  VHTCaps;
+    OPTIE  VHTOperation;
+    OPTIE  ChannelSwitchWrapper;
+    OPTIE  VHTExtBssLoad;
+    //WLAN_FEATURE_FILS_SK
+    OPTIE  fils_indication;
     OPTIE  sec_chan_offset_ele;
+    OPTIE  WAPI;
+    OPTIE  ESETxmitPower;
+    OPTIE  WPA;
     OPTIE  WMMInfoAp;
     OPTIE  WMMParams;
     OPTIE  WMMCaps;
-    OPTIE  WAPI;
+    OPTIE  ESEVersion;
     OPTIE  ESERadMgmtCap;
     OPTIE  ESETrafStrmMet;
-    OPTIE  ESETxmitPower;
 
     OPTIE  WscProbeRes;
     OPTIE  P2PProbeRes;
 
-    OPTIE  VHTCaps;
-    OPTIE  VHTOperation;
-    OPTIE  VHTExtBssLoad;
-    OPTIE  ExtCap;
-    OPTIE  OBSSScanParameters;
-    //WLAN_FEATURE_FILS_SK
-    OPTIE  fils_indication;
     OPTIE  Vendor1IE;
     OPTIE  vendor2_ie;
     OPTIE  Vendor3IE;
     OPTIE  hs20vendor_ie;
-    OPTIE  ChannelSwitchWrapper;
     OPTIE  QComVendorIE;
-    OPTIE  ESEVersion;
 } // End frame ProbeResponse.
 
 FRAME Authentication                      // 7.2.3.10
