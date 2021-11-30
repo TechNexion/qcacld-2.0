@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -3255,10 +3256,6 @@ tANI_U32 dot11fGetPackedIEExtCap(tpAniSirGlobal, tDot11fIEExtCap*, tANI_U32*);
 #ifdef __cplusplus
 }; /* End extern "C". */
 #endif /* C++ */
-
-#define WLAN_ELEMID_RSNXE ( 244 )
-#define WLAN_MAX_IE_LEN ( 255 )
-
 // EID 50 (0x32)
 typedef struct sDot11fIEExtSuppRates {
     tANI_U8      present;

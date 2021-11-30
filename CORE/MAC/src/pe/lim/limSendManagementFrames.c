@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2011-2019, 2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -2377,14 +2378,14 @@ limSendAssocReqMgmtFrame(tpAniSirGlobal   pMac,
     }
 
     /* RSNX IE for SAE PWE derivation based on H2E */
-    if (lim_get_ie_ptr(pAddIE, nAddIELen, WLAN_ELEMID_RSNXE)) {
-        rsnx_ie = vos_mem_malloc(WLAN_MAX_IE_LEN + 2);
+    if (lim_get_ie_ptr(pAddIE, nAddIELen, IEEE80211_ELEMID_RSNXE)) {
+        rsnx_ie = vos_mem_malloc(IEEE80211_MAX_IE_LEN + 2);
         if (!rsnx_ie)
             goto end;
 
         status = lim_strip_ie(pMac, pAddIE, &nAddIELen,
-                              WLAN_ELEMID_RSNXE, ONE_BYTE,
-                              NULL, 0, rsnx_ie, WLAN_MAX_IE_LEN);
+                              IEEE80211_ELEMID_RSNXE, ONE_BYTE,
+                              NULL, 0, rsnx_ie, IEEE80211_MAX_IE_LEN);
         if (eHAL_STATUS_SUCCESS != status) {
             limLog(pMac, LOGE,("Failed to strip Vendor IEs"));
             goto end;

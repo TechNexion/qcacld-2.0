@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2011,2014, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -1372,6 +1373,7 @@ enum {
     IEEE80211_ELEMID_QUIET_CHANNEL    = 198,  /* Quiet Channel */
     IEEE80211_ELEMID_OP_MODE_NOTIFY   = 199,  /* Operating Mode Notification */
     IEEE80211_ELEMID_VENDOR           = 221,  /* vendor private */
+    IEEE80211_ELEMID_RSNXE            = 244,
 };
 
 #define IEEE80211_MAX_IE_LEN                255
