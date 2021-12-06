@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2011-2019, 2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -1058,6 +1059,7 @@ typedef struct tagCsrRoamProfile
     tSirMacRateSet  extended_rates;
     uint8_t sub20_channelwidth;
     bool force_24ghz_in_ht20;
+    bool require_h2e;
     tCsrBssid bssid_hint;
 #ifdef WLAN_FEATURE_FILS_SK
     bool fils_connection;

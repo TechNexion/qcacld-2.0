@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -7361,6 +7362,7 @@ eHalStatus csrRoamCopyProfile(tpAniSirGlobal pMac, tCsrRoamProfile *pDstProfile,
             pDstProfile->extended_rates.numRates =
                 pSrcProfile->extended_rates.numRates;
         }
+        pDstProfile->require_h2e = pSrcProfile->require_h2e;
 
     }while(0);
 
@@ -13565,6 +13567,7 @@ static void csrRoamGetBssStartParms(tpAniSirGlobal pMac,
 	tANI_U8 channel = 0;
 	tSirNwType nwType;
 	tANI_U8 operation_channel = 0;
+	tANI_U8 h2e;
 	tSirMacRateSet *opr_rates = &pParam->operationalRateSet;
 	tSirMacRateSet *ext_rates = &pParam->extendedRateSet;
 
@@ -13659,6 +13662,24 @@ static void csrRoamGetBssStartParms(tpAniSirGlobal pMac,
 		csr_populate_intersection_driver_and_hostpd_rates(pParam,
 				&rates_driver,
 				&rates_hostapd);
+	}
+	if (pProfile->require_h2e) {
+		h2e = BASIC_RATE_MASK |
+		      WLAN_BSS_MEMBERSHIP_SELECTOR_SAE_H2E;
+		if (ext_rates->numRates < SIR_MAC_MAX_NUMBER_OF_RATES) {
+			ext_rates->rate[ext_rates->numRates] = h2e;
+			ext_rates->numRates++;
+			VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_DEBUG,
+				  "H2E bss membership add to ext support rate");
+		} else if (opr_rates->numRates < SIR_MAC_MAX_NUMBER_OF_RATES) {
+			opr_rates->rate[opr_rates->numRates] = h2e;
+			opr_rates->numRates++;
+			VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_DEBUG,
+				  "H2E bss membership add to support rate");
+		} else {
+			VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+				  "rates full, can not add H2E bss membership");
+		}
 	}
 
 	pParam->operationChn = channel;

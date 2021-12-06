@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -623,6 +624,7 @@ typedef struct sap_Config {
     uint8_t ampdu_size;
     tSirMacRateSet  supported_rates;
     tSirMacRateSet  extended_rates;
+    bool require_h2e;
     eCsrBand   target_band;
     uint16_t  sub20_channelwidth;
     /* beacon count before channel switch */

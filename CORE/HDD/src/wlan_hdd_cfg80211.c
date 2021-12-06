@@ -18258,6 +18258,27 @@ static inline int wlan_hdd_set_udp_resp_offload(hdd_adapter_t *padapter,
 }
 #endif
 
+/**
+ * wlan_hdd_check_h2e() - check SAE/H2E require flag from support rate sets
+ * @rs: support rate or extended support rate set
+ * @require_h2e: pointer to store require h2e flag
+ *
+ * Return: none
+ */
+static void wlan_hdd_check_h2e(const tSirMacRateSet *rs, bool *require_h2e)
+{
+	uint8_t i;
+
+	if (!rs || !require_h2e)
+		return;
+
+	for (i = 0; i < rs->numRates; i++) {
+		if (rs->rate[i] == (BASIC_RATE_MASK |
+				    WLAN_BSS_MEMBERSHIP_SELECTOR_SAE_H2E))
+			*require_h2e = true;
+	}
+}
+
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,4,0)) && !defined(WITH_BACKPORTS)
 static int wlan_hdd_cfg80211_start_bss(hdd_adapter_t *pHostapdAdapter,
                             struct beacon_parameters *params)
@@ -18818,6 +18839,11 @@ static int wlan_hdd_cfg80211_start_bss(hdd_adapter_t *pHostapdAdapter,
                             pConfig->extended_rates.rate[i]);
                 }
         }
+        pConfig->require_h2e = false;
+        wlan_hdd_check_h2e(&pConfig->supported_rates,
+                           &pConfig->require_h2e);
+        wlan_hdd_check_h2e(&pConfig->extended_rates,
+                           &pConfig->require_h2e);
     }
 
     wlan_hdd_set_sapHwmode(pHostapdAdapter);

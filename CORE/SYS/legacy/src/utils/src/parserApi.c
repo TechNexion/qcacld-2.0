@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -681,6 +682,8 @@ PopulateDot11fExtSuppRates(tpAniSirGlobal pMac, tANI_U8 nChannelNum,
 
     if ( 0 != nRates )
     {
+        limLog(pMac, LOG1, FL("ext supp rates present, num %d"),
+               nRates);
         pDot11f->num_rates = ( tANI_U8 )nRates;
         vos_mem_copy( pDot11f->rates, rates, nRates );
         pDot11f->present   = 1;
