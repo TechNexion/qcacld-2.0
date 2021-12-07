@@ -13664,7 +13664,7 @@ static void csrRoamGetBssStartParms(tpAniSirGlobal pMac,
 				&rates_hostapd);
 	}
 	if (pProfile->require_h2e) {
-		h2e = BASIC_RATE_MASK |
+		h2e = WLAN_BASIC_RATE_MASK |
 		      WLAN_BSS_MEMBERSHIP_SELECTOR_SAE_H2E;
 		if (ext_rates->numRates < SIR_MAC_MAX_NUMBER_OF_RATES) {
 			ext_rates->rate[ext_rates->numRates] = h2e;

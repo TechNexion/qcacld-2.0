@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2011-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -63,6 +64,7 @@
 
 #include "vos_types.h"
 #include "wlan_qct_wda.h"
+#include "ieee80211_common.h"
 
 /*
  * fill up the rate info properly based on what is actually supported by the peer
@@ -1900,6 +1902,41 @@ limPopulateOwnRateSet(tpAniSirGlobal pMac,
     return eSIR_FAILURE;
 } /*** limPopulateOwnRateSet() ***/
 
+/**
+ * lim_remove_membership_selectors() - remove elements from rate set
+ *
+ * @rate_set: pointer to rate set
+ *
+ * Removes the BSS membership selector elements from the rate set, and keep
+ * only the rates
+ *
+ * Return: none
+ */
+static void lim_remove_membership_selectors(tSirMacRateSet *rate_set)
+{
+	int i, selector_count = 0;
+
+	for (i = 0; i < rate_set->numRates; i++) {
+		if ((rate_set->rate[i] == (WLAN_BASIC_RATE_MASK |
+				WLAN_BSS_MEMBERSHIP_SELECTOR_HT_PHY)) ||
+		    (rate_set->rate[i] == (WLAN_BASIC_RATE_MASK |
+				WLAN_BSS_MEMBERSHIP_SELECTOR_VHT_PHY)) ||
+		    (rate_set->rate[i] == (WLAN_BASIC_RATE_MASK |
+				WLAN_BSS_MEMBERSHIP_SELECTOR_GLK)) ||
+		    (rate_set->rate[i] == (WLAN_BASIC_RATE_MASK |
+				WLAN_BSS_MEMBERSHIP_SELECTOR_EPD)) ||
+		    (rate_set->rate[i] == (WLAN_BASIC_RATE_MASK |
+				WLAN_BSS_MEMBERSHIP_SELECTOR_SAE_H2E)) ||
+		    (rate_set->rate[i] == (WLAN_BASIC_RATE_MASK |
+				WLAN_BSS_MEMBERSHIP_SELECTOR_HE_PHY)))
+			selector_count++;
+
+		if (i + selector_count < rate_set->numRates)
+			rate_set->rate[i] = rate_set->rate[i + selector_count];
+	}
+	rate_set->numRates -= selector_count;
+}
+
 #ifdef WLAN_FEATURE_11AC
 tSirRetStatus
 limPopulatePeerRateSet(tpAniSirGlobal pMac,
@@ -1956,6 +1993,10 @@ limPopulatePeerRateSet(tpAniSirGlobal pMac,
     }
     else
         tempRateSet2.numRates = 0;
+
+    lim_remove_membership_selectors(&tempRateSet);
+    lim_remove_membership_selectors(&tempRateSet2);
+
     if ((tempRateSet.numRates + tempRateSet2.numRates) > SIR_MAC_RATESET_EID_MAX)
     {
         //we are in big trouble
@@ -2133,7 +2174,11 @@ limPopulateMatchingRateSet(tpAniSirGlobal pMac,
     else
         tempRateSet2.numRates = 0;
 
-    if ((tempRateSet.numRates + tempRateSet2.numRates) > 12)
+    lim_remove_membership_selectors(&tempRateSet);
+    lim_remove_membership_selectors(&tempRateSet2);
+
+    if ((tempRateSet.numRates + tempRateSet2.numRates) >
+        SIR_MAC_MAX_NUMBER_OF_RATES)
     {
         PELOGE(limLog(pMac, LOGE, FL("more than 12 rates in CFG"));)
         goto error;
