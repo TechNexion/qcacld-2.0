@@ -9067,6 +9067,7 @@ static void hdd_update_tgt_vht_cap(hdd_context_t *hdd_ctx,
     tANI_U32 value = 0;
     hdd_config_t *pconfig = hdd_ctx->cfg_ini;
     tANI_U32 temp = 0;
+    tANI_U32 enable_tx_stbc;
 
     /* Get the current MPDU length */
     status = ccmCfgGetInt(hdd_ctx->hHal, WNI_CFG_VHT_MAX_MPDU_LENGTH, &value);
@@ -9243,26 +9244,24 @@ static void hdd_update_tgt_vht_cap(hdd_context_t *hdd_ctx,
     }
 
     /* Get VHT TX STBC cap */
-    status = ccmCfgGetInt(hdd_ctx->hHal, WNI_CFG_VHT_TXSTBC, &value);
-
-    if (status != eHAL_STATUS_SUCCESS) {
-        VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_ERROR,
-                  "%s: could not get VHT TX STBC",
-                  __func__);
-        value = 0;
-    }
+    enable_tx_stbc = pconfig->enableTxSTBC;
+    if (!(cfg->vht_tx_stbc && pconfig->enable2x2))
+        enable_tx_stbc = 0;
+    VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_DEBUG,
+			  "%s: vht stbc ini enableTxSTBC %x,target %x, 2x2 %d",
+			  __func__, pconfig->enableTxSTBC, cfg->vht_tx_stbc,
+			  pconfig->enable2x2);
 
     /* VHT TX STBC cap */
-    if (value && !cfg->vht_tx_stbc) {
-        status = ccmCfgSetInt(hdd_ctx->hHal, WNI_CFG_VHT_TXSTBC,
-                              cfg->vht_tx_stbc, NULL,
-                              eANI_BOOLEAN_FALSE);
 
-        if (status == eHAL_STATUS_FAILURE) {
-            VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_FATAL,
-                      "%s: could not set the VHT TX STBC to CCM",
-                      __func__);
-        }
+    status = ccmCfgSetInt(hdd_ctx->hHal, WNI_CFG_VHT_TXSTBC,
+                          enable_tx_stbc, NULL,
+                          eANI_BOOLEAN_FALSE);
+
+    if (status == eHAL_STATUS_FAILURE) {
+        VOS_TRACE(VOS_MODULE_ID_VOSS, VOS_TRACE_LEVEL_FATAL,
+                  "%s: could not set the VHT TX STBC to CCM",
+                  __func__);
     }
 
     /* Get VHT RX STBC cap */
