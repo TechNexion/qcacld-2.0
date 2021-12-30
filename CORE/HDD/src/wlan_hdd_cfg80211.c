@@ -17562,7 +17562,11 @@ int wlan_hdd_cfg80211_update_apies(hdd_adapter_t* pHostapdAdapter)
                           WLAN_EID_INTERWORKING);
 
     wlan_hdd_add_extra_ie(pHostapdAdapter, genie, &total_ielen,
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0))
                           WLAN_EID_VHT_TX_POWER_ENVELOPE);
+#else
+                          WLAN_EID_TX_POWER_ENVELOPE);
+#endif
     wlan_hdd_add_extra_ie(pHostapdAdapter, genie, &total_ielen,
                           IEEE80211_ELEMID_RSNXE);
     if (0 != wlan_hdd_add_ie(pHostapdAdapter, genie,
