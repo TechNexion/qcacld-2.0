@@ -884,7 +884,9 @@ static inline void hif_free_bus_request(HIF_DEVICE *device,
 static inline int hif_start_tx_completion_thread(HIF_DEVICE *device)
 {
 #ifdef CONFIG_PERF_NON_QC_PLATFORM
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
 	struct sched_param param = {.sched_priority = 99};
+#endif
 #endif
 	if (!device->tx_completion_task) {
 		device->tx_completion_req = NULL;
@@ -2154,7 +2156,9 @@ static A_STATUS hifEnableFunc(HIF_DEVICE *device, struct sdio_func *func)
 {
     int ret = A_OK;
 #ifdef CONFIG_PERF_NON_QC_PLATFORM
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
     struct sched_param param = {.sched_priority = 99};
+#endif
 #endif
     ENTER("sdio_func 0x%pK", func);
 
