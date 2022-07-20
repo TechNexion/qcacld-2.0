@@ -182,8 +182,12 @@ int _readwrite_file(const char *filename, char *rbuf,
 	int ret = 0;
 	struct file *filp = (struct file *)-ENOENT;
 	mm_segment_t oldfs;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,10,0)
 	oldfs = get_fs();
 	set_fs(KERNEL_DS);
+#else
+	oldfs = force_uaccess_begin();
+#endif
 
 	do {
 		filp = filp_open(filename, mode, S_IRUSR);
@@ -238,7 +242,11 @@ int _readwrite_file(const char *filename, char *rbuf,
 	if (!IS_ERR(filp))
 		filp_close(filp, NULL);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,10,0)
 	set_fs(oldfs);
+#else
+	force_uaccess_end(oldfs);
+#endif
 	return ret;
 }
 
