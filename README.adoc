@@ -1,0 +1,27 @@
+= qcacld-2.0 for Qualcomm WIFI module
+
+The qcacld-2.0 is Qualcomm WIFI module out-of-tree driver.
+
+To make and make install module for QCA9377-3 and QCA6174-3:
+[source,console]
+$: KERNEL_SRC=<your kernel path> CONFIG_CLD_HL_SDIO_CORE=y TARGET_BUILD_VARIANT=user make -j4
+
+[source,console]
+$: KERNEL_SRC=<your kernel path> INSTALL_MOD_PATH=<modules> make modules_install
+
+(NOTE: The "modules" directory should be already installed kernel module inside)
+
+If you want to enable P2P device interface you must add this parameter to make command line:
+[source,console]
+CONFIG_P2P_INTERFACE=y
+
+*Prepare WIFI/BT firmware*
+
+Because of the license restriction, please contact TechNexion FAE or Sales to get licensed firmware files.
+
+After getting the firmware binary:
+
+Decompress the tarball and put all the firmware files into your target's `/lib/firmware` directory.
+
+*Support kernel:* `5.10.x` `5.15.x`
+
