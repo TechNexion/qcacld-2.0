@@ -4741,7 +4741,7 @@ eHalStatus sme_set_bpf_instructions(tHalHandle hal,
  *
  * Return: eHAL_STATUS_SUCCESS on success, non-zero error code on failure.
  */
-eHalStatus sme_create_mon_session(tHalHandle hal_handle, uint8_t *bssid);
+eHalStatus sme_create_mon_session(tHalHandle hal_handle, tSirMacAddr bss_id);
 eHalStatus sme_get_mib_stats(tHalHandle hal,
 				csr_mib_stats_callback callback,
 				void *context, void *vos_context,

@@ -41,7 +41,11 @@
 #include <utilsApi.h>
 #include <wlan_qct_wda.h>
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
+#include <acpi/platform/acgcc.h>
+#else
 #include <stdarg.h>
+#endif
 #include "utilsGlobal.h"
 #include "macInitApi.h"
 #include "palApi.h"

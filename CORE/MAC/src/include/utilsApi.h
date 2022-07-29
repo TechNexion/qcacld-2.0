@@ -39,7 +39,7 @@
 #ifndef __UTILSAPI_H
 #define __UTILSAPI_H
 
-#include <stdarg.h>
+#include <acpi/platform/acgcc.h>
 #include <sirCommon.h>
 #include "aniGlobal.h"
 #include "utilsGlobal.h"

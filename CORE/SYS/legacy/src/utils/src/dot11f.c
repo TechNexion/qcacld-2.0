@@ -118,7 +118,11 @@ typedef struct sIEDefn {
 #ifndef DOT11F_HAVE_LOG_MACROS
 
 #include <stdio.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
+#include <acpi/platform/acgcc.h>
+#else
 #include <stdarg.h>
+#endif
 
 #ifndef DOT11F_LOG_GATE
 #   define DOT11F_LOG_GATE FRLOGW
