@@ -974,6 +974,7 @@ end:
  * Return: The buffer with the formated board filename.
  */
 
+#ifdef CONFIG_QCA_BOARD_DATA_USE_BOARD_ID
 #if (defined(CONFIG_CNSS) || defined(HIF_SDIO))
 static char *ol_board_id_to_filename(struct ol_softc *scn, uint16_t board_id)
 {
@@ -1010,6 +1011,7 @@ static char *ol_board_id_to_filename(struct ol_softc *scn, uint16_t board_id)
 	return kstrdup(QCA_BOARD_DATA_FILE, GFP_KERNEL);
 #endif
 }
+#endif
 #endif
 
 #if defined(CONFIG_HL_SUPPORT)
