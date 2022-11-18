@@ -19542,7 +19542,11 @@ static int wlan_hdd_cfg80211_del_beacon(struct wiphy *wiphy,
  * Return: zero for success non-zero for failure
  */
 static int wlan_hdd_cfg80211_stop_ap(struct wiphy *wiphy,
-					struct net_device *dev)
+					struct net_device *dev
+#if defined(FORCE_MLO_SUPPORT)
+					, unsigned int link_id
+#endif
+					)
 {
 	int ret;
 
@@ -21392,6 +21396,9 @@ static int __wlan_hdd_cfg80211_add_key( struct wiphy *wiphy,
 
 static int wlan_hdd_cfg80211_add_key( struct wiphy *wiphy,
                                       struct net_device *ndev,
+#if defined(FORCE_MLO_SUPPORT)
+                                      int link_id,
+#endif
                                       u8 key_index, bool pairwise,
                                       const u8 *mac_addr,
                                       struct key_params *params
@@ -21486,6 +21493,9 @@ static int __wlan_hdd_cfg80211_get_key(
 static int wlan_hdd_cfg80211_get_key(
                         struct wiphy *wiphy,
                         struct net_device *ndev,
+#if defined(FORCE_MLO_SUPPORT)
+                        int link_id,
+#endif
                         u8 key_index, bool pairwise,
                         const u8 *mac_addr, void *cookie,
                         void (*callback)(void *cookie, struct key_params*)
@@ -21630,6 +21640,9 @@ static int __wlan_hdd_cfg80211_del_key(struct wiphy *wiphy,
  */
 static int wlan_hdd_cfg80211_del_key(struct wiphy *wiphy,
 					struct net_device *dev,
+#if defined(FORCE_MLO_SUPPORT)
+					int link_id,
+#endif
 					u8 key_index,
 					bool pairwise, const u8 *mac_addr)
 {
@@ -21765,6 +21778,9 @@ static int __wlan_hdd_cfg80211_set_default_key( struct wiphy *wiphy,
 
 static int wlan_hdd_cfg80211_set_default_key( struct wiphy *wiphy,
                                               struct net_device *ndev,
+#if defined(FORCE_MLO_SUPPORT)
+                                              int link_id,
+#endif
                                               u8 key_index,
                                               bool unicast, bool multicast)
 {
@@ -28023,6 +28039,9 @@ static int __wlan_hdd_set_default_mgmt_key(struct wiphy *wiphy,
  */
 static int wlan_hdd_set_default_mgmt_key(struct wiphy *wiphy,
 					   struct net_device *netdev,
+#if defined(FORCE_MLO_SUPPORT)
+					   int link_id,
+#endif
 					   u8 key_index)
 {
 	int ret;
@@ -31955,6 +31974,9 @@ __wlan_hdd_cfg80211_set_ap_channel_width(struct wiphy *wiphy,
 static int
 wlan_hdd_cfg80211_set_ap_channel_width(struct wiphy *wiphy,
 				       struct net_device *dev,
+#if defined(FORCE_MLO_SUPPORT)
+				       unsigned int link_id,
+#endif
 				       struct cfg80211_chan_def *chandef)
 {
 	int ret;

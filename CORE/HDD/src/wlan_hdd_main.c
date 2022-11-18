@@ -13460,7 +13460,11 @@ static void hdd_connect_done(struct net_device *dev, const u8 *bssid,
     struct cfg80211_connect_resp_params fils_params;
     vos_mem_zero(&fils_params, sizeof(fils_params));
 
+#if defined(FORCE_MLO_SUPPORT)
+    fils_params.links[0].bssid = bssid;
+#else
     fils_params.bssid = bssid;
+#endif
     if (!roam_fils_params) {
         fils_params.status = WLAN_STATUS_UNSPECIFIED_FAILURE;
         hdd_populate_fils_params(&fils_params, NULL, 0, NULL,
@@ -13472,7 +13476,11 @@ static void hdd_connect_done(struct net_device *dev, const u8 *bssid,
         fils_params.req_ie_len = req_ie_len;
         fils_params.resp_ie = resp_ie;
         fils_params.resp_ie_len = resp_ie_len;
+#if defined(FORCE_MLO_SUPPORT)
+        fils_params.links[0].bss = bss;
+#else
         fils_params.bss = bss;
+#endif
         hdd_populate_fils_params(&fils_params, roam_fils_params->kek,
                      roam_fils_params->kek_len,
                      roam_fils_params->fils_pmk,

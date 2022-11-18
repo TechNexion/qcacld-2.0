@@ -1914,6 +1914,10 @@ ifeq ($(CONFIG_CLD_REGDB), y)
 CDEFINES += -DCLD_REGDB
 endif
 
+ifeq ($(CONFIG_FORCE_MLO_SUPPORT), y)
+CDEFINES += -DFORCE_MLO_SUPPORT
+endif
+
 # Module information used by KBuild framework
 ifeq ($(CONFIG_FEATURE_LARGE_PREALLOC),y)
 obj-$(CONFIG_QCA_CLD_WLAN) += wlan_prealloc.o
