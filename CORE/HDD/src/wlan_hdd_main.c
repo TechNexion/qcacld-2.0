@@ -11352,7 +11352,11 @@ VOS_STATUS hdd_register_interface( hdd_adapter_t *pAdapter, tANI_U8 rtnl_lock_he
             return VOS_STATUS_E_FAILURE;
          }
       }
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0))
+      if (cfg80211_register_netdevice(pWlanDev))
+#else
       if (register_netdevice(pWlanDev))
+#endif
       {
          hddLog(VOS_TRACE_LEVEL_ERROR,"%s:Failed:register_netdev",__func__);
          return VOS_STATUS_E_FAILURE;
@@ -11734,7 +11738,11 @@ void hdd_cleanup_adapter(hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
 
    if (test_bit(NET_DEVICE_REGISTERED, &pAdapter->event_flags)) {
       if (rtnl_held) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0))
+         cfg80211_unregister_netdevice(pWlanDev);
+#else
          unregister_netdevice(pWlanDev);
+#endif
       } else {
          unregister_netdev(pWlanDev);
       }
@@ -12599,7 +12607,11 @@ err_add_adapter_back:
 
 err_malloc_adapter_node:
 	if (rtnl_held)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0))
+        cfg80211_unregister_netdevice(adapter->dev);
+#else
 		unregister_netdevice(adapter->dev);
+#endif
 	else
 		unregister_netdev(adapter->dev);
 

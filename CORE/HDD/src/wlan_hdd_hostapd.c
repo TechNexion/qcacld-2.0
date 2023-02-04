@@ -9050,7 +9050,11 @@ VOS_STATUS hdd_register_hostapd( hdd_adapter_t *pAdapter, tANI_U8 rtnl_lock_held
             return VOS_STATUS_E_FAILURE;
          }
       }
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0))
+      if (cfg80211_register_netdevice(dev))
+#else
       if (register_netdevice(dev))
+#endif
       {
          hddLog(VOS_TRACE_LEVEL_FATAL,
                 "%s:Failed:register_netdevice", __func__);
