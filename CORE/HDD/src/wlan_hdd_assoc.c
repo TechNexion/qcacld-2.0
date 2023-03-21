@@ -2155,7 +2155,7 @@ static void hdd_send_roamed_ind(struct net_device *dev,
 {
 	struct cfg80211_roam_info info = {0};
 
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
 	info.links[0].bss = bss;
 #else
 	info.bss = bss;

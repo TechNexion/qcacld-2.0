@@ -19543,7 +19543,7 @@ static int wlan_hdd_cfg80211_del_beacon(struct wiphy *wiphy,
  */
 static int wlan_hdd_cfg80211_stop_ap(struct wiphy *wiphy,
 					struct net_device *dev
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
 					, unsigned int link_id
 #endif
 					)
@@ -21396,7 +21396,7 @@ static int __wlan_hdd_cfg80211_add_key( struct wiphy *wiphy,
 
 static int wlan_hdd_cfg80211_add_key( struct wiphy *wiphy,
                                       struct net_device *ndev,
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
                                       int link_id,
 #endif
                                       u8 key_index, bool pairwise,
@@ -21493,7 +21493,7 @@ static int __wlan_hdd_cfg80211_get_key(
 static int wlan_hdd_cfg80211_get_key(
                         struct wiphy *wiphy,
                         struct net_device *ndev,
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
                         int link_id,
 #endif
                         u8 key_index, bool pairwise,
@@ -21640,7 +21640,7 @@ static int __wlan_hdd_cfg80211_del_key(struct wiphy *wiphy,
  */
 static int wlan_hdd_cfg80211_del_key(struct wiphy *wiphy,
 					struct net_device *dev,
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
 					int link_id,
 #endif
 					u8 key_index,
@@ -21778,7 +21778,7 @@ static int __wlan_hdd_cfg80211_set_default_key( struct wiphy *wiphy,
 
 static int wlan_hdd_cfg80211_set_default_key( struct wiphy *wiphy,
                                               struct net_device *ndev,
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
                                               int link_id,
 #endif
                                               u8 key_index,
@@ -28039,7 +28039,7 @@ static int __wlan_hdd_set_default_mgmt_key(struct wiphy *wiphy,
  */
 static int wlan_hdd_set_default_mgmt_key(struct wiphy *wiphy,
 					   struct net_device *netdev,
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
 					   int link_id,
 #endif
 					   u8 key_index)
@@ -31974,7 +31974,7 @@ __wlan_hdd_cfg80211_set_ap_channel_width(struct wiphy *wiphy,
 static int
 wlan_hdd_cfg80211_set_ap_channel_width(struct wiphy *wiphy,
 				       struct net_device *dev,
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
 				       unsigned int link_id,
 #endif
 				       struct cfg80211_chan_def *chandef)

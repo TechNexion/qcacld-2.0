@@ -13460,7 +13460,7 @@ static void hdd_connect_done(struct net_device *dev, const u8 *bssid,
     struct cfg80211_connect_resp_params fils_params;
     vos_mem_zero(&fils_params, sizeof(fils_params));
 
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
     fils_params.links[0].bssid = bssid;
 #else
     fils_params.bssid = bssid;
@@ -13476,7 +13476,7 @@ static void hdd_connect_done(struct net_device *dev, const u8 *bssid,
         fils_params.req_ie_len = req_ie_len;
         fils_params.resp_ie = resp_ie;
         fils_params.resp_ie_len = resp_ie_len;
-#if defined(FORCE_MLO_SUPPORT)
+#if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
         fils_params.links[0].bss = bss;
 #else
         fils_params.bss = bss;
