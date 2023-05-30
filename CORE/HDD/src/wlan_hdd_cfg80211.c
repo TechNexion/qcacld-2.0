@@ -25296,7 +25296,15 @@ static int __wlan_hdd_cfg80211_connect( struct wiphy *wiphy,
                             req->bssid, req->ssid,
                             req->ssid_len);
                 if (bss) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0))
+                    struct cfg80211_assoc_failure data;
+                    data.ap_mld_addr = NULL;
+                    data.bss[0] = bss;
+                    data.timeout = true;
+                    cfg80211_assoc_failure(ndev, &data);
+#else
                     cfg80211_assoc_timeout(ndev, bss);
+#endif
                     return -ETIMEDOUT;
                 }
             }
