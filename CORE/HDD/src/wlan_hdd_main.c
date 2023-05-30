@@ -10765,7 +10765,11 @@ static int __hdd_set_mac_address(struct net_device *dev, void *addr)
 		return ret;
 
 	memcpy(&pAdapter->macAddressCurrent, psta_mac_addr->sa_data, ETH_ALEN);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	dev_addr_mod(dev, 0, psta_mac_addr->sa_data, ETH_ALEN);
+#else
 	memcpy(dev->dev_addr, psta_mac_addr->sa_data, ETH_ALEN);
+#endif
 
 	EXIT();
 	return 0;
@@ -11232,7 +11236,11 @@ static hdd_adapter_t* hdd_alloc_station_adapter(hdd_context_t *pHddCtx,
       strlcpy(pAdapter->ifname, name, IFNAMSIZ);
 #endif
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+      dev_addr_mod(pWlanDev, 0, (void *)macAddr, sizeof(tSirMacAddr));
+#else
       vos_mem_copy(pWlanDev->dev_addr, (void *)macAddr, sizeof(tSirMacAddr));
+#endif
       vos_mem_copy( pAdapter->macAddressCurrent.bytes, macAddr, sizeof(tSirMacAddr));
       pWlanDev->watchdog_timeo = HDD_TX_TIMEOUT;
       /*
@@ -11303,8 +11311,12 @@ static hdd_adapter_t *hdd_alloc_monitor_adapter(hdd_context_t *pHddCtx,
 	   /* Init the net_device structure */
 	   strlcpy(pwlan_dev->name, name, IFNAMSIZ);
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	   dev_addr_mod(pwlan_dev, 0, (void *)macAddr, sizeof(tSirMacAddr));
+#else
 	   vos_mem_copy(pwlan_dev->dev_addr,
 			(void *)macAddr, sizeof(tSirMacAddr));
+#endif
 	   vos_mem_copy(pAdapter->macAddressCurrent.bytes,
 			macAddr, sizeof(tSirMacAddr));
 	   pwlan_dev->watchdog_timeo = HDD_TX_TIMEOUT;

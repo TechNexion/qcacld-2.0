@@ -20304,6 +20304,15 @@ static int __wlan_hdd_cfg80211_change_iface(struct wiphy *wiphy,
 
             if ((WLAN_HDD_SOFTAP == pAdapter->device_mode) &&
                 (pConfig->apRandomBssidEnabled)) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+                u8 addr[MAX_ADDR_LEN];
+                get_random_bytes(&addr[3], 3);
+                addr[0] = 0x02;
+                addr[1] = 0x1A;
+                addr[2] = 0x11;
+                addr[3] |= 0xF0;
+                dev_addr_mod(ndev, 0, addr, 6);
+#else
                 /* To meet Android requirements create a randomized
                    MAC address of the form 02:1A:11:Fx:xx:xx */
                 get_random_bytes(&ndev->dev_addr[3], 3);
@@ -20311,6 +20320,7 @@ static int __wlan_hdd_cfg80211_change_iface(struct wiphy *wiphy,
                 ndev->dev_addr[1] = 0x1A;
                 ndev->dev_addr[2] = 0x11;
                 ndev->dev_addr[3] |= 0xF0;
+#endif
                 memcpy(pAdapter->macAddressCurrent.bytes, ndev->dev_addr,
                        VOS_MAC_ADDR_SIZE);
                 pr_info("wlan: Generated HotSpot BSSID "MAC_ADDRESS_STR"\n",
