@@ -20924,12 +20924,24 @@ static int __wlan_hdd_change_station(struct wiphy *wiphy,
                 vos_mem_copy(StaParams.extn_capability, params->ext_capab,
                              params->ext_capab_len);
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+            if (NULL != params->link_sta_params.ht_capa) {
+#else
             if (NULL != params->ht_capa) {
+#endif
                 StaParams.htcap_present = 1;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+                vos_mem_copy(&StaParams.HTCap, params->link_sta_params.ht_capa, sizeof(tSirHTCap));
+#else
                 vos_mem_copy(&StaParams.HTCap, params->ht_capa, sizeof(tSirHTCap));
+#endif
             }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+            StaParams.supported_rates_len = params->link_sta_params.supported_rates_len;
+#else
             StaParams.supported_rates_len = params->supported_rates_len;
+#endif
 
             /*
              * Note : The Maximum sizeof supported_rates sent by the Supplicant
@@ -20945,8 +20957,13 @@ static int __wlan_hdd_change_station(struct wiphy *wiphy,
 
             if (0 != StaParams.supported_rates_len) {
                 int i = 0;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+                vos_mem_copy(StaParams.supported_rates, params->link_sta_params.supported_rates,
+                             StaParams.supported_rates_len);
+#else
                 vos_mem_copy(StaParams.supported_rates, params->supported_rates,
                              StaParams.supported_rates_len);
+#endif
                 VOS_TRACE( VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_INFO,
                            "Supported Rates with Length %d", StaParams.supported_rates_len);
                 for (i=0; i < StaParams.supported_rates_len; i++)
@@ -20954,9 +20971,17 @@ static int __wlan_hdd_change_station(struct wiphy *wiphy,
                                "[%d]: %0x", i, StaParams.supported_rates[i]);
             }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+            if (NULL != params->link_sta_params.vht_capa) {
+#else
             if (NULL != params->vht_capa) {
+#endif
                 StaParams.vhtcap_present = 1;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+                vos_mem_copy(&StaParams.VHTCap, params->link_sta_params.vht_capa, sizeof(tSirVHTCap));
+#else
                 vos_mem_copy(&StaParams.VHTCap, params->vht_capa, sizeof(tSirVHTCap));
+#endif
             }
 
             if (0 != params->ext_capab_len ) {
@@ -20971,7 +20996,11 @@ static int __wlan_hdd_change_station(struct wiphy *wiphy,
             }
 
             if (pHddCtx->cfg_ini->fEnableTDLSWmmMode &&
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+                (params->link_sta_params.ht_capa || params->link_sta_params.vht_capa ||
+#else
                 (params->ht_capa || params->vht_capa ||
+#endif
                 (params->sta_flags_set & BIT(NL80211_STA_FLAG_WME))))
                 is_qos_wmm_sta = true;
 
