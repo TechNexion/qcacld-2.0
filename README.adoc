@@ -23,5 +23,5 @@ After getting the firmware binary:
 
 Decompress the tarball and put all the firmware files into your target's `/lib/firmware` directory.
 
-*Support kernel:* `5.10.x` `5.15.x`
+*Support kernel:* `5.10.x` `5.15.x` `6.1.x`
 
