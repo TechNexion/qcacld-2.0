@@ -1884,6 +1884,18 @@ ifeq ($(call cc-option-yn, -Wno-maybe-uninitialized),y)
 EXTRA_CFLAGS += -Wno-maybe-uninitialized
 endif
 
+ifeq ($(call cc-option-yn, -Wno-discarded-qualifiers),y)
+EXTRA_CFLAGS += -Wno-discarded-qualifiers
+endif
+
+ifeq ($(call cc-option-yn, -Wno-cast-function-type),y)
+EXTRA_CFLAGS += -Wno-cast-function-type
+endif
+
+ifeq ($(call cc-option-yn, -Wno-address),y)
+EXTRA_CFLAGS += -Wno-address
+endif
+
 # If the module name is not "wlan", then the define MULTI_IF_NAME to be the
 # same a the QCA CHIP name. The host driver will then append MULTI_IF_NAME to
 # any string that must be unique for all instances of the driver on the system.
