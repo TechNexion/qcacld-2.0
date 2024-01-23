@@ -1278,7 +1278,7 @@ VOS_STATUS hdd_mon_rx_packet_cbk(v_VOID_t *vos_ctx, adf_nbuf_t rx_buf,
 			 * This is the last packet on the chain
 			 * Scheduling rx sirq
 			 */
-			rxstat = netif_rx_ni(skb);
+			rxstat = netif_rx(skb);
 		}
 
 		if (NET_RX_SUCCESS == rxstat)
@@ -1343,7 +1343,7 @@ VOS_STATUS hdd_vir_mon_rx_cbk(v_VOID_t *vos_ctx, adf_nbuf_t rx_buf,
 			 * This is the last packet on the chain
 			 * Scheduling rx sirq
 			 */
-			rxstat = netif_rx_ni(skb);
+			rxstat = netif_rx(skb);
 		}
 
 		skb = skb_next;
@@ -1587,7 +1587,7 @@ VOS_STATUS hdd_rx_packet_cbk(v_VOID_t *vosContext,
            * This is the last packet on the chain
            * Scheduling rx sirq
            */
-          rxstat = netif_rx_ni(skb);
+          rxstat = netif_rx(skb);
       }
 
       if (NET_RX_SUCCESS == rxstat)

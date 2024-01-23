@@ -3064,18 +3064,18 @@ static void hdd_ipa_send_skb_to_network(adf_nbuf_t skb, hdd_adapter_t *adapter)
 
 	++adapter->hdd_stats.hddTxRxStats.rxPackets[cpu_index];
 #ifdef QCA_CONFIG_SMP
-	result = netif_rx_ni(skb);
+	result = netif_rx(skb);
 #else
 	ip_h = (struct iphdr*)((uint8_t*)skb->data);
 	if ((skb->protocol == htons(ETH_P_IP)) &&
 		(ip_h->protocol == IPPROTO_ICMP)) {
-		result = netif_rx_ni(skb);
+		result = netif_rx(skb);
 	} else {
-		/* Call netif_rx_ni for every IPA_WLAN_RX_SOFTIRQ_THRESH packets
+		/* Call netif_rx for every IPA_WLAN_RX_SOFTIRQ_THRESH packets
 		 * to avoid excessive softirq's.
 		 */
 		if (atomic_dec_and_test(&softirq_mitigation_cntr)){
-			result = netif_rx_ni(skb);
+			result = netif_rx(skb);
 			atomic_set(&softirq_mitigation_cntr,
 					IPA_WLAN_RX_SOFTIRQ_THRESH);
 		} else {

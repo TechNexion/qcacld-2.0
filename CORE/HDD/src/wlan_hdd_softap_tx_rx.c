@@ -999,7 +999,7 @@ VOS_STATUS hdd_softap_rx_packet_cbk(v_VOID_t *vosContext,
           * This is the last packet on the chain
           * Scheduling rx sirq
           */
-         rxstat = netif_rx_ni(skb);
+         rxstat = netif_rx(skb);
       }
 
       if (NET_RX_SUCCESS == rxstat)
