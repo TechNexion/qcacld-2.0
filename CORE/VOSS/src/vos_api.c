@@ -3465,9 +3465,11 @@ static int qca_readwrite_file(const char *filename,
 {
     int ret = 0;
     struct file *filp = (struct file *)-ENOENT;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,18,0)
     mm_segment_t oldfs;
     oldfs = get_fs();
     set_fs(KERNEL_DS);
+#endif
 
     hddLog(VOS_TRACE_LEVEL_INFO, "%s: filename %s \n", __func__, filename);
 
@@ -3515,7 +3517,9 @@ static int qca_readwrite_file(const char *filename,
     if (!IS_ERR(filp)) {
         filp_close(filp, NULL);
     }
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,18,0)
     set_fs(oldfs);
+#endif
 
     return ret;
 }
