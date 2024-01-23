@@ -387,7 +387,11 @@ static void *crash_dump_get_file_data(struct file *file)
 {
 	void *scn;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	scn = pde_data(file_inode(file));
+#else
 	scn = PDE_DATA(file_inode(file));
+#endif
 	return scn;
 }
 #else

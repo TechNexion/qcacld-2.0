@@ -68,7 +68,11 @@ static void *memdump_get_file_data(struct file *file)
 {
 	void *hdd_ctx;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	hdd_ctx = pde_data(file_inode(file));
+#else
 	hdd_ctx = PDE_DATA(file_inode(file));
+#endif
 	return hdd_ctx;
 }
 #else

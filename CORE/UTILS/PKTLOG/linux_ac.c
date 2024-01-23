@@ -775,8 +775,13 @@ __pktlog_read(struct file *file, char *buf, size_t nbytes, loff_t *ppos)
 	int start_offset, end_offset;
 	int fold_offset, ppos_data, cur_rd_offset;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	struct ath_pktlog_info *pl_info = (struct ath_pktlog_info *)
+					  pde_data(file->f_path.dentry->d_inode);
+#else
 	struct ath_pktlog_info *pl_info = (struct ath_pktlog_info *)
 					  PDE_DATA(file->f_path.dentry->d_inode);
+#endif
 #else
 	struct proc_dir_entry *proc_entry = PDE(file->f_dentry->d_inode);
 	struct ath_pktlog_info *pl_info = (struct ath_pktlog_info *)
@@ -910,8 +915,13 @@ pktlog_read(struct file *file, char *buf, size_t nbytes, loff_t *ppos)
 {
 	size_t ret_val = 0;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	struct ath_pktlog_info *pl_info = (struct ath_pktlog_info *)
+					  pde_data(file->f_path.dentry->d_inode);
+#else
 	struct ath_pktlog_info *pl_info = (struct ath_pktlog_info *)
 					  PDE_DATA(file->f_path.dentry->d_inode);
+#endif
 #else
 	struct proc_dir_entry *proc_entry = PDE(file->f_dentry->d_inode);
 	struct ath_pktlog_info *pl_info = (struct ath_pktlog_info *)
