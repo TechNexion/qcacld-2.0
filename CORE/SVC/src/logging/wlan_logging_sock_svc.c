@@ -782,8 +782,11 @@ static int wlan_logging_thread(void *Arg)
 	}
 
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	kthread_complete_and_exit(&gwlan_logging.shutdown_comp, 0);
+#else
 	complete_and_exit(&gwlan_logging.shutdown_comp, 0);
-
+#endif
 	return 0;
 }
 

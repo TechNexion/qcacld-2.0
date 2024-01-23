@@ -84,8 +84,11 @@ static int oob_task(void *pm_oob)
 		}
 	}
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
+	kthread_complete_and_exit(&hif_oob->oob_completion, 0);
+#else
 	complete_and_exit(&hif_oob->oob_completion, 0);
-
+#endif
 	return 0;
 }
 
