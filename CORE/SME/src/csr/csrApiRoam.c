@@ -5624,9 +5624,12 @@ static eHalStatus csrRoamSaveSecurityRspIE(tpAniSirGlobal pMac, tANI_U32 session
                             pIeBuf += pIesLocal->RSN.akm_suite_cnt * 4;
                         }
                         //copy the rest
-                        vos_mem_copy(pIeBuf,
-                                     pIesLocal->RSN.akm_suite + pIesLocal->RSN.akm_suite_cnt * 4,
-                                     2 + pIesLocal->RSN.pmkid_count * 4);
+                        if( pIesLocal->RSN.pmkid_count )
+                        {
+                            vos_mem_copy(pIeBuf,
+                                         pIesLocal->RSN.akm_suite + pIesLocal->RSN.akm_suite_cnt * 4,
+                                         2 + pIesLocal->RSN.pmkid_count * 4);
+                        }
                         pSession->nWpaRsnRspIeLength = nIeLen + 2;
                     }
                 }
