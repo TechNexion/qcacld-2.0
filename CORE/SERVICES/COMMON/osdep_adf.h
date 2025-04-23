@@ -962,8 +962,10 @@ typedef struct scatterlist            sg_t;
 #define ARRAY_LENGTH(a)         (sizeof(a) / sizeof((a)[0]))
 #endif
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0))
 #define MIN(a, b)                adf_os_min(a, b)
 #define MAX(a, b)                adf_os_max(a, b)
+#endif
 
 /*
  * PCI configuration space access
