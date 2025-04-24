@@ -2048,7 +2048,7 @@ static int __iw_get_name(struct net_device *dev,
 			 union iwreq_data *wrqu, char *extra)
 {
 	ENTER();
-	strlcpy(wrqu, "Qcom:802.11n", IFNAMSIZ);
+	strlcpy((char *)wrqu, "Qcom:802.11n", IFNAMSIZ);
 	EXIT();
 	return 0;
 }
