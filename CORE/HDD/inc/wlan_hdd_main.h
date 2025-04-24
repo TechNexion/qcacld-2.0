@@ -70,6 +70,9 @@
 /*---------------------------------------------------------------------------
   Preprocessor definitions and constants
   -------------------------------------------------------------------------*/
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,7,0))
+#define strlcpy(dest, src, size) strscpy(dest, src, size)
+#endif
 /** Number of Tx Queues */
 #define NUM_TX_QUEUES 4
 /** HDD's internal Tx Queue Length. Needs to be a power of 2 */
