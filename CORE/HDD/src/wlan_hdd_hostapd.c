@@ -1569,7 +1569,7 @@ VOS_STATUS hdd_chan_change_notify(hdd_adapter_t *hostapd_adapter,
 		hdd_update_chandef(hostapd_adapter, &chandef, cb_mode);
 
 #if defined(FORCE_MLO_SUPPORT) || (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0))
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)) || (LINUX_VERSION_CODE > KERNEL_VERSION(6, 8, 0))
 	cfg80211_ch_switch_notify(dev, &chandef, 0);
 #else
 	cfg80211_ch_switch_notify(dev, &chandef, 0, 0);
