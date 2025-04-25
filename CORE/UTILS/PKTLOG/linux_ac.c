@@ -255,8 +255,10 @@ ATH_SYSCTL_DECL(ath_sysctl_pktlog_enable, ctl, write, filp, buffer, lenp,
 		return -ENODEV;
 	}
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,10,0))
 	ctl->data = &enable;
 	ctl->maxlen = sizeof(enable);
+#endif
 
 	if (write) {
 		ret = ATH_SYSCTL_PROC_DOINTVEC(ctl, write, filp, buffer,
@@ -276,8 +278,10 @@ ATH_SYSCTL_DECL(ath_sysctl_pktlog_enable, ctl, write, filp, buffer, lenp,
 			       __func__);
 	}
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,10,0))
 	ctl->data = NULL;
 	ctl->maxlen = 0;
+#endif
 
 	mutex_unlock(&proc_mutex);
 	return ret;
@@ -316,8 +320,10 @@ ATH_SYSCTL_DECL(ath_sysctl_pktlog_size, ctl, write, filp, buffer, lenp,
 		return -ENODEV;
 	}
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,10,0))
 	ctl->data = &size;
 	ctl->maxlen = sizeof(size);
+#endif
 
 	if (write) {
 		ret = ATH_SYSCTL_PROC_DOINTVEC(ctl, write, filp, buffer,
@@ -332,8 +338,10 @@ ATH_SYSCTL_DECL(ath_sysctl_pktlog_size, ctl, write, filp, buffer, lenp,
 					       lenp, ppos);
 	}
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,10,0))
 	ctl->data = NULL;
 	ctl->maxlen = 0;
+#endif
 
 	mutex_unlock(&proc_mutex);
 	return ret;
