@@ -88,7 +88,9 @@
 #define AAD_LEN 20
 #define IV_SIZE_AES_128 16
 #define CMAC_IPN_LEN 6
-
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,7,0))
+#define CRYPTO_ALG_TYPE_AHASH_MASK	0x0000000e
+#endif
 
 /*----------------------------------------------------------------------------
  * Type Declarations
