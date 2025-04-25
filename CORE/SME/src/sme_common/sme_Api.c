@@ -9726,6 +9726,7 @@ void sme_PreChannelSwitchIndFullPowerCB(void *callbackContext,
     tpAniSirGlobal pMac = (tpAniSirGlobal)callbackContext;
     tSirMbMsg *pMsg;
     tANI_U16 msgLen;
+    (void)status;
 
     msgLen = (tANI_U16)(sizeof( tSirMbMsg ));
     pMsg = vos_mem_malloc(msgLen);
@@ -9754,6 +9755,7 @@ void sme_PreChannelSwitchIndOffloadFullPowerCB(void *callbackContext,tANI_U32 se
     tpAniSirGlobal pMac = (tpAniSirGlobal)callbackContext;
     tSirMbMsg *pMsg;
     tANI_U16 msgLen;
+    (void)status;
 
     msgLen = (tANI_U16)(sizeof( tSirMbMsg ));
     pMsg = vos_mem_malloc(msgLen);
