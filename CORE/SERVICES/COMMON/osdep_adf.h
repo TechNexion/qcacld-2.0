@@ -161,9 +161,16 @@ static inline void spin_unlock_dpc(spinlock_t *lock)
 typedef unsigned long TQUEUE_ARG;
 #define mark_bh(a)
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,10,0))
 #define ATH_SYSCTL_DECL(f, ctl, write, filp, buffer, lenp, ppos) \
     f(struct ctl_table *ctl, int write, void *buffer,                   \
         size_t *lenp, loff_t *ppos)
+#else
+#define ATH_SYSCTL_DECL(f, ctl, write, filp, buffer, lenp, ppos) \
+    f(const struct ctl_table *ctl, int write, void *buffer,                   \
+        size_t *lenp, loff_t *ppos)
+#endif
+
 #define ATH_SYSCTL_PROC_DOINTVEC(ctl, write, filp, buffer, lenp, ppos) \
     proc_dointvec(ctl, write, buffer, lenp, ppos)
 #define ATH_SYSCTL_PROC_DOSTRING(ctl, write, filp, buffer, lenp, ppos) \
