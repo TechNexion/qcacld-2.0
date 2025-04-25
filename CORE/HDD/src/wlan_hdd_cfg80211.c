@@ -20021,12 +20021,20 @@ static int __wlan_hdd_cfg80211_change_beacon(struct wiphy *wiphy,
  */
 static int wlan_hdd_cfg80211_change_beacon(struct wiphy *wiphy,
 					struct net_device *dev,
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,7,0))
 					struct cfg80211_beacon_data *params)
+#else
+					struct cfg80211_ap_update *params)
+#endif
 {
 	int ret;
 
 	vos_ssr_protect(__func__);
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,7,0))
 	ret = __wlan_hdd_cfg80211_change_beacon(wiphy, dev, params);
+#else
+	ret = __wlan_hdd_cfg80211_change_beacon(wiphy, dev, &params->beacon);
+#endif
 	vos_ssr_unprotect(__func__);
 
 	return ret;
