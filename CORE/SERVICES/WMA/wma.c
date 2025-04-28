@@ -26267,7 +26267,7 @@ wma_wow_parse_pbm_mp_reason(tp_wma_handle wma, int32_t wow_reason,
 {
 }
 
-static void inline wma_wow_pbm_mp_clear(tp_wma_handle wma) {}
+static inline void wma_wow_pbm_mp_clear(tp_wma_handle wma) {}
 #endif
 
 /**
@@ -28727,7 +28727,7 @@ bool static wma_is_lpass_enabled(tp_wma_handle wma)
 		return false;
 }
 #else
-bool static wma_is_lpass_enabled(tp_wma_handle wma)
+static bool wma_is_lpass_enabled(tp_wma_handle wma)
 {
 	return false;
 }
@@ -28744,7 +28744,7 @@ bool static wma_is_lpass_enabled(tp_wma_handle wma)
  *
  * Return: true if NaN is enabled else false
  */
-bool static wma_is_nan_enabled(tp_wma_handle wma)
+static bool wma_is_nan_enabled(tp_wma_handle wma)
 {
 	if (wma->is_nan_enabled)
 		return true;

@@ -247,7 +247,7 @@ static void lim_process_sae_msg(tpAniSirGlobal mac, struct sir_sae_msg *body)
 \return none
   -------------------------------------------------------------*/
 
-tANI_U8 static
+static tANI_U8
 defMsgDecision(tpAniSirGlobal pMac, tpSirMsgQ  limMsg)
 {
 

@@ -198,7 +198,7 @@ void limFTCleanup(tpAniSirGlobal pMac, tpPESession psessionEntry)
  * We suspend the link and then now proceed to switch channel.
  *
  *------------------------------------------------------------------*/
-void static
+static void
 limFTPreAuthSuspendLinkHandler(tpAniSirGlobal pMac, eHalStatus status,
                                  tANI_U32 *data)
 {

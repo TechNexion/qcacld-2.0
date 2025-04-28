@@ -271,7 +271,7 @@ static const u32 hdd_cipher_suites[] =
 #endif
 };
 
-const static struct ieee80211_channel hdd_channels_2_4_GHZ[] =
+static const struct ieee80211_channel hdd_channels_2_4_GHZ[] =
 {
     HDD2GHZCHAN(2412, 1, 0) ,
     HDD2GHZCHAN(2417, 2, 0) ,
@@ -289,7 +289,7 @@ const static struct ieee80211_channel hdd_channels_2_4_GHZ[] =
     HDD2GHZCHAN(2484, 14, 0) ,
 };
 
-const static struct ieee80211_channel hdd_channels_5_GHZ[] =
+static const struct ieee80211_channel hdd_channels_5_GHZ[] =
 {
     HDD5GHZCHAN(5180, 36, 0) ,
     HDD5GHZCHAN(5200, 40, 0) ,

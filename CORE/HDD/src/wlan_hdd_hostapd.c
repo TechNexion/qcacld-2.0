@@ -3611,8 +3611,7 @@ static int hdd_sap_get_chan_width(hdd_adapter_t *adapter, int *value)
 	return 0;
 }
 
-int
-static __iw_softap_set_ini_cfg(struct net_device *dev,
+static int __iw_softap_set_ini_cfg(struct net_device *dev,
                           struct iw_request_info *info,
                           union iwreq_data *wrqu, char *extra)
 {
@@ -3665,8 +3664,7 @@ static __iw_softap_set_ini_cfg(struct net_device *dev,
     return vos_status_to_os_return(vstatus);
 }
 
-int
-static iw_softap_set_ini_cfg(struct net_device *dev,
+static int iw_softap_set_ini_cfg(struct net_device *dev,
                              struct iw_request_info *info,
                              union iwreq_data *wrqu, char *extra)
 {
@@ -3679,8 +3677,7 @@ static iw_softap_set_ini_cfg(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_softap_get_ini_cfg(struct net_device *dev,
+static int __iw_softap_get_ini_cfg(struct net_device *dev,
                              struct iw_request_info *info,
                              union iwreq_data *wrqu, char *extra)
 {
@@ -3707,8 +3704,7 @@ static __iw_softap_get_ini_cfg(struct net_device *dev,
     return 0;
 }
 
-int
-static iw_softap_get_ini_cfg(struct net_device *dev,
+static int iw_softap_get_ini_cfg(struct net_device *dev,
                              struct iw_request_info *info,
                              union iwreq_data *wrqu, char *extra)
 {
@@ -3810,8 +3806,7 @@ static int iw_softap_set_two_ints_getnone(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_softap_wowl_config_pattern(struct net_device *dev,
+static int __iw_softap_wowl_config_pattern(struct net_device *dev,
                                        struct iw_request_info *info,
                                        union iwreq_data *wrqu, char *extra)
 {
@@ -3880,8 +3875,7 @@ static __iw_softap_wowl_config_pattern(struct net_device *dev,
     return ret;
 }
 
-int
-static iw_softap_wowl_config_pattern(struct net_device *dev,
+static int iw_softap_wowl_config_pattern(struct net_device *dev,
                                      struct iw_request_info *info,
                                      union iwreq_data *wrqu, char *extra)
 {
@@ -4461,8 +4455,7 @@ wlan_hdd_au_get_cts(hdd_adapter_t * pAdapter,
 }
 #endif
 
-int
-static __iw_softap_setparam(struct net_device *dev,
+static int __iw_softap_setparam(struct net_device *dev,
                             struct iw_request_info *info,
                             union iwreq_data *wrqu, char *extra)
 {
@@ -5393,9 +5386,7 @@ static int iw_softap_get_three(struct net_device *dev,
 	return ret;
 }
 
-
-int
-static iw_softap_setparam(struct net_device *dev,
+static int iw_softap_setparam(struct net_device *dev,
                           struct iw_request_info *info,
                           union iwreq_data *wrqu, char *extra)
 {
@@ -5408,8 +5399,7 @@ static iw_softap_setparam(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_softap_getparam(struct net_device *dev,
+static int __iw_softap_getparam(struct net_device *dev,
                             struct iw_request_info *info,
                             union iwreq_data *wrqu, char *extra)
 {
@@ -5662,8 +5652,7 @@ static __iw_softap_getparam(struct net_device *dev,
     return ret;
 }
 
-int
-static iw_softap_getparam(struct net_device *dev,
+static int iw_softap_getparam(struct net_device *dev,
                           struct iw_request_info *info,
                           union iwreq_data *wrqu, char *extra)
 {
@@ -5796,8 +5785,7 @@ wlan_hdd_get_group_info(hdd_adapter_t *pAdapter, union iwreq_data *wrqu,
 }
 #endif
 
-int
-static __iw_set_char_get_char(struct net_device *dev,
+static int __iw_set_char_get_char(struct net_device *dev,
                                struct iw_request_info *info,
                                union iwreq_data *wrqu, char *extra)
 {
@@ -5934,8 +5922,7 @@ int iw_softap_modify_acl(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_softap_getchannel(struct net_device *dev,
+static int __iw_softap_getchannel(struct net_device *dev,
                               struct iw_request_info *info,
                               union iwreq_data *wrqu, char *extra)
 {
@@ -5958,8 +5945,7 @@ static __iw_softap_getchannel(struct net_device *dev,
     return 0;
 }
 
-int
-static iw_softap_getchannel(struct net_device *dev,
+static int iw_softap_getchannel(struct net_device *dev,
                             struct iw_request_info *info,
                             union iwreq_data *wrqu, char *extra)
 {
@@ -5972,8 +5958,7 @@ static iw_softap_getchannel(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_softap_set_max_tx_power(struct net_device *dev,
+static int __iw_softap_set_max_tx_power(struct net_device *dev,
                         struct iw_request_info *info,
                         union iwreq_data *wrqu, char *extra)
 {
@@ -6013,8 +5998,7 @@ static __iw_softap_set_max_tx_power(struct net_device *dev,
     return 0;
 }
 
-int
-static iw_softap_set_max_tx_power(struct net_device *dev,
+static int iw_softap_set_max_tx_power(struct net_device *dev,
                                   struct iw_request_info *info,
                                   union iwreq_data *wrqu, char *extra)
 {
@@ -6027,8 +6011,7 @@ static iw_softap_set_max_tx_power(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_display_data_path_snapshot(struct net_device *dev,
+static int __iw_display_data_path_snapshot(struct net_device *dev,
                         struct iw_request_info *info,
                         union iwreq_data *wrqu, char *extra)
 {
@@ -6048,8 +6031,7 @@ static __iw_display_data_path_snapshot(struct net_device *dev,
     return 0;
 }
 
-int
-static iw_display_data_path_snapshot(struct net_device *dev,
+static int iw_display_data_path_snapshot(struct net_device *dev,
                                      struct iw_request_info *info,
                                      union iwreq_data *wrqu, char *extra)
 {
@@ -6062,8 +6044,7 @@ static iw_display_data_path_snapshot(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_softap_set_tx_power(struct net_device *dev,
+static int __iw_softap_set_tx_power(struct net_device *dev,
                         struct iw_request_info *info,
                         union iwreq_data *wrqu, char *extra)
 {
@@ -6101,8 +6082,7 @@ static __iw_softap_set_tx_power(struct net_device *dev,
     return 0;
 }
 
-int
-static iw_softap_set_tx_power(struct net_device *dev,
+static int iw_softap_set_tx_power(struct net_device *dev,
                               struct iw_request_info *info,
                               union iwreq_data *wrqu, char *extra)
 {
@@ -6117,8 +6097,7 @@ static iw_softap_set_tx_power(struct net_device *dev,
 
 #define IS_BROADCAST_MAC(x) (((x[0] & x[1] & x[2] & x[3] & x[4] & x[5]) == 0xff) ? 1 : 0)
 
-int
-static __iw_softap_getassoc_stamacaddr(struct net_device *dev,
+static int __iw_softap_getassoc_stamacaddr(struct net_device *dev,
                         struct iw_request_info *info,
                         union iwreq_data *wrqu, char *extra)
 {
@@ -6195,8 +6174,7 @@ static __iw_softap_getassoc_stamacaddr(struct net_device *dev,
     return ret;
 }
 
-int
-static iw_softap_getassoc_stamacaddr(struct net_device *dev,
+static int iw_softap_getassoc_stamacaddr(struct net_device *dev,
                                    struct iw_request_info *info,
                                    union iwreq_data *wrqu, char *extra)
 {
@@ -6222,8 +6200,7 @@ static iw_softap_getassoc_stamacaddr(struct net_device *dev,
     iwpriv softap.0 disassoc_sta 0x00 0x0a 0xf5 0x11 0x22 0x33
 */
 
-int
-static __iw_softap_disassoc_sta(struct net_device *dev,
+static int __iw_softap_disassoc_sta(struct net_device *dev,
                         struct iw_request_info *info,
                         union iwreq_data *wrqu, char *extra)
 {
@@ -6265,8 +6242,7 @@ static __iw_softap_disassoc_sta(struct net_device *dev,
     return 0;
 }
 
-int
-static iw_softap_disassoc_sta(struct net_device *dev,
+static int iw_softap_disassoc_sta(struct net_device *dev,
                               struct iw_request_info *info,
                               union iwreq_data *wrqu, char *extra)
 {
@@ -6279,8 +6255,7 @@ static iw_softap_disassoc_sta(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_softap_ap_stats(struct net_device *dev,
+static int __iw_softap_ap_stats(struct net_device *dev,
                         struct iw_request_info *info,
                         union iwreq_data *wrqu, char *extra)
 {
@@ -6329,8 +6304,7 @@ static __iw_softap_ap_stats(struct net_device *dev,
     return 0;
 }
 
-int
-static iw_softap_ap_stats(struct net_device *dev,
+static int iw_softap_ap_stats(struct net_device *dev,
                           struct iw_request_info *info,
                           union iwreq_data *wrqu, char *extra)
 {
@@ -6343,8 +6317,7 @@ static iw_softap_ap_stats(struct net_device *dev,
 	return ret;
 }
 
-int
-static __iw_get_char_setnone(struct net_device *dev,
+static int __iw_get_char_setnone(struct net_device *dev,
                              struct iw_request_info *info,
                              union iwreq_data *wrqu, char *extra)
 {
