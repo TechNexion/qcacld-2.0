@@ -388,7 +388,7 @@ static void dfs_process_dc_pulse(struct ath_dfs *dfs, struct dfs_event *event,
                                (rf->rf_dl.dl_elems[i].de_time), min_pri);
                         deviation = __adf_os_abs(min_pri *
                                         miss_pulse_number -
-                                        rf->rf_dl.dl_elems[i].de_time);
+                                        (int)rf->rf_dl.dl_elems[i].de_time);
                         if (deviation > miss_pulse_number*3) {
                             dfs_reset_delayline(&rf->rf_dl);
                             VOS_TRACE(VOS_MODULE_ID_SAP,
