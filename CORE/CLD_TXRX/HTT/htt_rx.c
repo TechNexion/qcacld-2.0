@@ -208,7 +208,11 @@ htt_rx_ring_fill_level(struct htt_pdev_t *pdev)
 static void
 htt_rx_ring_refill_retry(struct timer_list *t)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+	htt_pdev_handle pdev = timer_container_of(pdev, t, rx_ring.refill_retry_timer);
+#else
 	htt_pdev_handle pdev = from_timer(pdev, t, rx_ring.refill_retry_timer);
+#endif
 	htt_rx_msdu_buff_replenish(pdev);
 }
 #else

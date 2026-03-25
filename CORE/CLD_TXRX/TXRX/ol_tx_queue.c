@@ -975,8 +975,13 @@ void
 ol_tx_pdev_peer_bal_timer(struct timer_list *t)
 {
 	int i;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+	struct ol_txrx_pdev_t *pdev =
+			timer_container_of(pdev, t, tx_peer_bal.peer_bal_timer);
+#else
 	struct ol_txrx_pdev_t *pdev =
 			from_timer(pdev, t, tx_peer_bal.peer_bal_timer);
+#endif
 #else
 void
 ol_tx_pdev_peer_bal_timer(void *context)
@@ -1305,7 +1310,11 @@ u_int8_t ol_tx_pdev_is_target_empty(void)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 void ol_tx_pdev_throttle_phase_timer(struct timer_list *t)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+   struct ol_txrx_pdev_t *pdev = timer_container_of(pdev, t, tx_throttle.phase_timer);
+#else
    struct ol_txrx_pdev_t *pdev = from_timer(pdev, t, tx_throttle.phase_timer);
+#endif
 #else
 void ol_tx_pdev_throttle_phase_timer(void *context)
 {
@@ -1364,8 +1373,13 @@ void ol_tx_pdev_throttle_phase_timer(void *context)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 void ol_tx_pdev_throttle_tx_timer(struct timer_list *t)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+	struct ol_txrx_pdev_t *pdev =
+			timer_container_of(pdev, t, tx_throttle.tx_timer);
+#else
 	struct ol_txrx_pdev_t *pdev =
 			from_timer(pdev, t, tx_throttle.tx_timer);
+#endif
 	ol_tx_pdev_ll_pause_queue_send_all(pdev);
 }
 #else

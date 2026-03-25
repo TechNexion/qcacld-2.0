@@ -38,7 +38,11 @@
 #ifndef __PARSE_H__
 #define __PARSE_H__
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,18,0))
+#include <linux/stdarg.h>
+#else
 #include <stdarg.h>
+#endif
 #include "sirMacPropExts.h"
 #include "dot11f.h"
 #ifdef WLAN_FEATURE_VOWIFI_11R

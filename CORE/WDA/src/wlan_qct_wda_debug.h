@@ -30,7 +30,11 @@
 #if  !defined (ANI_OS_TYPE_ANDROID)
 #include <stdio.h>
 #endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,18,0))
+#include <linux/stdarg.h>
+#else
 #include <stdarg.h>
+#endif
 
 #include "utilsApi.h"
 #include "sirDebug.h"

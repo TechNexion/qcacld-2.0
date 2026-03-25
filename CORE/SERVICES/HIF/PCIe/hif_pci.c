@@ -2363,7 +2363,11 @@ HIF_wake_target_cpu(struct hif_pci_softc *sc)
 static void
 HIF_sleep_entry(struct timer_list *t)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+	 struct HIF_CE_state *hif_state = timer_container_of(hif_state, t, sleep_timer);
+#else
 	 struct HIF_CE_state *hif_state = from_timer(hif_state, t, sleep_timer);
+#endif
 #else
 static void
 HIF_sleep_entry(void *arg)

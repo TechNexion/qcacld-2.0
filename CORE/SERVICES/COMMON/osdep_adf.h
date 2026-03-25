@@ -698,7 +698,9 @@ os_mesgq_handler(struct timer_list *t)
 os_mesgq_handler(void *timer_arg)
 #endif
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+    os_mesg_queue_t    *queue = timer_container_of(queue, t, _timer);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
     os_mesg_queue_t    *queue = from_timer(queue, t, _timer);
 #else
     os_mesg_queue_t    *queue = (os_mesg_queue_t*)timer_arg;

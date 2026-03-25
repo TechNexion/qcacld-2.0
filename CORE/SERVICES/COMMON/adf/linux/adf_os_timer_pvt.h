@@ -107,8 +107,12 @@ __adf_os_hrtimer_init(adf_os_handle_t      hdl,
                     struct hrtimer   *timer,
                     __adf_os_hrtimer_func_t  func)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0))
+    hrtimer_setup(timer, func, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+#else
     hrtimer_init(timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
     timer->function = func;
+#endif
     return A_STATUS_OK;
 }
 
@@ -156,7 +160,11 @@ __adf_os_timer_mod(struct timer_list *timer, a_uint32_t delay)
 static inline a_bool_t
 __adf_os_timer_cancel(struct timer_list *timer)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0))
+    if (likely(timer_delete(timer)))
+#else
     if (likely(del_timer(timer)))
+#endif
         return 1;
     else
         return 0;
@@ -178,7 +186,11 @@ __adf_os_hrtimer_cancel(struct hrtimer *timer)
 static inline void
 __adf_os_timer_free(struct timer_list *timer)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0))
+    timer_delete_sync(timer);
+#else
     del_timer_sync(timer);
+#endif
 }
 
 /*
@@ -197,7 +209,11 @@ __adf_os_timer_free(struct timer_list *timer)
 static inline a_bool_t
 __adf_os_timer_sync_cancel(struct timer_list *timer)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0))
+    return timer_delete_sync(timer);
+#else
     return del_timer_sync(timer);
+#endif
 }
 
 

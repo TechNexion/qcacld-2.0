@@ -118,7 +118,9 @@ static void vos_linux_timer_callback (struct timer_list *t)
 static void vos_linux_timer_callback (void *data)
 #endif
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+   vos_timer_t *timer = timer_container_of(timer, t, platformInfo.Timer);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
    vos_timer_t *timer = from_timer(timer, t, platformInfo.Timer);
 #else
    vos_timer_t *timer = ( vos_timer_t *)data;
@@ -572,7 +574,11 @@ VOS_STATUS vos_timer_destroy ( vos_timer_t *timer )
          break;
       case VOS_TIMER_STATE_RUNNING:
          /* Stop the timer first */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0))
+         timer_delete_sync(&(timer->platformInfo.Timer));
+#else
          del_timer(&(timer->platformInfo.Timer));
+#endif
          vStatus = VOS_STATUS_SUCCESS;
          break;
       case VOS_TIMER_STATE_STOPPED:
@@ -635,7 +641,11 @@ VOS_STATUS vos_timer_destroy ( vos_timer_t *timer )
          break;
       case VOS_TIMER_STATE_RUNNING:
          /* Stop the timer first */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0))
+         timer_delete_sync(&(timer->platformInfo.Timer));
+#else
          del_timer(&(timer->platformInfo.Timer));
+#endif
          vStatus = VOS_STATUS_SUCCESS;
          break;
       case VOS_TIMER_STATE_STOPPED:
@@ -823,7 +833,11 @@ VOS_STATUS vos_timer_stop ( vos_timer_t *timer )
 
    timer->state = VOS_TIMER_STATE_STOPPED;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0))
+   timer_delete_sync(&(timer->platformInfo.Timer));
+#else
    del_timer(&(timer->platformInfo.Timer));
+#endif
 
    adf_os_spin_unlock_irqrestore( &timer->platformInfo.spinlock);
 

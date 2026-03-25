@@ -1503,7 +1503,11 @@ static void hif_oob_irq_handler(void *dev_para)
 static void
 HIF_sleep_entry(struct timer_list *t)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+    HIF_DEVICE *device = timer_container_of(device, t, sleep_timer);
+#else
     HIF_DEVICE *device = from_timer(device, t, sleep_timer);
+#endif
 #else
 static void
 HIF_sleep_entry(void *arg)

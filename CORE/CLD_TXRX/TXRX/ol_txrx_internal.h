@@ -106,7 +106,11 @@ extern unsigned g_txrx_print_level;
 
 #ifdef TXRX_PRINT_ENABLE
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,18,0))
+#include <linux/stdarg.h>
+#else
 #include <stdarg.h>       /* va_list */
+#endif
 #include <adf_os_types.h> /* adf_os_vprint */
 
 /* Supress 4296 - expression is always true

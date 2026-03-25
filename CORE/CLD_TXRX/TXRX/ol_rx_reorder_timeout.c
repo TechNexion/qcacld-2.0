@@ -139,7 +139,9 @@ ol_rx_reorder_timeout(void *arg)
     u_int32_t time_now_ms;
     struct ol_tx_reorder_cat_timeout_t *rx_reorder_timeout_ac;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+    rx_reorder_timeout_ac = timer_container_of(rx_reorder_timeout_ac, t, timer);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
     rx_reorder_timeout_ac = from_timer(rx_reorder_timeout_ac, t, timer);
 #else
     rx_reorder_timeout_ac = (struct ol_tx_reorder_cat_timeout_t *) arg;

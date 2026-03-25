@@ -1308,7 +1308,11 @@ more_watermarks:
 static void
 CE_poll_timeout(struct timer_list *t)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+   struct CE_state *CE_state = timer_container_of(CE_state, t, poll_timer);
+#else
    struct CE_state *CE_state = from_timer(CE_state, t, poll_timer);
+#endif
 #else
 static void
 CE_poll_timeout(void *arg)

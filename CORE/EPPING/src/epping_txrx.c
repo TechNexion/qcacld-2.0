@@ -67,7 +67,11 @@ static void epping_stop_adapter(epping_adapter_t *pAdapter);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 static void epping_timer_expire(struct timer_list *t)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+	epping_adapter_t *pAdapter = timer_container_of(pAdapter, t, epping_timer);
+#else
 	epping_adapter_t *pAdapter = from_timer(pAdapter, t, epping_timer);
+#endif
 
 	if (pAdapter == NULL) {
 		EPPING_LOG(VOS_TRACE_LEVEL_FATAL,

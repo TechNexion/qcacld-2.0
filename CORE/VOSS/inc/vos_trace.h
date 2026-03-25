@@ -44,7 +44,11 @@
   Include Files
   ------------------------------------------------------------------------*/
 #include  <vos_types.h>  // For VOS_MODULE_ID...
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,18,0))
+#include <linux/stdarg.h>
+#else
 #include  <stdarg.h>       // For va_list...
+#endif
 #include  <vos_status.h>
 #include  <i_vos_types.h>
 

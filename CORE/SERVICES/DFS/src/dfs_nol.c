@@ -76,7 +76,11 @@ static
 OS_TIMER_FUNC(dfs_remove_from_nol)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+    struct dfs_nolelem *elem = timer_container_of(elem, t, nol_timer);
+#else
     struct dfs_nolelem *elem = from_timer(elem, t, nol_timer);
+#endif
     struct dfs_nol_timer_arg *nol_arg = elem->dfs_timer_arg;
 #else
     struct dfs_nol_timer_arg *nol_arg;

@@ -184,7 +184,11 @@ static void dfs_radar_delay(void *data)
 static OS_TIMER_FUNC(dfs_task)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+	struct ath_dfs *dfs = timer_container_of(dfs, t, ath_dfs_task_timer);
+#else
 	struct ath_dfs *dfs = from_timer(dfs, t, ath_dfs_task_timer);
+#endif
 	struct ieee80211com *ic = dfs->ic;
 #else
 	struct ieee80211com *ic;
@@ -241,7 +245,11 @@ static
 OS_TIMER_FUNC(dfs_testtimer_task)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+    struct ath_dfs *dfs = timer_container_of(dfs, t, ath_dfs_task_timer);
+#else
     struct ath_dfs *dfs = from_timer(dfs, t, ath_dfs_task_timer);
+#endif
     struct ieee80211com *ic = dfs->ic;
 #else
     struct ieee80211com *ic;

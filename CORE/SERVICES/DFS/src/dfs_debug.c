@@ -162,7 +162,9 @@ void dfs_print_activity(struct ath_dfs *dfs)
 #ifndef ATH_DFS_RADAR_DETECTION_ONLY
 OS_TIMER_FUNC(dfs_debug_timeout)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+    struct ath_dfs *dfs = timer_container_of(dfs, t, ath_dfs_task_timer);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
     struct ath_dfs *dfs = from_timer(dfs, t, ath_dfs_task_timer);
 #else
     struct ieee80211com *ic;
