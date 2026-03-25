@@ -1691,7 +1691,12 @@ static void wlan_hdd_update_txq_timestamp(struct net_device *dev)
 	for (i = 0; i < NUM_TX_QUEUES; i++) {
 		txq = netdev_get_tx_queue(dev, i);
 		unlock = __netif_tx_trylock(txq);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0))
+		txq_trans_cond_update(txq);
+#else
 		txq_trans_update(txq);
+#endif
+
 		if (unlock == true)
 			__netif_tx_unlock(txq);
 	}
