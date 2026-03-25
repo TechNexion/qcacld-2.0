@@ -22400,9 +22400,16 @@ static inline bool wlan_hdd_cfg80211_validate_scan_req(struct
                    cfg80211 in kernel. Hence setting scan_req->notified to avoid
                    assertion. Kernel will take care of memory cleanup.
                 */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,17,0))
+                struct cfg80211_scan_info info = {
+                    .aborted = true,
+                };
+                cfg80211_scan_done(scan_req, &info);
+#else
                 scan_req->notified = true;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,8,0))
                 scan_req->info.aborted = true;
+#endif
 #endif
                 hddLog(VOS_TRACE_LEVEL_ERROR, "Load/Unload in progress");
                 return false;
@@ -26203,6 +26210,9 @@ static int __wlan_hdd_cfg80211_set_wiphy_params(struct wiphy *wiphy,
 }
 
 static int wlan_hdd_cfg80211_set_wiphy_params(struct wiphy *wiphy,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,17,0))
+                                              int radio_idx,
+#endif
                                                                 u32 changed)
 {
      int ret;
@@ -26285,6 +26295,9 @@ static int wlan_hdd_cfg80211_set_txpower(struct wiphy *wiphy,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0) || defined(WITH_BACKPORTS)
         struct wireless_dev *wdev,
 #endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,17,0))
+        int radio_idx,
+#endif
         enum nl80211_tx_power_setting type,
         int dbm)
 {
@@ -26365,6 +26378,10 @@ static int __wlan_hdd_cfg80211_get_txpower(struct wiphy *wiphy,
 static int wlan_hdd_cfg80211_get_txpower(struct wiphy *wiphy,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0) || defined(WITH_BACKPORTS)
 					 struct wireless_dev *wdev,
+#endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,17,0))
+					 int radio_idx,
+					 unsigned int link_id,
 #endif
 					 int *dbm)
 {
