@@ -1962,3 +1962,4 @@ else
 obj-$(CONFIG_QCA_CLD_WLAN) += $(MODNAME).o
 $(MODNAME)-y := $(OBJS)
 endif
+ccflags-y += $(EXTRA_CFLAGS)
